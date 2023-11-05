@@ -3,9 +3,11 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include "graph.h"
+#include <set>
 
 //AdjacencyList functionality
-std::vector<std::vector<int>> readGraphFile(std::string filename){
+Graph readGraphFile(std::string filename){
     std::cout << "Reading Graph file..." << std::endl;
     std::ifstream inputFile(filename);
     std::vector<std::vector<int>> adjList;
@@ -13,7 +15,8 @@ std::vector<std::vector<int>> readGraphFile(std::string filename){
     //Check if file can be opened
     if (!inputFile.is_open()){
         std::cout << "Failed to open " << filename << "." << std::endl;
-        return adjList;
+        Graph graph;
+        return graph;
     }
 
     std::string line;
@@ -48,8 +51,8 @@ std::vector<std::vector<int>> readGraphFile(std::string filename){
         }
 
     }
-
-    return adjList;
+    Graph graph(adjList, n0, n1, m);
+    return graph;
 }
 
 void printAdjacencyList(const std::vector<std::vector<int>>& adjacencyList) {
@@ -62,6 +65,33 @@ void printAdjacencyList(const std::vector<std::vector<int>>& adjacencyList) {
     }
 }
 
-void verifier (const std::vector<std::vector<int>>& adjacencyList, std::vector<int> ordering){
-    
+// OSCM tools
+bool verifier (Graph graph, std::vector<int> ordering){
+    std::set<int> uniqueElems;  // To store unique numbers, no node allowed to occur twice
+
+    for (int elem : ordering){
+        //Assume we still need to go back to +1 notation
+        elem++;
+
+        //Case: node is not element of B (free order)
+        if (elem <= graph.n0 || elem > graph.n0 + graph.n1){
+            return false;
+        }
+
+        //Check if node already occured
+        if (uniqueElems.find(elem) != uniqueElems.end()) {
+            return false;
+        }
+
+        //Add number to set
+        uniqueElems.insert(elem);
+    }
+
+    //All elems within range and unique
+    return true;
 }
+
+std::vector<int> bruteForce (Graph graph){
+
+}
+

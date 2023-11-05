@@ -1,5 +1,5 @@
-#ifndef FUNCTIONS_H
-#define FUNCTIONS_H
+#ifndef GRAPH_H
+#define GRAPH_H
 #include <iostream>
 #include <vector>
 

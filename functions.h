@@ -2,8 +2,10 @@
 #define FUNCTIONS_H
 #include <iostream>
 #include <vector>
+#include "graph.h"
 
-std::vector<std::vector<int>> readGraphFile(std::string filename);
+Graph readGraphFile(std::string filename);
 void printAdjacencyList(const std::vector<std::vector<int>>& adjacencyList);
+bool verifier (Graph graph, std::vector<int> ordering);
 
 #endif

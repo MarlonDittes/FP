@@ -1,10 +1,20 @@
 #include <iostream>
 #include "argtable3.h"
 #include "functions.h"
+#include "graph.h"
 
 //Real main
 int mymain(std::string graphfile){
-    readGraphFile(graphfile);
+    Graph graph;
+    graph = readGraphFile(graphfile);
+    printAdjacencyList(graph.adjList);
+
+    std::vector<int> freeOrder;
+    freeOrder.push_back(4);
+    freeOrder.push_back(3);
+    freeOrder.push_back(5);
+
+    std::cout << verifier(graph, freeOrder) << std::endl;
 
     return 0;
 }
