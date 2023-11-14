@@ -12,6 +12,8 @@ int main(int argc, char* argv[]) {
     g->printGraph();
     std::cout << "count crossings" << std::endl;
     std::cout << "number of crossings in g: " << g->countCrossings() << std::endl;
-    return 0;
+
+    auto result = bruteForce(*g);
+    outputOrder(result.first, "../output.txt");
 }
 

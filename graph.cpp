@@ -133,3 +133,61 @@ Graph* readGraph(std::string graph_file) {
     //g.printGraph();
     return g;
 }
+
+std::vector<Node*> Graph::getOrder(){
+    return this->Order;
+}
+
+void Graph::setOrder(std::vector<Node*> order){
+    this->Order = order;
+}
+
+bool compareNodePointers(Node* a, Node* b) {
+    return a->order < b->order;
+}
+
+std::pair<std::vector<Node*>, int> bruteForce(Graph g){
+    std::vector<Node*> baseOrder = g.getOrder();
+    std::sort(baseOrder.begin(), baseOrder.end(), compareNodePointers);
+
+    std::vector<Node*> bestOrder = baseOrder;
+    int bestCrossings = g.countCrossings();
+
+    do {
+        Graph tmp = g;
+        tmp.setOrder(baseOrder);
+        // Display the current permutation
+        std::cout << "Permutation:";
+        for (const Node* node : baseOrder) {
+            std::cout << " Order: " << node->order << ", ID: " << node->id;
+        }
+        std::cout << "\n";
+
+        int crossings = tmp.countCrossings();
+        std::cout << "Crossings: " << crossings << std::endl;
+
+        if (crossings < bestCrossings){
+            bestOrder = baseOrder;
+            bestCrossings = crossings;
+        }
+
+    } while (std::next_permutation(baseOrder.begin(), baseOrder.end(), compareNodePointers));
+
+    return std::make_pair(bestOrder, bestCrossings);
+}
+
+void outputOrder (std::vector<Node*> order, std::string output){
+    std::ofstream outputFile(output);
+
+    if (!outputFile.is_open()) {
+        std::cerr << "Error opening output file." << std::endl;
+        return;
+    }
+
+    for (const auto& node : order){
+        // Print the node id to the file
+        outputFile << node->id << std::endl;
+    }
+
+    outputFile.close();
+}

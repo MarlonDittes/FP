@@ -29,8 +29,13 @@ class Graph {
     void printGraph();
     int countCrossings();
     void sortYArray();
+
+    std::vector<Node*> getOrder();
+    void setOrder(std::vector<Node*> order);
 };
 
 Graph* readGraph(std::string graph_file);
 
+std::pair<std::vector<Node*>, int> bruteForce(Graph g);
+void outputOrder (std::vector<Node*> order, std::string output);
 #endif //GRAPH_H
