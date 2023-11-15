@@ -4,6 +4,8 @@
 #include <sstream>
 #include <algorithm>
 #include <cassert>
+#include <utility>
+#include <cmath>
 
 //Constructor dependent on size of Y
 Graph::Graph(int size_X, int size_Y, int edge_number) : size_X(size_X), size_Y(size_Y), edge_number(edge_number) {
@@ -49,8 +51,6 @@ void Graph::sortYArray() {
     }
 }
 
-
-
 int Graph::countCrossings() {
     if (edge_number == 0) {
         return 0;
@@ -72,74 +72,35 @@ int Graph::countCrossings() {
     return crossings;
 }
 
-Graph* readGraph(std::string graph_file) {
-
-    std::cout << "read graph..." << std::endl;
-    std::string tmp; //for p and ocr in input format
-    int size_X; //X = A, fixed partition
-    int size_Y; //Y = B, free partition
-    int edge_number; 
-
-    std::ifstream file(graph_file);
-
-    if (!file.is_open()) {
-        std::cout << "error: file not open" << std::endl;
-    }
-
-    std::string line;
-
-    std::getline(file, line);
-
-    while (line[0] == 'c') {
-        std::cout << "skip" << std::endl;
-        std::getline(file, line);
-    }
-
-    std::stringstream ss(line);
-    ss >> tmp; //p
-    ss >> tmp; //ocr
-    std::cout << "tmp: " << tmp << std::endl;
-    ss >> size_X;
-    ss >> size_Y;
-    ss >> edge_number;
-
-    std::cout << "size_X: " << size_X << std::endl;
-    std::cout << "size_Y: " << size_Y << std::endl;
-    std::cout << "edge_number: " << edge_number << std::endl;
-
-    //initialize graph
-    Graph* g = new Graph(size_X, size_Y, edge_number); 
-    std::cout<<"test"<<std::endl;
-    //read adjacencies of the nodes in the graph file
-    while (std::getline(file, line)) {
-        std::cout << "while..." << std::endl;
-        
-        if (line[0] == 'c') {
-            continue;
-        }
-        std::stringstream ss(line);
-
-        int x;
-        int y;
-
-        ss >> x;
-        ss >> y;
-        std::cout << "addEdge: " << x << " - " << y << std::endl;
-        g->addEdge(x, y);            
-    }
-    std::cout << "close" << std::endl;
-    file.close();
-
-    //g.printGraph();
-    return g;
-}
-
 std::vector<Node*> Graph::getOrder(){
     return this->Order;
 }
 
 void Graph::setOrder(std::vector<Node*> order){
     this->Order = order;
+}
+
+void Graph::swapNodes(int node0, int node1) {
+    std::swap(Order[node0]->order, Order[node1]->order);
+    std::swap(Order[node0], Order[node1]);
+}
+
+std::pair<std::vector<Node*>, int> Graph::Greedy() {
+    int crossings;
+    for (int i = 0; i < Order.size()-1; i++) {
+        Graph comp = *this;
+        int crossings_old = this->countCrossings();
+        this->swapNodes(i, i+1);
+        int crossings_new = this->countCrossings();
+        if (crossings_old < crossings_new) {
+            this->swapNodes(i, i+1);
+        }
+        if (i == Order.size()-2) {
+            crossings = std::min(crossings_new, crossings_old);
+        }
+    }
+
+    return std::make_pair(this->Order, crossings);
 }
 
 bool compareNodePointers(Node* a, Node* b) {
@@ -157,14 +118,14 @@ std::pair<std::vector<Node*>, int> bruteForce(Graph g){
         Graph tmp = g;
         tmp.setOrder(baseOrder);
         // Display the current permutation
-        std::cout << "Permutation:";
+        /*std::cout << "Permutation:";
         for (const Node* node : baseOrder) {
             std::cout << " Order: " << node->order << ", ID: " << node->id;
         }
         std::cout << "\n";
-
+*/
         int crossings = tmp.countCrossings();
-        std::cout << "Crossings: " << crossings << std::endl;
+        //std::cout << "Crossings: " << crossings << std::endl;
 
         if (crossings < bestCrossings){
             bestOrder = baseOrder;
@@ -174,20 +135,4 @@ std::pair<std::vector<Node*>, int> bruteForce(Graph g){
     } while (std::next_permutation(baseOrder.begin(), baseOrder.end(), compareNodePointers));
 
     return std::make_pair(bestOrder, bestCrossings);
-}
-
-void outputOrder (std::vector<Node*> order, std::string output){
-    std::ofstream outputFile(output);
-
-    if (!outputFile.is_open()) {
-        std::cerr << "Error opening output file." << std::endl;
-        return;
-    }
-
-    for (const auto& node : order){
-        // Print the node id to the file
-        outputFile << node->id << std::endl;
-    }
-
-    outputFile.close();
 }

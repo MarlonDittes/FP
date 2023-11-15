@@ -29,6 +29,8 @@ class Graph {
     void printGraph();
     int countCrossings();
     void sortYArray();
+    void swapNodes(int node0, int node1);
+    std::pair<std::vector<Node*>, int> Greedy();
 
     std::vector<Node*> getOrder();
     void setOrder(std::vector<Node*> order);
