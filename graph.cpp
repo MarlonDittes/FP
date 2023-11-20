@@ -87,8 +87,9 @@ void Graph::swapNodes(int node0, int node1) {
 
 std::pair<std::vector<Node*>, int> Graph::Greedy() {
     int crossings;
+    Graph comp = *this;           
     for (int i = 0; i < Order.size()-1; i++) {
-        Graph comp = *this;
+        //Graph comp = *this;       wir brauchen den Original Graph bevor wir sie modifizieren, würde den auch zurückgeben.              
         int crossings_old = this->countCrossings();
         this->swapNodes(i, i+1);
         int crossings_new = this->countCrossings();
@@ -102,6 +103,70 @@ std::pair<std::vector<Node*>, int> Graph::Greedy() {
 
     return std::make_pair(this->Order, crossings);
 }
+
+void Graph::Median_Heuristic()
+{
+
+    for (int i = 0; i < Order.size() - 1; i++) {
+        for (int j = 0; j < Order[i]->X.size(); j++) {
+            Order[i]->median = Order[i]->X[j];
+        }
+    }
+    
+    std::sort(Order.begin(), Order.end(), [](const Node* a, const Node* b) {
+        return a->median < b->median;
+    });
+    
+    for (int i = 0; i < Order.size(); i++) {
+        Order[i]->order = i;
+    }
+    
+    
+    /*for (int i = 0; i < Order.size() - 1; i++) {
+        int neighbourhood_sum = 0;
+        for (int j = 0; j < Order[i]->X.size(); j++) { neighbourhood_sum += Order[i]->X[j]; }
+        if (neighbourhood_sum > i) {
+            for (int j = neighbourhood_sum; j > 0; j--) {
+                this->swapNodes(j, j - 1);
+            }
+        }
+        else {
+            for (int j = 0; j < neighbourhood_sum; j++) {
+                this->swapNodes(j, j + 1);
+            }
+        }
+    }*/
+}
+
+bool Graph::verifier(Graph check)
+{
+    std::vector<bool> unique_id_vec(this->Order.size(), false);
+
+    for (int i = 0; i < Order.size(); i++) {
+        
+        //check every node id comes exactly once
+        if (unique_id_vec[this->Order[i]->id - this->size_X - 1]) { return false; }
+        unique_id_vec[this->Order[i]->id - this->size_X - 1] = true;
+        
+        //check for "illegal node id's"
+        if (this->Order[i]->id > (check.size_X + check.size_Y)) { return false; }
+        
+        //neighbours of each node are the same as the graph at the beginning
+        for (int j = 0; j < Order[i]->X.size(); j++) {
+            int id_check = this->Order[i]->id;
+            if (this->Order[i]->X[j] != check.Y[id_check - this->size_X - 1].X[j]) { return false; }
+        }
+    }
+
+    //a node id disappeared from the Order array.
+    for (int i = 0; i < unique_id_vec.size(); i++) {
+        if (!unique_id_vec[i]) { return false; }
+    }
+    return true;
+}
+
+
+
 
 bool compareNodePointers(Node* a, Node* b) {
     return a->order < b->order;

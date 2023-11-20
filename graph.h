@@ -8,6 +8,7 @@ struct Node {
     std::vector<int> X;
     int order;
     int id;
+    int median = 0;
 
     Node() {
         X = std::vector<int>();
@@ -31,6 +32,10 @@ class Graph {
     void sortYArray();
     void swapNodes(int node0, int node1);
     std::pair<std::vector<Node*>, int> Greedy();
+
+    void Median_Heuristic();
+
+    bool verifier(Graph check);
 
     std::vector<Node*> getOrder();
     void setOrder(std::vector<Node*> order);
