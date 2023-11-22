@@ -86,10 +86,8 @@ void Graph::swapNodes(int node0, int node1) {
 }
 
 std::pair<std::vector<Node*>, int> Graph::Greedy() {
-    int crossings;
-    Graph comp = *this;           
+    int crossings;          
     for (int i = 0; i < Order.size()-1; i++) {
-        //Graph comp = *this;       wir brauchen den Original Graph bevor wir sie modifizieren, würde den auch zurückgeben.              
         int crossings_old = this->countCrossings();
         this->swapNodes(i, i+1);
         int crossings_new = this->countCrossings();
@@ -106,11 +104,13 @@ std::pair<std::vector<Node*>, int> Graph::Greedy() {
 
 void Graph::Median_Heuristic()
 {
-
-    for (int i = 0; i < Order.size() - 1; i++) {
+    for (int i = 0; i < Order.size(); i++) {
         for (int j = 0; j < Order[i]->X.size(); j++) {
-            Order[i]->median = Order[i]->X[j];
+            Order[i]->median += Order[i]->X[j];
         }
+
+        Order[i]->median = Order[i]->median / Order[i]->X.size();
+        std::cout << "id: " << Order[i]->id << " median: " << Order[i]->median << std::endl;
     }
     
     std::sort(Order.begin(), Order.end(), [](const Node* a, const Node* b) {
@@ -120,22 +120,6 @@ void Graph::Median_Heuristic()
     for (int i = 0; i < Order.size(); i++) {
         Order[i]->order = i;
     }
-    
-    
-    /*for (int i = 0; i < Order.size() - 1; i++) {
-        int neighbourhood_sum = 0;
-        for (int j = 0; j < Order[i]->X.size(); j++) { neighbourhood_sum += Order[i]->X[j]; }
-        if (neighbourhood_sum > i) {
-            for (int j = neighbourhood_sum; j > 0; j--) {
-                this->swapNodes(j, j - 1);
-            }
-        }
-        else {
-            for (int j = 0; j < neighbourhood_sum; j++) {
-                this->swapNodes(j, j + 1);
-            }
-        }
-    }*/
 }
 
 bool Graph::verifier(Graph check)
@@ -165,7 +149,11 @@ bool Graph::verifier(Graph check)
     return true;
 }
 
+/*void Graph::DFS_partition() {
+    int partition = 0;
 
+    std::vector
+}*/
 
 
 bool compareNodePointers(Node* a, Node* b) {

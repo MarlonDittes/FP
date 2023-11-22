@@ -9,6 +9,7 @@ struct Node {
     int order;
     int id;
     int median = 0;
+    int partition = -1;
 
     Node() {
         X = std::vector<int>();
@@ -32,6 +33,7 @@ class Graph {
     void sortYArray();
     void swapNodes(int node0, int node1);
     std::pair<std::vector<Node*>, int> Greedy();
+    void DFS_partition();
 
     void Median_Heuristic();
 
