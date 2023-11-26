@@ -27,6 +27,6 @@ int main(int argc, char* argv[]) {
 
     outputOrder(result.first, "../output.txt");
 
-    
+    readHyperGraph("../hypergraph.txt", "../graph2.txt");
 }
 
