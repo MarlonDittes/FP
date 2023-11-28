@@ -16,6 +16,8 @@ struct Node {
     }
 };
 
+typedef std::vector<std::pair<Node*, Node*>> Twins;
+
 class Graph {
     private:
     std::vector<Node> Y; 
@@ -30,6 +32,7 @@ class Graph {
     Node* getNode(int i);
     void printGraph();
     int countCrossings();
+    int countCrossingsForPair(int a, int b);
     void sortYArray();
     void swapNodes(int node0, int node1);
     std::pair<std::vector<Node*>, int> Greedy();
@@ -41,6 +44,10 @@ class Graph {
 
     std::vector<Node*> getOrder();
     void setOrder(std::vector<Node*> order);
+
+    //reductions:
+    Twins findTwins();
+    void cheapReduction();
 };
 
 Graph* readGraph(std::string graph_file);

@@ -72,6 +72,18 @@ int Graph::countCrossings() {
     return crossings;
 }
 
+int Graph::countCrossingsForPair(int a, int b) { //for a < b
+    int crossings = 0;
+    for (auto& i : Order[a]->X) {
+        for (auto& j : Order[b]->X) {
+            if (i > j) {
+                crossings++;
+            }
+        }
+    }
+    return crossings;
+}
+
 std::vector<Node*> Graph::getOrder(){
     return this->Order;
 }
@@ -155,6 +167,45 @@ bool Graph::verifier(Graph check)
     std::vector
 }*/
 
+//typedef std::vector<std::pair<Node*, Node*>> Twins;
+
+Twins Graph::findTwins() {
+    Twins twins;
+    for (int i = 0; i < Order.size()-1; i++) {
+        for (int j = i+1; j < Order.size(); j++) {
+            if (Order[i]->X.size() != Order[j]->X.size()) {
+                continue;
+            }
+
+            for (int k = 0; k < Order[i]->X.size(); k++) {
+                if (Order[i]->X[k] != Order[j]->X[k]) {
+                    break;
+                }
+
+                //found twins
+                if (k == Order[i]->X.size()-1) {
+                    std::pair<Node*, Node*> twin = std::make_pair(Order[i], Order[j]); 
+                    twins.push_back(twin); //twin_reduce()
+                }
+            }
+        }
+    }
+    return twins;
+}
+
+/*
+void Graph::cheapReduction() {
+    for (int a = 0; a < Order.size()-1; a++) {
+        for (int b = a+1; b < Order.size(); b++) {
+            int a_smaller_b = countCrossingsForPair(a, b);
+            int b_smaller_a = countCrossingsForPair(b, a);
+            if (a_smaller_b == 0 || b_smaller_a == 0) {
+
+            }
+        }
+    }
+}
+*/
 
 bool compareNodePointers(Node* a, Node* b) {
     return a->order < b->order;

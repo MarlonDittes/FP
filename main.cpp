@@ -16,7 +16,17 @@ int main(int argc, char* argv[]) {
     std::cout << "count crossings" << std::endl;
     std::cout << "number of crossings in g: " << g->countCrossings() << std::endl;
 
-    auto result = bruteForce(*g);
+    Twins twins = g->findTwins();
+    std::cout << "twins size: " << twins.size() << std::endl;
+
+    std::cout << "twins: " << std::endl;
+    for (auto& twin: twins) {
+        std::cout << twin.first->id << " - " << twin.second->id << std::endl;
+    }
+
+    std::cout << "crossings between 4, 5: " << g->countCrossingsForPair(1, 2) << std::endl;
+
+    /*auto result = bruteForce(*g);
     std::cout << "crossings BRUTE FORCE: " << result.second << std::endl;
     //std::cout << "crossings GREEDY: " << g->Greedy().second << std::endl;
 
@@ -26,7 +36,7 @@ int main(int argc, char* argv[]) {
     std::cout << g->verifier(verifier) << std::endl;
 
     outputOrder(result.first, "../output.txt");
-
+*/
     
 }
 
