@@ -6,7 +6,7 @@ Graph* readGraph(std::string graph_file) {
     std::string tmp; //for p and ocr in input format
     int size_X; //X = A, fixed partition
     int size_Y; //Y = B, free partition
-    int edge_number; 
+    int edge_number;
 
     std::ifstream file(graph_file);
 
@@ -36,12 +36,12 @@ Graph* readGraph(std::string graph_file) {
     std::cout << "edge_number: " << edge_number << std::endl;
 
     //initialize graph
-    Graph* g = new Graph(size_X, size_Y, edge_number); 
-    std::cout<<"test"<<std::endl;
+    Graph* g = new Graph(size_X, size_Y, edge_number);
+    std::cout << "test" << std::endl;
     //read adjacencies of the nodes in the graph file
     while (std::getline(file, line)) {
         std::cout << "while..." << std::endl;
-        
+
         if (line[0] == 'c') {
             continue;
         }
@@ -53,7 +53,7 @@ Graph* readGraph(std::string graph_file) {
         ss >> x;
         ss >> y;
         std::cout << "addEdge: " << x << " - " << y << std::endl;
-        g->addEdge(x, y);            
+        g->addEdge(x, y);
     }
     std::cout << "close" << std::endl;
     file.close();
@@ -62,7 +62,7 @@ Graph* readGraph(std::string graph_file) {
     return g;
 }
 
-void outputOrder (std::vector<Node*> order, std::string output){
+void outputOrder(std::vector<Node*> order, std::string output) {
     std::ofstream outputFile(output);
 
     if (!outputFile.is_open()) {
@@ -70,7 +70,7 @@ void outputOrder (std::vector<Node*> order, std::string output){
         return;
     }
 
-    for (const auto& node : order){
+    for (const auto& node : order) {
         // Print the node id to the file
         outputFile << node->id << std::endl;
     }

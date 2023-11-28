@@ -9,7 +9,7 @@ struct Node {
     int order;
     int id;
     int median = 0;
-    int partition = -1;
+    std::vector<int> partition;
 
     Node() {
         X = std::vector<int>();
@@ -17,14 +17,15 @@ struct Node {
 };
 
 class Graph {
-    private:
-    std::vector<Node> Y; 
+private:
+    std::vector<Node> Y;
+    std::vector<Node> fixed_nodes;
     std::vector<Node*> Order;
     int size_X;
     int size_Y;
     int edge_number;
 
-    public:
+public:
     Graph(int size_X, int size_Y, int edge_number);
     void addEdge(int y, int x);
     Node* getNode(int i);
@@ -33,8 +34,11 @@ class Graph {
     void sortYArray();
     void swapNodes(int node0, int node1);
     std::pair<std::vector<Node*>, int> Greedy();
-    void DFS_partition();
-
+    
+    std::pair<int,int> DFS_partition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
+    void Partition();
+    void APUtil(int start_node_id, std::vector<int>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
+    void AP();
     void Median_Heuristic();
 
     bool verifier(Graph check);
@@ -46,5 +50,5 @@ class Graph {
 Graph* readGraph(std::string graph_file);
 
 std::pair<std::vector<Node*>, int> bruteForce(Graph g);
-void outputOrder (std::vector<Node*> order, std::string output);
+void outputOrder(std::vector<Node*> order, std::string output);
 #endif //GRAPH_H

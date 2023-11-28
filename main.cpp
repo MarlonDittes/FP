@@ -1,6 +1,7 @@
 #include <iostream>
 #include "graph.h"
 #include "io.h"
+#include "stack.h"
 
 int main(int argc, char* argv[]) {
     std::string graph_file = argv[1];
@@ -20,13 +21,23 @@ int main(int argc, char* argv[]) {
     std::cout << "crossings BRUTE FORCE: " << result.second << std::endl;
     //std::cout << "crossings GREEDY: " << g->Greedy().second << std::endl;
 
-    g->Median_Heuristic();
-    std::cout << "number of crossings in g: " << g->countCrossings() << std::endl;
+    //g->Median_Heuristic();
+    //std::cout << "number of crossings in g: " << g->countCrossings() << std::endl;
+
+    g->Partition();
     g->printGraph();
-    std::cout << g->verifier(verifier) << std::endl;
+    g->AP();
+
+
+    if (g->verifier(verifier)) {
+        std::cout << "Graph is valid"<<std::endl;
+    }
+    else {
+        std::cout << "Graph is NOT valid" << std::endl;
+    }
 
     outputOrder(result.first, "../output.txt");
 
-    
+
 }
 
