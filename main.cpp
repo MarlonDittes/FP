@@ -50,6 +50,6 @@ int main(int argc, char* argv[]) {
 */
     
 
-
+readHyperGraph("../hypergraph.txt", "../graph2.txt");
 }
 
