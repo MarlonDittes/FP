@@ -5,9 +5,9 @@ Graph* readGraph(std::string graph_file) {
 
     std::cout << "read graph..." << std::endl;
     std::string tmp; //for p and ocr in input format
-    int size_X; //X = A, fixed partition
-    int size_Y; //Y = B, free partition
-    int edge_number;
+    int n0; //neighbours = A, fixed partition
+    int n1; //movable_nodes = B, free partition
+    int m;
 
     std::ifstream file(graph_file);
 
@@ -28,16 +28,16 @@ Graph* readGraph(std::string graph_file) {
     ss >> tmp; //p
     ss >> tmp; //ocr
     std::cout << "tmp: " << tmp << std::endl;
-    ss >> size_X;
-    ss >> size_Y;
-    ss >> edge_number;
+    ss >> n0;
+    ss >> n1;
+    ss >> m;
 
-    std::cout << "size_X: " << size_X << std::endl;
-    std::cout << "size_Y: " << size_Y << std::endl;
-    std::cout << "edge_number: " << edge_number << std::endl;
+    std::cout << "n0: " << n0 << std::endl;
+    std::cout << "n1: " << n1 << std::endl;
+    std::cout << "m: " << m << std::endl;
 
     //initialize graph
-    Graph* g = new Graph(size_X, size_Y, edge_number);
+    Graph* g = new Graph(n0, n1, m);
     std::cout << "test" << std::endl;
     //read adjacencies of the nodes in the graph file
     while (std::getline(file, line)) {
@@ -88,8 +88,8 @@ void writeHyperGraphToBipartiteGraph(int n0, int n1, int m, std::vector<std::pai
     }
 
     // Write header comments
-    outputFile << "c first number: size X (A)\n";
-    outputFile << "c second number: size Y (B)\n";
+    outputFile << "c first number: size neighbours (A)\n";
+    outputFile << "c second number: size movable_nodes (B)\n";
     outputFile << "c third number: number of edges (m)\n";
     outputFile << "p ocr " << n0 << " " << n1 << " " << m << "\n";
 
