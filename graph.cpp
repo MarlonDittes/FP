@@ -10,26 +10,23 @@
 
 
 //Constructor dependent on size of movable_nodes
-Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), fixed_nodes(n0), movable_nodes(n1), order_nodes(n1) {
+Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0+n1), order_nodes(n1) {
 
-    //initialize id and order in the movable_nodes and order_nodes Array
-    for (int i = 0; i < order_nodes.size(); i++) {
-        movable_nodes[i].id = n0 + i + 1; //set id to start at n0+1 to n0+n1;
-        movable_nodes[i].order = i;
-        //order_nodes[i] = movable_nodes[i].id //link order to id 
-        order_nodes[i] = &movable_nodes[i]; //link order to index (not id!)
+    for (int i = 0; i < n0; i++) {
+        graph[i].id = i;
     }
-
-    for (int i = 0; i < this->n0; i++) {
-        fixed_nodes[i].id = i + 1;
+    //initialize id and order in the graph
+    for (int i = 0; i < order_nodes.size(); i++) {
+        graph[n0+i].id = n0+i; 
+        graph[n0+i].order = i;
+        order_nodes[i] = &graph[n0+i]; //link order to index (not id!)
     }
 }
 
 //adding Edges from movable_nodes to neighbours
 void Graph::addEdge(int x, int y) {
-    //!offset of neighbours because y id starts at n0+1 -> this function works only for input data
-    movable_nodes[y - n0 - 1].neighbours.push_back(x); // in vector movable_nodes add adjacency (y,x) with x of X
-    fixed_nodes[x - 1].neighbours.push_back(y);
+    graph[x].neighbours.push_back(y);
+    graph[y].neighbours.push_back(x);   
 }
 
 void Graph::printGraph() {

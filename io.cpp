@@ -54,7 +54,7 @@ Graph* readGraph(std::string graph_file) {
         ss >> x;
         ss >> y;
         std::cout << "addEdge: " << x << " - " << y << std::endl;
-        g->addEdge(x, y);
+        g->addEdge(x-1, y-1);
     }
     std::cout << "close" << std::endl;
     file.close();

@@ -6,8 +6,8 @@
 
 struct Node {
     std::vector<int> neighbours; //name needs to be changed
-    int order;
-    int id;
+    int order = -1;
+    int id = -1;
     int median = 0;
     std::vector<int> partition;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
@@ -17,8 +17,7 @@ typedef std::vector<std::pair<Node*, Node*>> Twins;
 
 class Graph {
 private:
-    std::vector<Node> movable_nodes;
-    std::vector<Node> fixed_nodes;
+    std::vector<Node> graph;
     std::vector<Node*> order_nodes;
     int n0; //size fixed nodes
     int n1; //size movable nodes
