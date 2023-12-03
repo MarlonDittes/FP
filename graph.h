@@ -50,6 +50,8 @@ public:
 };
 
 std::pair<std::vector<Node*>, int> bruteForce(Graph g);
+int factorial(int n);
+std::pair<std::vector<Node*>, int> bruteForceParallel(Graph g);
 
 //reduction:
 Twins findTwins();
