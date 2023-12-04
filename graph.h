@@ -45,7 +45,8 @@ public:
     void APUtil(int start_node_id, std::vector<int>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
     void AP();
     void Median_Heuristic();
-
+    void Sorted_straight_line_reduction();
+    bool DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visited);
     bool verifier(Graph check);
 };
 

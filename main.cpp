@@ -10,12 +10,24 @@ int main(int argc, char* argv[]) {
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
-    g->sortMovableNodes();
+    //g->sortMovableNodes();
     std::cout << "sorted" << std::endl;
 
     g->printGraph();
     std::cout << "count crossings" << std::endl;
     std::cout << "number of crossings in g: " << g->countCrossings() << std::endl;
+
+    /*
+    g->Sorted_straight_line_reduction();
+    g->printGraph();
+    std::cout << "number of crossings in g: " << g->countCrossings() << std::endl;
+    */
+
+    /*
+    g->Partition();
+    g->printGraph();
+    g->AP();
+    */
 
    /* Twins twins = g->findTwins();
     std::cout << "twins size: " << twins.size() << std::endl;
@@ -27,16 +39,18 @@ int main(int argc, char* argv[]) {
 
     std::cout << "crossings between 4, 5: " << g->countCrossingsForPair(1, 2) << std::endl;
 */
-    /*auto result = bruteForce(*g);
+    auto result = bruteForce(*g);
     std::cout << "crossings BRUTE FORCE: " << result.second << std::endl;
     //std::cout << "crossings GREEDY: " << g->Greedy().second << std::endl;
 
     //g->Median_Heuristic();
     //std::cout << "number of crossings in g: " << g->countCrossings() << std::endl;
 
+    /*
     g->Partition();
     g->printGraph();
     g->AP();
+    */
 
 
     if (g->verifier(verifier)) {
@@ -47,9 +61,9 @@ int main(int argc, char* argv[]) {
     }
 
     outputOrder(result.first, "../output.txt");
-*/
+
     
 
-readHyperGraph("../hypergraph.txt", "../graph2.txt");
+//readHyperGraph("../hypergraph.txt", "../graph2.txt");
 }
 

@@ -40,28 +40,21 @@ void Graph::printGraph() {
         std::cout << std::endl;
     }
 
-    for (int i = 0; i < movable_nodes.size(); i++) {
-        std::cout << "Node Id: " << movable_nodes[i].id << " Partition : ";
-        for (int j = 0; j < movable_nodes[i].partition.size(); j++) {
-            std::cout << movable_nodes[i].partition[j] << " ";
-        }
-        std::cout << std::endl;
-    }
-
-    for (int i = 0; i < fixed_nodes.size(); i++) {
-        std::cout << "Node Id: " << fixed_nodes[i].id << " Partition : ";
-        for (int j = 0; j < fixed_nodes[i].partition.size(); j++) {
-            std::cout<<fixed_nodes[i].partition[j] << " ";
+    for (int i = 0; i < graph.size(); i++) {
+        std::cout << "Node Id: " << graph[i].id << " Partition : ";
+        for (int j = 0; j < graph[i].partition.size(); j++) {
+            std::cout << graph[i].partition[j] << " ";
         }
         std::cout << std::endl;
     }
 }
 
+/*
 void Graph::sortMovableNodes() {
     for (int i = 0; i < movable_nodes.size(); i++) {
         std::sort(movable_nodes[i].neighbours.begin(), movable_nodes[i].neighbours.end());
     }
-}
+}*/
 
 int Graph::countCrossings() {
     if (m == 0) {
@@ -101,6 +94,7 @@ void Graph::swapNodes(int node0, int node1) {
     std::swap(order_nodes[node0], order_nodes[node1]);
 }
 
+/*
 void Graph::makeNodeInvisible(int order_of_node) {
     Node* node = order_nodes[order_of_node];
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
@@ -119,7 +113,7 @@ void Graph::makeNodeInvisible(int order_of_node) {
 
     //set visible counter to end of adjacency array -> as if all edges removed
     node->offset_visible_nodes = node->neighbours.size();
-}
+} */
 
 std::pair<std::vector<Node*>, int> Graph::Greedy() {
     int crossings;
@@ -166,16 +160,16 @@ bool Graph::verifier(Graph check)
     for (int i = 0; i < order_nodes.size(); i++) {
 
         //check every node id comes exactly once
-        if (unique_id_vec[this->order_nodes[i]->id - this->n0 - 1]) { return false; }
-        unique_id_vec[this->order_nodes[i]->id - this->n0 - 1] = true;
+        if (unique_id_vec[this->order_nodes[i]->id - this->n0]) { return false; }
+        unique_id_vec[this->order_nodes[i]->id - this->n0] = true;
 
         //check for "illegal node id's"
-        if (this->order_nodes[i]->id > (check.n0 + check.n1)) { return false; }
+        if (this->order_nodes[i]->id >= (check.n0 + check.n1)) { return false; }
 
         //neighbours of each node are the same as the graph at the beginning
         for (int j = 0; j < order_nodes[i]->neighbours.size(); j++) {
             int id_check = this->order_nodes[i]->id;
-            if (this->order_nodes[i]->neighbours[j] != check.movable_nodes[id_check - this->n0 - 1].neighbours[j]) { return false; }
+            if (this->order_nodes[i]->neighbours[j] != check.graph[id_check].neighbours[j]) { return false; }
         }
     }
 
@@ -208,27 +202,12 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
         if (!visited[current_node]) {
             std::cout << "Visited " << current_node << " ";
             visited[current_node] = true;
-            if (current_node >= n0) {
-                // movable_nodes[current_node - n0].partition = partition;
-                movable_nodes[current_node - n0].partition.push_back(partition);
-            }
-            else {
-                fixed_nodes[current_node].partition.push_back(partition);
-            }
+            graph[current_node].partition.push_back(partition);
         }
 
-        if (current_node >= n0) {
-            for (int i = 0; i < movable_nodes[current_node - n0].neighbours.size(); i++) {
-                if (!visited[movable_nodes[current_node - n0].neighbours[i] - 1]) {
-                    stack.push(movable_nodes[current_node - n0].neighbours[i] - 1);
-                }
-            }
-        }
-        else {
-            for (int i = 0; i < fixed_nodes[current_node].neighbours.size(); i++) {
-                if (!visited[fixed_nodes[current_node].neighbours[i] - 1]) {
-                    stack.push(fixed_nodes[current_node].neighbours[i] - 1);
-                }
+        for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
+            if (!visited[graph[current_node].neighbours[i]]) {
+                stack.push(graph[current_node].neighbours[i]);
             }
         }
     }
@@ -239,7 +218,7 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
 
 void Graph::Partition()
 {
-    int start_node_fix = fixed_nodes[0].id - 1;
+    int start_node_fix = graph[0].id;
     int partition = 0;
     int rounds_counter = 0;
 
@@ -265,7 +244,7 @@ void Graph::Partition()
         start_node_fix = next_fixed_node;
         partition++;
     }
-}
+} 
 
 
 // A recursive function that find articulation 
@@ -290,53 +269,27 @@ void Graph::APUtil(int start_node_id, std::vector<int>& visited, std::vector<int
     // Initialize discovery time and low value
     disc[start_node_id] = low[start_node_id] = ++time;
 
-    if (start_node_id >= n0) {
-        // Go through all vertices adjacent to this
-        for (int i = 0; i < movable_nodes[start_node_id - n0].neighbours.size(); i++) {
-            // If v is not visited yet, then make it a child of u
-            // in DFS tree and recur for it
-            if (!visited[movable_nodes[start_node_id - n0].neighbours[i] - 1]) {
-                children++;
-                APUtil(movable_nodes[start_node_id - n0].neighbours[i] - 1, visited, disc, low, time, start_node_id, isAP);
+    // Go through all vertices adjacent to this
+    for (int i = graph[start_node_id].offset_visible_nodes; i < graph[start_node_id].neighbours.size(); i++) {
+        // If v is not visited yet, then make it a child of u
+        // in DFS tree and recur for it
+        if (!visited[graph[start_node_id].neighbours[i]]) {
+            children++;
+            APUtil(graph[start_node_id].neighbours[i], visited, disc, low, time, start_node_id, isAP);
 
-                // Check if the subtree rooted with v has
-                // a connection to one of the ancestors of u
-                low[start_node_id] = std::min(low[start_node_id], low[movable_nodes[start_node_id - n0].neighbours[i] - 1]);
+            // Check if the subtree rooted with v has
+            // a connection to one of the ancestors of u
+            low[start_node_id] = std::min(low[start_node_id], low[graph[start_node_id].neighbours[i]]);
 
-                // If start_node_id is not root and low value of one of
-                // its child is more than discovery value of u.
-                if (parent != -1 && low[movable_nodes[start_node_id - n0].neighbours[i] - 1] >= disc[start_node_id])
-                    isAP[start_node_id] = true;
-            }
-
-            // Update low value of start_node_id for parent function calls.
-            else if (movable_nodes[start_node_id - n0].neighbours[i] - 1 != parent)
-                low[start_node_id] = std::min(low[start_node_id], disc[movable_nodes[start_node_id - n0].neighbours[i] - 1]);
+            // If start_node_id is not root and low value of one of
+            // its child is more than discovery value of u.
+            if (parent != -1 && low[graph[start_node_id].neighbours[i]] >= disc[start_node_id])
+                isAP[start_node_id] = true;
         }
-    }
-    else {
-        // Go through all vertices adjacent to this
-        for (int i = 0; i < fixed_nodes[start_node_id].neighbours.size(); i++) {
-            // If v is not visited yet, then make it a child of u
-            // in DFS tree and recur for it
-            if (!visited[fixed_nodes[start_node_id].neighbours[i] - 1]) {
-                children++;
-                APUtil(fixed_nodes[start_node_id].neighbours[i] - 1, visited, disc, low, time, start_node_id, isAP);
-
-                // Check if the subtree rooted with v has
-                // a connection to one of the ancestors of u
-                low[start_node_id] = std::min(low[start_node_id], low[fixed_nodes[start_node_id].neighbours[i] - 1]);
-
-                // If start_node_id is not root and low value of one of
-                // its child is more than discovery value of u.
-                if (parent != -1 && low[fixed_nodes[start_node_id].neighbours[i] - 1] >= disc[start_node_id])
-                    isAP[start_node_id] = true;
-            }
-
-            // Update low value of start_node_id for parent function calls.
-            else if (fixed_nodes[start_node_id].neighbours[i] - 1 != parent)
-                low[start_node_id] = std::min(low[start_node_id], disc[fixed_nodes[start_node_id].neighbours[i] - 1]);
-        }
+            
+        // Update low value of start_node_id for parent function calls.
+        else if (graph[start_node_id].neighbours[i] != parent)
+            low[start_node_id] = std::min(low[start_node_id], disc[graph[start_node_id].neighbours[i]]);
     }
 
     // If start_node_id is root of DFS tree and has two or more children.
@@ -355,7 +308,7 @@ void Graph::AP()
     // Adding this loop so that the
     // code works even if we are given
     // disconnected graph
-    for (int start_node_id= 0; start_node_id < this->n0 + this->n1; start_node_id++)
+    for (int start_node_id = 0; start_node_id < this->n0 + this->n1; start_node_id++)
         if (!visited[start_node_id]) {
             APUtil(start_node_id, visited, disc, low, time, par, isAP);
         }
@@ -368,7 +321,7 @@ void Graph::AP()
     }
 
     int partition_offset = 0;
-    for (int i = 0; i < this->n0; i++) {
+    /*for (int i = 0; i < this->n0; i++) {
         for (int j = 0; j < fixed_nodes[i].partition[j]; j++) {
             fixed_nodes[i].partition[j] = fixed_nodes[i].partition[j] + partition_offset;
 
@@ -378,9 +331,80 @@ void Graph::AP()
 
 
         }
-    }
+    }*/
 
 }
+
+
+bool Graph::DFS_for_sorted_straight_line(int start_node,  std::vector<bool>& visited) {
+    // need to make sure at the beginning that all nodes with degree 0 are removed. we can do this since by setting their
+    // order to be the right most position and adding an ignore marker.
+    Stack stack;
+    stack.push(start_node);
+    int mod_calc = 0;
+    int last_fix_node_id = start_node;
+
+
+    //move this to a seperate function called DFS
+    while (!stack.isEmpty()) {
+
+        int current_node = stack.peek();
+        stack.pop();
+
+        if(mod_calc % 2 == 0 && current_node != 0) { 
+            if (last_fix_node_id != current_node - 1) {
+                std::cout << "The given Graph / Partition is not a straight line" << std::endl;
+                return false;
+            }
+            else {
+                last_fix_node_id = current_node;
+            }
+        }
+
+        if (!visited[current_node]) {
+            std::cout << "Visited " << current_node << " ";
+            visited[current_node] = true;
+        }
+        for (int i = 0; i < graph[current_node].neighbours.size(); i++) {
+            if ((graph[current_node].neighbours.size() - graph[current_node].offset_visible_nodes) > 2) { 
+                std::cout << "node : " << current_node << " has more than 1 neighbour therefore straight line reduction can not be achieved " << std::endl;
+                return false; }
+            if (!visited[graph[current_node].neighbours[i]]) {
+                stack.push(graph[current_node].neighbours[i]);
+            }
+        }
+
+        mod_calc++;
+    }
+
+    return true;
+}
+
+
+
+void Graph::Sorted_straight_line_reduction() {
+    // max 1 DFS
+    // after every second search make sure the node that is visited has an ID exactly +1 of the node before.
+    // this can be done using a mod 2 if statement to check if the node we are about the visit is a fix node or not
+    // all nodes must have a max of 1 neighbour. to make sure of this after 1 DFS check all nodes were visited.
+
+    // after we have found out that it is a straight line input that can lead to 0 crossings --> use median Heuristic,
+    // to calculate the median of their neighbours, which then in turn gives us the order of the moveable nodes.
+    int start_node_id = 0;
+    std::vector<bool> visited(n0 + n1);
+    if (DFS_for_sorted_straight_line(start_node_id, visited)) {
+        for (int i = 0; i < visited.size(); i++) {
+            if (!visited[i]) {
+                std::cout << "not a sorted straight line reduction, not all nodes in this given partition/graph can be visited" << std::endl;
+            }
+        }
+        Median_Heuristic();
+    }
+    else {
+        std::cout << "sorted straight line reduction could not be done" << std::endl;
+    }
+}
+
 
 //typedef std::vector<std::pair<Node*, Node*>> Twins;
 
