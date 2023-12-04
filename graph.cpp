@@ -7,26 +7,30 @@
 #include <cassert>
 #include <utility>
 #include <cmath>
+#include <omp.h>
 
 
 //Constructor dependent on size of movable_nodes
-Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0+n1), order_nodes(n1) {
+Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), fixed_nodes(n0), movable_nodes(n1), order_nodes(n1) {
 
-    for (int i = 0; i < n0; i++) {
-        graph[i].id = i;
-    }
-    //initialize id and order in the graph
+    //initialize id and order in the movable_nodes and order_nodes Array
     for (int i = 0; i < order_nodes.size(); i++) {
-        graph[n0+i].id = n0+i; 
-        graph[n0+i].order = i;
-        order_nodes[i] = &graph[n0+i]; //link order to index (not id!)
+        movable_nodes[i].id = n0 + i + 1; //set id to start at n0+1 to n0+n1;
+        movable_nodes[i].order = i;
+        //order_nodes[i] = movable_nodes[i].id //link order to id 
+        order_nodes[i] = &movable_nodes[i]; //link order to index (not id!)
+    }
+
+    for (int i = 0; i < this->n0; i++) {
+        fixed_nodes[i].id = i + 1;
     }
 }
 
 //adding Edges from movable_nodes to neighbours
 void Graph::addEdge(int x, int y) {
-    graph[x].neighbours.push_back(y);
-    graph[y].neighbours.push_back(x);   
+    //!offset of neighbours because y id starts at n0+1 -> this function works only for input data
+    movable_nodes[y - n0 - 1].neighbours.push_back(x); // in vector movable_nodes add adjacency (y,x) with x of X
+    fixed_nodes[x - 1].neighbours.push_back(y);
 }
 
 void Graph::printGraph() {
@@ -476,6 +480,44 @@ std::pair<std::vector<Node*>, int> bruteForce(Graph g) {
         }
 
     } while (std::next_permutation(baseOrder.begin(), baseOrder.end(), compareNodePointers));
+
+    return std::make_pair(bestOrder, bestCrossings);
+}
+
+int factorial(int n) {
+    return (n == 0 || n == 1) ? 1 : n * factorial(n - 1);
+}
+
+std::pair<std::vector<Node*>, int> bruteForceParallel(Graph g) {
+    std::vector<Node*> baseOrder = g.getOrderNodes();
+    std::sort(baseOrder.begin(), baseOrder.end(), compareNodePointers);
+
+    // Save current max
+    std::vector<Node*> bestOrder = baseOrder;
+    int bestCrossings = g.countCrossings();
+
+    #pragma omp parallel for
+    for (int i = 0; i < factorial(baseOrder.size()); i++){
+        std::vector<Node*> permutation = baseOrder;
+
+        // Generate the ith permutation
+        for (int j = 0; j < i; ++j) {
+            std::next_permutation(permutation.begin(), permutation.end(), compareNodePointers);
+        }
+
+        Graph tmp = g;
+        tmp.setOrderNodes(permutation);
+
+        int crossings = tmp.countCrossings();
+        //std::cout << "Crossings: " << crossings << std::endl;
+        #pragma omp critical
+        {
+            if (crossings < bestCrossings) {
+                bestOrder = baseOrder;
+                bestCrossings = crossings;
+            }
+        }
+    }
 
     return std::make_pair(bestOrder, bestCrossings);
 }
