@@ -35,7 +35,7 @@ public:
     void printGraph();
     int countCrossings();
     int countCrossingsForPair(int order_a, int order_b);
-    void sortMovableNodes();
+    void sortNeighbours();
     void swapNodes(int order_a, int order_b);
     void makeNodeInvisible(int order);
 

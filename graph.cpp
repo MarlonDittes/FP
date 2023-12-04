@@ -49,12 +49,12 @@ void Graph::printGraph() {
     }
 }
 
-/*
-void Graph::sortMovableNodes() {
-    for (int i = 0; i < movable_nodes.size(); i++) {
-        std::sort(movable_nodes[i].neighbours.begin(), movable_nodes[i].neighbours.end());
+
+void Graph::sortNeighbours() {
+    for (int i = 0; i < graph.size(); i++) {
+        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end());
     }
-}*/
+}
 
 int Graph::countCrossings() {
     if (m == 0) {
@@ -94,11 +94,11 @@ void Graph::swapNodes(int node0, int node1) {
     std::swap(order_nodes[node0], order_nodes[node1]);
 }
 
-/*
+
 void Graph::makeNodeInvisible(int order_of_node) {
     Node* node = order_nodes[order_of_node];
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
-        Node* neighbour = &fixed_nodes[node->neighbours[i]];
+        Node* neighbour = &graph[node->neighbours[i]];
 
         //make node invisible in all adjacencie lists of fixed neighbours
         for (int j = neighbour->offset_visible_nodes; j < neighbour->neighbours.size(); j++) {
@@ -113,7 +113,7 @@ void Graph::makeNodeInvisible(int order_of_node) {
 
     //set visible counter to end of adjacency array -> as if all edges removed
     node->offset_visible_nodes = node->neighbours.size();
-} */
+}
 
 std::pair<std::vector<Node*>, int> Graph::Greedy() {
     int crossings;
@@ -406,7 +406,7 @@ void Graph::Sorted_straight_line_reduction() {
 }
 
 
-//typedef std::vector<std::pair<Node*, Node*>> Twins;
+typedef std::vector<std::pair<Node*, Node*>> Twins;
 
 Twins findTwins(Graph* g) {
     Twins twins;

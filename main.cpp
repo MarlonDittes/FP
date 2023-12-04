@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
-    //g->sortMovableNodes();
+    //g->sortNeighbours();
     std::cout << "sorted" << std::endl;
 
     g->printGraph();
