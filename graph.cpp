@@ -31,6 +31,7 @@ void Graph::addEdge(int x, int y) {
 }
 
 void Graph::printGraph() {
+    std::cout << "Printing graph..." << std::endl;
 
     //print in order_nodes of movable_nodes (B)
     for (int i = 0; i < order_nodes.size(); i++) {
@@ -57,11 +58,11 @@ void Graph::sortNeighbours() {
     }
 }
 
-int Graph::countCrossings() {
+long Graph::countCrossings() {
     if (m == 0) {
         return 0;
     }
-    int crossings = 0;
+    long crossings = 0;
     //iterate through movable_nodes
     for (int u = 0; u < order_nodes.size() - 1; u++) {
         //iterate through movable_nodes+1
@@ -116,8 +117,8 @@ void Graph::makeNodeInvisible(int order_of_node) {
     node->offset_visible_nodes = node->neighbours.size();
 }
 
-std::pair<std::vector<Node*>, int> Graph::Greedy() {
-    int crossings;
+std::pair<std::vector<Node*>, long> Graph::Greedy() {
+    long crossings;
     for (int i = 0; i < order_nodes.size() - 1; i++) {
         int crossings_old = this->countCrossings();
         this->swapNodes(i, i + 1);
@@ -125,6 +126,8 @@ std::pair<std::vector<Node*>, int> Graph::Greedy() {
         if (crossings_old < crossings_new) {
             this->swapNodes(i, i + 1);
         }
+
+        // Case for last comparison
         if (i == order_nodes.size() - 2) {
             crossings = std::min(crossings_new, crossings_old);
         }
@@ -448,15 +451,15 @@ void Graph::cheapReduction() {
 */
 
 bool compareNodePointers(Node* a, Node* b) {
-    return a->order < b->order;
+    return a->id < b->id;
 }
 
-std::pair<std::vector<Node*>, int> bruteForce(Graph g) {
+std::pair<std::vector<Node*>, long> bruteForce(Graph g) {
     std::vector<Node*> baseOrder = g.getOrderNodes();
     std::sort(baseOrder.begin(), baseOrder.end(), compareNodePointers);
 
     std::vector<Node*> bestOrder = baseOrder;
-    int bestCrossings = g.countCrossings();
+    long bestCrossings = g.countCrossings();
 
     do {
         Graph tmp = g;
@@ -468,7 +471,7 @@ std::pair<std::vector<Node*>, int> bruteForce(Graph g) {
         }
         std::cout << "\n";
 */
-        int crossings = tmp.countCrossings();
+        long crossings = tmp.countCrossings();
         //std::cout << "Crossings: " << crossings << std::endl;
 
         if (crossings < bestCrossings) {
@@ -481,17 +484,17 @@ std::pair<std::vector<Node*>, int> bruteForce(Graph g) {
     return std::make_pair(bestOrder, bestCrossings);
 }
 
-int factorial(int n) {
+long factorial(int n) {
     return (n == 0 || n == 1) ? 1 : n * factorial(n - 1);
 }
 
-std::pair<std::vector<Node*>, int> bruteForceParallel(Graph g) {
+std::pair<std::vector<Node*>, long> bruteForceParallel(Graph g) {
     std::vector<Node*> baseOrder = g.getOrderNodes();
     std::sort(baseOrder.begin(), baseOrder.end(), compareNodePointers);
 
     // Save current max
     std::vector<Node*> bestOrder = baseOrder;
-    int bestCrossings = g.countCrossings();
+    long bestCrossings = g.countCrossings();
 
     #pragma omp parallel for
     for (int i = 0; i < factorial(baseOrder.size()); i++){
@@ -505,7 +508,7 @@ std::pair<std::vector<Node*>, int> bruteForceParallel(Graph g) {
         Graph tmp = g;
         tmp.setOrderNodes(permutation);
 
-        int crossings = tmp.countCrossings();
+        long crossings = tmp.countCrossings();
         //std::cout << "Crossings: " << crossings << std::endl;
         #pragma omp critical
         {

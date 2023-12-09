@@ -33,13 +33,13 @@ public:
     void setOrderNodes(std::vector<Node*> order) { this->order_nodes = order; } ;
 
     void printGraph();
-    int countCrossings();
+    long countCrossings();
     int countCrossingsForPair(int order_a, int order_b);
     void sortNeighbours();
     void swapNodes(int order_a, int order_b);
     void makeNodeInvisible(int order);
 
-    std::pair<std::vector<Node*>, int> Greedy();
+    std::pair<std::vector<Node*>, long> Greedy();
     std::pair<int,int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
     void Partition();
     void APUtil(int start_node_id, std::vector<int>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
@@ -50,9 +50,9 @@ public:
     bool verifier(Graph check);
 };
 
-std::pair<std::vector<Node*>, int> bruteForce(Graph g);
-int factorial(int n);
-std::pair<std::vector<Node*>, int> bruteForceParallel(Graph g);
+std::pair<std::vector<Node*>, long> bruteForce(Graph g);
+long factorial(int n);
+std::pair<std::vector<Node*>, long> bruteForceParallel(Graph g);
 
 //reduction:
 Twins findTwins();

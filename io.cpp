@@ -2,8 +2,7 @@
 #include <vector>
 
 Graph* readGraph(std::string graph_file) {
-
-    std::cout << "read graph..." << std::endl;
+    std::cout << "Reading graph..." << std::endl;
     std::string tmp; //for p and ocr in input format
     int n0; //neighbours = A, fixed partition
     int n1; //movable_nodes = B, free partition
@@ -20,14 +19,12 @@ Graph* readGraph(std::string graph_file) {
     std::getline(file, line);
 
     while (line[0] == 'c') {
-        std::cout << "skip" << std::endl;
         std::getline(file, line);
     }
 
     std::stringstream ss(line);
     ss >> tmp; //p
     ss >> tmp; //ocr
-    std::cout << "tmp: " << tmp << std::endl;
     ss >> n0;
     ss >> n1;
     ss >> m;
@@ -38,11 +35,8 @@ Graph* readGraph(std::string graph_file) {
 
     //initialize graph
     Graph* g = new Graph(n0, n1, m);
-    std::cout << "test" << std::endl;
     //read adjacencies of the nodes in the graph file
     while (std::getline(file, line)) {
-        std::cout << "while..." << std::endl;
-
         if (line[0] == 'c') {
             continue;
         }
@@ -53,10 +47,8 @@ Graph* readGraph(std::string graph_file) {
 
         ss >> x;
         ss >> y;
-        std::cout << "addEdge: " << x << " - " << y << std::endl;
         g->addEdge(x-1, y-1);
     }
-    std::cout << "close" << std::endl;
     file.close();
 
     //g.printGraph();
@@ -141,6 +133,62 @@ void readHyperGraph(std::string hypergraph_file, std::string output){
         }
     
         std::stringstream ss(line);
+
+        int edge_vertex;
+        while (ss >> edge_vertex){
+            //Need to offset edge_vertex indices by ammount of vertices in A partition (= n0)
+            edges_in_bipartite_graph.push_back(std::make_pair(edge_index, n0 + edge_vertex));
+        }          
+
+        //Prep next edges
+        edge_index++;
+    }
+    
+    writeHyperGraphToBipartiteGraph(n0, n1, edges_in_bipartite_graph.size(), edges_in_bipartite_graph, output); 
+
+    file.close();
+    return;
+}
+
+void readWeightedHyperGraph(std::string hypergraph_file, std::string output){
+    std::cout << "read hypergraph..." << std::endl;
+
+    std::ifstream file(hypergraph_file);
+
+    if (!file.is_open()) {
+        std::cout << "error: file not open" << std::endl;
+    }
+
+    std::string line;
+    std::getline(file, line);
+
+    // Skipping comments
+    while (line[0] == '%') {
+        std::getline(file, line);
+    }
+
+    // First non comment line
+    std::stringstream ss(line);
+    int n0, n1, fmp;
+
+    ss >> n0;
+    ss >> n1;
+    ss >> fmp;
+
+    //std::cout << "n0: " << n0 << " n1: "<< n1 << std::endl;
+
+    std::vector<std::pair<int, int>> edges_in_bipartite_graph;
+    //read adjacencies of the nodes in the graph file
+    int edge_index = 1;
+    while (std::getline(file, line)) {
+        // Skip comments
+        if (line[0] == '%') {
+            continue;
+        }
+    
+        std::stringstream ss(line);
+        int weight;
+        ss >> weight;
 
         int edge_vertex;
         while (ss >> edge_vertex){
