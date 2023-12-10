@@ -2,6 +2,9 @@
 #include "graph.h"
 #include "io.h"
 #include "stack.h"
+#include "performance.h"
+
+constexpr int MODE_COUNT = 4;
 
 int main(int argc, char* argv[]) {
     std::string graph_file = argv[1];
@@ -33,15 +36,15 @@ int main(int argc, char* argv[]) {
 
     // Testing Stuff
     // Brute Force (parallel)
-    //auto resultBF = bruteForce(*g);
+    auto resultBF = bruteForce(*g);
     //auto resultBF = bruteForceParallel(*g);
-    //std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
+    std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
     //outputOrder(resultBF.first, "../output.txt");
 
 
     // Greedy
-    auto resultGREEDY = g->Greedy();
-    std::cout << "crossings GREEDY: " << resultGREEDY.second << std::endl;
+    //auto resultGREEDY = g->Greedy();
+    //std::cout << "crossings GREEDY: " << resultGREEDY.second << std::endl;
 
     // Median Heuristic
     //g->Median_Heuristic();
@@ -60,7 +63,10 @@ int main(int argc, char* argv[]) {
         std::cout << "Graph is NOT valid" << std::endl;
     }
 
-    
+    for (int mode = 1; mode<=MODE_COUNT; mode++){
+        calculatePerformance("../tiny_test_set", "../performance_data/" + std::to_string(mode), mode);
+        std::cout << "Mode " << mode << " done." << std::endl;
+    }  
 
     //readWeightedHyperGraph("../hypergraphs/4000_4_40_5.4.hgr", "../bipartitegraphs/4000_4_40_5.4.gr");
 }

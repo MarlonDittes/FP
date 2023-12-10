@@ -2,7 +2,7 @@
 #include <vector>
 
 Graph* readGraph(std::string graph_file) {
-    std::cout << "Reading graph..." << std::endl;
+    //std::cout << "Reading graph..." << std::endl;
     std::string tmp; //for p and ocr in input format
     int n0; //neighbours = A, fixed partition
     int n1; //movable_nodes = B, free partition
@@ -11,7 +11,7 @@ Graph* readGraph(std::string graph_file) {
     std::ifstream file(graph_file);
 
     if (!file.is_open()) {
-        std::cout << "error: file not open" << std::endl;
+        //std::cout << "error: file not open" << std::endl;
     }
 
     std::string line;
@@ -29,9 +29,9 @@ Graph* readGraph(std::string graph_file) {
     ss >> n1;
     ss >> m;
 
-    std::cout << "n0: " << n0 << std::endl;
-    std::cout << "n1: " << n1 << std::endl;
-    std::cout << "m: " << m << std::endl;
+    //std::cout << "n0: " << n0 << std::endl;
+    //std::cout << "n1: " << n1 << std::endl;
+    //std::cout << "m: " << m << std::endl;
 
     //initialize graph
     Graph* g = new Graph(n0, n1, m);

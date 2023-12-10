@@ -144,7 +144,7 @@ void Graph::Median_Heuristic()
         }
 
         order_nodes[i]->median = order_nodes[i]->median / order_nodes[i]->neighbours.size();
-        std::cout << "id: " << order_nodes[i]->id << " median: " << order_nodes[i]->median << std::endl;
+        //std::cout << "id: " << order_nodes[i]->id << " median: " << order_nodes[i]->median << std::endl;
     }
 
     std::sort(order_nodes.begin(), order_nodes.end(), [](const Node* a, const Node* b) {
