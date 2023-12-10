@@ -50,9 +50,8 @@ public:
     bool verifier(Graph check);
 };
 
-std::pair<std::vector<Node*>, long> bruteForce(Graph g);
-long factorial(int n);
-std::pair<std::vector<Node*>, long> bruteForceParallel(Graph g);
+std::pair<std::vector<Node*>, long> bruteForce(Graph* g);
+std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end);
 
 //reduction:
 Twins findTwins();

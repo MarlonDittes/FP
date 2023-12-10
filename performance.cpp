@@ -46,7 +46,7 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                     // 1 BruteForce 
                     case 1:
                         start = std::chrono::high_resolution_clock::now();
-                        result = bruteForce(*g);
+                        result = bruteForce(g);
                         stop = std::chrono::high_resolution_clock::now();
                         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 

@@ -204,7 +204,7 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
         }
 
         if (!visited[current_node]) {
-            std::cout << "Visited " << current_node << " ";
+            //std::cout << "Visited " << current_node << " ";
             visited[current_node] = true;
             graph[current_node].partition.push_back(partition);
         }
@@ -454,16 +454,15 @@ bool compareNodePointers(Node* a, Node* b) {
     return a->id < b->id;
 }
 
-std::pair<std::vector<Node*>, long> bruteForce(Graph g) {
-    std::vector<Node*> baseOrder = g.getOrderNodes();
+std::pair<std::vector<Node*>, long> bruteForce(Graph* g) {
+    std::vector<Node*> baseOrder = g->getOrderNodes();
     std::sort(baseOrder.begin(), baseOrder.end(), compareNodePointers);
 
     std::vector<Node*> bestOrder = baseOrder;
-    long bestCrossings = g.countCrossings();
+    long bestCrossings = g->countCrossings();
 
     do {
-        Graph tmp = g;
-        tmp.setOrderNodes(baseOrder);
+        g->setOrderNodes(baseOrder);
         // Display the current permutation
         /*std::cout << "Permutation:";
         for (const Node* node : baseOrder) {
@@ -471,7 +470,7 @@ std::pair<std::vector<Node*>, long> bruteForce(Graph g) {
         }
         std::cout << "\n";
 */
-        long crossings = tmp.countCrossings();
+        long crossings = g->countCrossings();
         //std::cout << "Crossings: " << crossings << std::endl;
 
         if (crossings < bestCrossings) {
@@ -484,40 +483,31 @@ std::pair<std::vector<Node*>, long> bruteForce(Graph g) {
     return std::make_pair(bestOrder, bestCrossings);
 }
 
-long factorial(int n) {
-    return (n == 0 || n == 1) ? 1 : n * factorial(n - 1);
-}
+std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end){
+    std::vector<Node*> baseOrder = g->getOrderNodes();
+    std::sort(baseOrder.begin() + begin, baseOrder.begin() + end, compareNodePointers);
 
-std::pair<std::vector<Node*>, long> bruteForceParallel(Graph g) {
-    std::vector<Node*> baseOrder = g.getOrderNodes();
-    std::sort(baseOrder.begin(), baseOrder.end(), compareNodePointers);
-
-    // Save current max
     std::vector<Node*> bestOrder = baseOrder;
-    long bestCrossings = g.countCrossings();
+    long bestCrossings = g->countCrossings();
 
-    #pragma omp parallel for
-    for (int i = 0; i < factorial(baseOrder.size()); i++){
-        std::vector<Node*> permutation = baseOrder;
-
-        // Generate the ith permutation
-        for (int j = 0; j < i; ++j) {
-            std::next_permutation(permutation.begin(), permutation.end(), compareNodePointers);
+    do {
+        g->setOrderNodes(baseOrder);
+        // Display the current permutation
+        /*std::cout << "Permutation:";
+        for (const Node* node : baseOrder) {
+            std::cout << " order_nodes: " << node->order << ", ID: " << node->id;
         }
-
-        Graph tmp = g;
-        tmp.setOrderNodes(permutation);
-
-        long crossings = tmp.countCrossings();
+        std::cout << "\n";
+*/
+        long crossings = g->countCrossings();
         //std::cout << "Crossings: " << crossings << std::endl;
-        #pragma omp critical
-        {
-            if (crossings < bestCrossings) {
-                bestOrder = baseOrder;
-                bestCrossings = crossings;
-            }
+
+        if (crossings < bestCrossings) {
+            bestOrder = baseOrder;
+            bestCrossings = crossings;
         }
-    }
+
+    } while (std::next_permutation(baseOrder.begin() + begin, baseOrder.begin() + end, compareNodePointers));
 
     return std::make_pair(bestOrder, bestCrossings);
 }

@@ -36,10 +36,11 @@ int main(int argc, char* argv[]) {
 
     // Testing Stuff
     // Brute Force (parallel)
-    auto resultBF = bruteForce(*g);
+    auto resultBF = bruteForce(g);
     //auto resultBF = bruteForceParallel(*g);
     std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
     //outputOrder(resultBF.first, "../output.txt");
+
 
 
     // Greedy
@@ -50,11 +51,11 @@ int main(int argc, char* argv[]) {
     //g->Median_Heuristic();
     //std::cout << "crossings MEDIAN_HEURISTIC: " << g->countCrossings() << std::endl;
 
-    /*
+    
     g->Partition();
     g->printGraph();
     g->AP();
-    */
+    
 
     if (g->verifier(verifier)) {
         std::cout << "Graph is valid"<<std::endl;
@@ -63,10 +64,13 @@ int main(int argc, char* argv[]) {
         std::cout << "Graph is NOT valid" << std::endl;
     }
 
+    // Testing on test set
+    /*
     for (int mode = 1; mode<=MODE_COUNT; mode++){
         calculatePerformance("../tiny_test_set", "../performance_data/" + std::to_string(mode), mode);
         std::cout << "Mode " << mode << " done." << std::endl;
-    }  
+    } 
+    */
 
     //readWeightedHyperGraph("../hypergraphs/4000_4_40_5.4.hgr", "../bipartitegraphs/4000_4_40_5.4.gr");
 }
