@@ -50,13 +50,6 @@ void Graph::printGraph() {
     }
 }
 
-
-void Graph::sortNeighbours() {
-    for (int i = 0; i < graph.size(); i++) {
-        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end());
-    }
-}
-
 int Graph::countCrossings() {
     if (m == 0) {
         return 0;
@@ -90,11 +83,16 @@ int Graph::countCrossingsForPair(int a, int b) { //for a < b
     return crossings;
 }
 
+void Graph::sortNeighbours() {
+    for (int i = 0; i < graph.size(); i++) {
+        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end());
+    }
+}
+
 void Graph::swapNodes(int node0, int node1) {
     std::swap(order_nodes[node0]->order, order_nodes[node1]->order);
     std::swap(order_nodes[node0], order_nodes[node1]);
 }
-
 
 void Graph::makeNodeInvisible(int order_of_node) {
     Node* node = order_nodes[order_of_node];
@@ -336,7 +334,6 @@ void Graph::AP()
 
 }
 
-
 bool Graph::DFS_for_sorted_straight_line(int start_node,  std::vector<bool>& visited) {
     // need to make sure at the beginning that all nodes with degree 0 are removed. we can do this since by setting their
     // order to be the right most position and adding an ignore marker.
@@ -381,8 +378,6 @@ bool Graph::DFS_for_sorted_straight_line(int start_node,  std::vector<bool>& vis
     return true;
 }
 
-
-
 void Graph::Sorted_straight_line_reduction() {
     // max 1 DFS
     // after every second search make sure the node that is visited has an ID exactly +1 of the node before.
@@ -405,47 +400,6 @@ void Graph::Sorted_straight_line_reduction() {
         std::cout << "sorted straight line reduction could not be done" << std::endl;
     }
 }
-
-
-typedef std::vector<std::pair<Node*, Node*>> Twins;
-
-Twins findTwins(Graph* g) {
-    Twins twins;
-    for (int i = 0; i < g->getSizeOfOrder()-1; i++) {
-        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
-            if (g->getNodeByOrder(i)->neighbours.size() != g->getNodeByOrder(j)->neighbours.size()) {
-                continue;
-            }
-
-            for (int k = 0; k < g->getNodeByOrder(i)->neighbours.size(); k++) {
-                if (g->getNodeByOrder(i)->neighbours[k] != g->getNodeByOrder(j)->neighbours[k]) {
-                    break;
-                }
-
-                //found twins
-                if (k == g->getNodeByOrder(i)->neighbours.size()-1) {
-                    std::pair<Node*, Node*> twin = std::make_pair(g->getNodeByOrder(i), g->getNodeByOrder(j)); 
-                    twins.push_back(twin); //twin_reduce()
-                }
-            }
-        }
-    }
-    return twins;
-}
-
-/*
-void Graph::cheapReduction() {
-    for (int a = 0; a < order_nodes.size()-1; a++) {
-        for (int b = a+1; b < order_nodes.size(); b++) {
-            int a_smaller_b = countCrossingsForPair(a, b);
-            int b_smaller_a = countCrossingsForPair(b, a);
-            if (a_smaller_b == 0 || b_smaller_a == 0) {
-
-            }
-        }
-    }
-}
-*/
 
 bool compareNodePointers(Node* a, Node* b) {
     return a->order < b->order;
@@ -517,4 +471,32 @@ std::pair<std::vector<Node*>, int> bruteForceParallel(Graph g) {
     }
 
     return std::make_pair(bestOrder, bestCrossings);
+}
+
+typedef std::vector<std::pair<Node*, Node*>> Twins;
+
+Twins findTwins(Graph* g) {
+    Twins twins;
+    for (int i = 0; i < g->getSizeOfOrder()-1; i++) {
+        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
+            if (g->getNodeByOrder(i)->neighbours.size() != g->getNodeByOrder(j)->neighbours.size()) {
+                continue;
+            }
+
+            for (int k = g->getNodeByOrder(i)->offset_visible_nodes; k < g->getNodeByOrder(i)->neighbours.size(); k++) {
+                if (g->getNodeByOrder(i)->neighbours[k] != g->getNodeByOrder(j)->neighbours[k]) {
+                    break;
+                }
+
+                //found twins
+                if (k == g->getNodeByOrder(i)->neighbours.size()-1) {
+                    std::pair<Node*, Node*> twin = std::make_pair(g->getNodeByOrder(i), g->getNodeByOrder(j)); 
+                    twins.push_back(twin); //twin_reduce()
+                    g->makeNodeInvisible(j); //j is made invisible 
+                    //!!! save crossings in i for both j and i as twins i and j are reduced to one node
+                }
+            }
+        }
+    }
+    return twins;
 }

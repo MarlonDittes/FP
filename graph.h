@@ -5,7 +5,7 @@
 #include <vector>
 
 struct Node {
-    std::vector<int> neighbours; //name needs to be changed
+    std::vector<int> neighbours;
     int order = -1;
     int id = -1;
     int median = 0;
@@ -40,14 +40,14 @@ public:
     void makeNodeInvisible(int order);
 
     std::pair<std::vector<Node*>, int> Greedy();
+    void Median_Heuristic();
+    bool verifier(Graph check);
     std::pair<int,int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
     void Partition();
     void APUtil(int start_node_id, std::vector<int>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
     void AP();
-    void Median_Heuristic();
-    void Sorted_straight_line_reduction();
     bool DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visited);
-    bool verifier(Graph check);
+    void Sorted_straight_line_reduction();
 };
 
 std::pair<std::vector<Node*>, int> bruteForce(Graph g);
