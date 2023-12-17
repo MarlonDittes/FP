@@ -22,6 +22,7 @@ private:
     int n0; //size fixed nodes
     int n1; //size movable nodes
     int m; //number of edges
+    std::vector<std::vector<int>> partitions;
 
 public:
     Graph(int n0, int n1, int m);
@@ -31,6 +32,12 @@ public:
     int getSizeOfOrder() { return order_nodes.size(); }
     std::vector<Node*> getOrderNodes() { return this->order_nodes; };
     void setOrderNodes(std::vector<Node*> order) { this->order_nodes = order; } ;
+    // New getters, do we need?
+    std::vector<std::vector<int>> getPartitions(){return this->partitions;};
+    int getN0(){return this->n0;};
+    int getN1(){return this->n1;};
+    int getM(){return this->m;};
+    std::vector<Node> getGraph(){return this->graph;};
 
     void printGraph();
     long countCrossings();
@@ -52,6 +59,9 @@ public:
 
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g);
 std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end);
+// New stuff
+std::pair<std::vector<Node*>, long> BranchAndReduce (Graph G);
+bool reduceCliqueReduction(Graph* g);
 
 //reduction:
 Twins findTwins();
