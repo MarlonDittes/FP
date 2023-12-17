@@ -206,7 +206,8 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
         if (!visited[current_node]) {
             //std::cout << "Visited " << current_node << " ";
             visited[current_node] = true;
-            graph[current_node].partition.push_back(partition);
+            this->graph[current_node].partition.push_back(partition);
+            this->partitions[partition].push_back(current_node);
         }
 
         for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
@@ -233,6 +234,9 @@ void Graph::Partition()
         std::pair<int, int> end_start_node_interval = DFSforPartition(start_node_fix, partition, visited);
         rounds_counter++;
         int next_fixed_node = end_start_node_interval.first + 1;
+
+        std::vector<Node*> tmp(0);
+        this->partitions.push_back(tmp);
         
         while (next_fixed_node <= end_start_node_interval.second) {
             if (visited[next_fixed_node]) {

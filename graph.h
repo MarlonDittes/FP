@@ -19,6 +19,7 @@ class Graph {
 private:
     std::vector<Node> graph;
     std::vector<Node*> order_nodes;
+    std::vector<std::vector<Node*>> partitions(0);
     int n0; //size fixed nodes
     int n1; //size movable nodes
     int m; //number of edges
