@@ -515,3 +515,98 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
 
     return std::make_pair(bestOrder, bestCrossings);
 }
+
+// CHANGE THIS TO BE SOMEWHERE ELSE; THIS SHOULDNT BE HERE
+enum Reduction {ZeroEdge, Complete};
+constexpr int BRUTE_CUTOFF;
+
+std::pair<std::vector<Node*>, long> BranchAndReduce (Graph* g, std::vector<Reduction> reductionTypes){
+    g->Median_Heuristic();
+
+    g->Partition();
+    g->AP();
+
+    auto partitions = g->getPartitions();           // NEED TO ADJUST THIS PROBABLY TO BE VECTOR<NODE*> NOT VECTOR<INT>!!, wait for shai AP
+    std::vector<std::pair<std::vector<Node*>, long>> results(0);
+    for (auto part : partitions){
+        Graph* partGraph = createGraphByPartition(g, part);
+        
+        bool changed = false;
+        for (auto reduct : reductionTypes){
+            /*
+            Need to implement this somehow
+
+            if (reduct.reduce()){
+                reduct.apply();
+                changed = true;
+            }
+            */
+        }
+
+        //Check if need to brute force since no more reductions were applicable
+        std::pair<std::vector<Node*>, long> result;
+
+        //decide if we should do this:
+        int numberOfVertices = g->getN0() + g->getN1();
+        bool otherCondition = numberOfVertices <= BRUTE_CUTOFF;
+
+        if (changed == false || otherCondition){
+            result = bruteForce(g);
+        } else {
+            result = BranchAndReduce(partGraph, reductionTypes);
+        }
+
+        results.push_back(result);
+    }
+
+     std::vector<Node*> solution(0);
+     long sumCrossings = 0;
+     for (auto result : results){
+        solution.insert(solution.end(), result.first.begin(), result.first.end());
+        sumCrossings += result.second;
+     }
+
+     return std::make_pair(solution, sumCrossings);
+}
+
+Graph* createGraphByPartition(Graph* g, std::vector<int> partition){
+    int n0 = 0;
+    int n1 = 0;
+    int m = 0;
+    std::vector<Node> g_nodes = g->getGraph();
+    std::vector<std::pair<int,int>> edges;
+    for (auto& ind : partition){
+        if (ind < g->getN0()){
+            n0++;
+            for (auto& neighbour : g_nodes[ind].neighbours){
+                m++;
+                edges.push_back(std::make_pair(ind, neighbour));
+            }
+        } else {
+            n1++;
+        }
+    }
+
+    Graph* partGraph = new Graph(n0,n1,m);
+    for (auto& edge : edges){
+        partGraph->addEdge(edge.first, edge.second);
+    }
+
+    return partGraph;
+}
+
+bool reduceCompleteReduction(Graph* g){
+    int n0 = g->getN0();
+    int n1 = g->getN1();
+    int m = g->getM();
+
+    if (n0 * n1 == m){
+        return true;
+    }
+}
+
+bool reduceZeroEdgeReduction(Graph* g){
+    if (g->getM() == 0){
+        return true;
+    }
+}
