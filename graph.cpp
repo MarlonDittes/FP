@@ -11,27 +11,28 @@
 
 
 //Constructor dependent on size of movable_nodes
-Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0+n1), order_nodes(n1) {
+Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0 + n1), order_nodes(n1) {
 
     for (int i = 0; i < n0; i++) {
         graph[i].id = i;
     }
     //initialize id and order in the graph
     for (int i = 0; i < order_nodes.size(); i++) {
-        graph[n0+i].id = n0+i; 
-        graph[n0+i].order = i;
-        order_nodes[i] = &graph[n0+i]; //link order to index (not id!)
+        graph[n0 + i].id = n0 + i;
+        graph[n0 + i].order = i;
+        order_nodes[i] = &graph[n0 + i]; //link order to index (not id!)
     }
 }
 
 //adding Edges from movable_nodes to neighbours
 void Graph::addEdge(int x, int y) {
     graph[x].neighbours.push_back(y);
-    graph[y].neighbours.push_back(x);   
+    graph[y].neighbours.push_back(x);
 }
 
 void Graph::printGraph() {
     std::cout << "Printing graph..." << std::endl;
+    std::cout << "fixed nodes = " << n0 << " moveable nodes : " << n1 << " total edges = " << m << std::endl;
 
     //print in order_nodes of movable_nodes (B)
     for (int i = 0; i < order_nodes.size(); i++) {
@@ -42,12 +43,10 @@ void Graph::printGraph() {
         std::cout << std::endl;
     }
 
-    for (int i = 0; i < graph.size(); i++) {
-        std::cout << "Node Id: " << graph[i].id << " Partition : ";
-        for (int j = 0; j < graph[i].partition.size(); j++) {
-            std::cout << graph[i].partition[j] << " ";
+    for (int i = 0; i < this->partitions.size(); i++) {
+        for (int j = 0; j < this->partitions[i].size(); j++) {
+            std::cout << "node id : " << this->partitions[i][j]->id << " is in partition : " << i << std::endl;
         }
-        std::cout << std::endl;
     }
 }
 
@@ -184,7 +183,7 @@ bool Graph::verifier(Graph check)
     return true;
 }
 
-std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partition ,std::vector<bool>& visited) {    
+std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited) {
     // need to make sure at the beginning that all nodes with degree 0 are removed. we can do this since by setting their
     // order to be the right most position and adding an ignore marker.
     Stack stack;
@@ -206,8 +205,8 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
         if (!visited[current_node]) {
             //std::cout << "Visited " << current_node << " ";
             visited[current_node] = true;
-            this->graph[current_node].partition.push_back(partition);
-            this->partitions[partition].push_back(current_node);
+            this->graph[current_node].partition = partition;
+            //this->partitions[partition].push_back(current_node);
         }
 
         for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
@@ -230,21 +229,18 @@ void Graph::Partition()
     std::vector<bool> visited(this->n0 + this->n1, false);
 
     while (rounds_counter < this->n0) {
-        
+
         std::pair<int, int> end_start_node_interval = DFSforPartition(start_node_fix, partition, visited);
         rounds_counter++;
         int next_fixed_node = end_start_node_interval.first + 1;
 
-        std::vector<Node*> tmp(0);
-        this->partitions.push_back(tmp);
-        
         while (next_fixed_node <= end_start_node_interval.second) {
             if (visited[next_fixed_node]) {
                 next_fixed_node++;
                 rounds_counter++;
             }
             else {
-                std::pair<int,int> end_start_node_interval_2 = DFSforPartition(next_fixed_node, partition, visited);
+                std::pair<int, int> end_start_node_interval_2 = DFSforPartition(next_fixed_node, partition, visited);
                 rounds_counter++;
                 next_fixed_node = end_start_node_interval_2.first + 1;
             }
@@ -252,7 +248,7 @@ void Graph::Partition()
         start_node_fix = next_fixed_node;
         partition++;
     }
-} 
+}
 
 
 // A recursive function that find articulation 
@@ -294,7 +290,7 @@ void Graph::APUtil(int start_node_id, std::vector<int>& visited, std::vector<int
             if (parent != -1 && low[graph[start_node_id].neighbours[i]] >= disc[start_node_id])
                 isAP[start_node_id] = true;
         }
-            
+
         // Update low value of start_node_id for parent function calls.
         else if (graph[start_node_id].neighbours[i] != parent)
             low[start_node_id] = std::min(low[start_node_id], disc[graph[start_node_id].neighbours[i]]);
@@ -329,22 +325,38 @@ void Graph::AP()
     }
 
     int partition_offset = 0;
-    /*for (int i = 0; i < this->n0; i++) {
-        for (int j = 0; j < fixed_nodes[i].partition[j]; j++) {
-            fixed_nodes[i].partition[j] = fixed_nodes[i].partition[j] + partition_offset;
-
+    std::vector<int> order_AP;
+    std::vector<Node*> tmp;
+    this->partitions.push_back(tmp);
+    for (int i = 0; i < isAP.size() - n1; i++) {
+        if (this->graph[i].partition + partition_offset == this->partitions.size()) {
+            this->partitions.push_back(tmp);
         }
-        if (isAP[i]) {
+
+        this->partitions[this->graph[i].partition + partition_offset].push_back(&this->graph[i]);
+
+        if (isAP[i] && i < this->n0) {
+            this->partitions.push_back(tmp);
+            order_AP.push_back(i);
             partition_offset++;
-
-
+            this->partitions[this->graph[i].partition + partition_offset].push_back(&this->graph[i]);
         }
-    }*/
+    }
+
+    int counter = 0;
+    for (int i = n0; i < isAP.size(); i++) {
+        if (counter < order_AP.size()) {
+            if (order_AP[counter] == i - n0) {
+                counter++;
+            }
+        }
+        this->partitions[this->graph[i].partition + counter].push_back(&this->graph[i]);
+    }
 
 }
 
 
-bool Graph::DFS_for_sorted_straight_line(int start_node,  std::vector<bool>& visited) {
+bool Graph::DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visited) {
     // need to make sure at the beginning that all nodes with degree 0 are removed. we can do this since by setting their
     // order to be the right most position and adding an ignore marker.
     Stack stack;
@@ -359,7 +371,7 @@ bool Graph::DFS_for_sorted_straight_line(int start_node,  std::vector<bool>& vis
         int current_node = stack.peek();
         stack.pop();
 
-        if(mod_calc % 2 == 0 && current_node != 0) { 
+        if (mod_calc % 2 == 0 && current_node != 0) {
             if (last_fix_node_id != current_node - 1) {
                 std::cout << "The given Graph / Partition is not a straight line" << std::endl;
                 return false;
@@ -374,9 +386,10 @@ bool Graph::DFS_for_sorted_straight_line(int start_node,  std::vector<bool>& vis
             visited[current_node] = true;
         }
         for (int i = 0; i < graph[current_node].neighbours.size(); i++) {
-            if ((graph[current_node].neighbours.size() - graph[current_node].offset_visible_nodes) > 2) { 
+            if ((graph[current_node].neighbours.size() - graph[current_node].offset_visible_nodes) > 2) {
                 std::cout << "node : " << current_node << " has more than 1 neighbour therefore straight line reduction can not be achieved " << std::endl;
-                return false; }
+                return false;
+            }
             if (!visited[graph[current_node].neighbours[i]]) {
                 stack.push(graph[current_node].neighbours[i]);
             }
@@ -418,8 +431,8 @@ typedef std::vector<std::pair<Node*, Node*>> Twins;
 
 Twins findTwins(Graph* g) {
     Twins twins;
-    for (int i = 0; i < g->getSizeOfOrder()-1; i++) {
-        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
+    for (int i = 0; i < g->getSizeOfOrder() - 1; i++) {
+        for (int j = i + 1; j < g->getSizeOfOrder(); j++) {
             if (g->getNodeByOrder(i)->neighbours.size() != g->getNodeByOrder(j)->neighbours.size()) {
                 continue;
             }
@@ -430,8 +443,8 @@ Twins findTwins(Graph* g) {
                 }
 
                 //found twins
-                if (k == g->getNodeByOrder(i)->neighbours.size()-1) {
-                    std::pair<Node*, Node*> twin = std::make_pair(g->getNodeByOrder(i), g->getNodeByOrder(j)); 
+                if (k == g->getNodeByOrder(i)->neighbours.size() - 1) {
+                    std::pair<Node*, Node*> twin = std::make_pair(g->getNodeByOrder(i), g->getNodeByOrder(j));
                     twins.push_back(twin); //twin_reduce()
                 }
             }
@@ -487,7 +500,7 @@ std::pair<std::vector<Node*>, long> bruteForce(Graph* g) {
     return std::make_pair(bestOrder, bestCrossings);
 }
 
-std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end){
+std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end) {
     std::vector<Node*> baseOrder = g->getOrderNodes();
     std::sort(baseOrder.begin() + begin, baseOrder.begin() + end, compareNodePointers);
 
@@ -517,22 +530,51 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
 }
 
 // CHANGE THIS TO BE SOMEWHERE ELSE; THIS SHOULDNT BE HERE
-enum Reduction {ZeroEdge, Complete};
-constexpr int BRUTE_CUTOFF;
+enum Reduction { ZeroEdge, Complete };
+constexpr int BRUTE_CUTOFF = 10;
 
-std::pair<std::vector<Node*>, long> BranchAndReduce (Graph* g, std::vector<Reduction> reductionTypes){
+
+Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
+    int n0 = 0;
+    int n1 = 0;
+    int m = 0;
+
+    std::vector<Node> g_nodes = g->getGraph();
+    std::vector<std::pair<int, int>> edges;
+    for (auto& ind : partition) {
+        if (ind->id < g->getN0()) {
+            n0++;
+            for (auto& neighbour : g_nodes[ind->id].neighbours) {
+                m++;
+                edges.push_back(std::make_pair(ind->id, neighbour));
+            }
+        }
+        else {
+            n1++;
+        }
+    }
+
+    Graph* partGraph = new Graph(n0, n1, m);
+    for (auto& edge : edges) {
+        partGraph->addEdge(edge.first, edge.second);
+    }
+
+    return partGraph;
+}
+
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduction> reductionTypes) {
     g->Median_Heuristic();
 
     g->Partition();
     g->AP();
 
-    auto partitions = g->getPartitions();           // NEED TO ADJUST THIS PROBABLY TO BE VECTOR<NODE*> NOT VECTOR<INT>!!, wait for shai AP
+    std::vector<std::vector<Node*>> partitions = g->getPartitions();           // NEED TO ADJUST THIS PROBABLY TO BE VECTOR<NODE*> NOT VECTOR<INT>!!, wait for shai AP
     std::vector<std::pair<std::vector<Node*>, long>> results(0);
-    for (auto part : partitions){
+    for (auto part : partitions) {
         Graph* partGraph = createGraphByPartition(g, part);
-        
+
         bool changed = false;
-        for (auto reduct : reductionTypes){
+        for (auto reduct : reductionTypes) {
             /*
             Need to implement this somehow
 
@@ -550,63 +592,38 @@ std::pair<std::vector<Node*>, long> BranchAndReduce (Graph* g, std::vector<Reduc
         int numberOfVertices = g->getN0() + g->getN1();
         bool otherCondition = numberOfVertices <= BRUTE_CUTOFF;
 
-        if (changed == false || otherCondition){
+        if (changed == false || otherCondition) {
             result = bruteForce(g);
-        } else {
+        }
+        else {
             result = BranchAndReduce(partGraph, reductionTypes);
         }
 
         results.push_back(result);
     }
 
-     std::vector<Node*> solution(0);
-     long sumCrossings = 0;
-     for (auto result : results){
+    std::vector<Node*> solution(0);
+    long sumCrossings = 0;
+    for (auto result : results) {
         solution.insert(solution.end(), result.first.begin(), result.first.end());
         sumCrossings += result.second;
-     }
-
-     return std::make_pair(solution, sumCrossings);
-}
-
-Graph* createGraphByPartition(Graph* g, std::vector<int> partition){
-    int n0 = 0;
-    int n1 = 0;
-    int m = 0;
-    std::vector<Node> g_nodes = g->getGraph();
-    std::vector<std::pair<int,int>> edges;
-    for (auto& ind : partition){
-        if (ind < g->getN0()){
-            n0++;
-            for (auto& neighbour : g_nodes[ind].neighbours){
-                m++;
-                edges.push_back(std::make_pair(ind, neighbour));
-            }
-        } else {
-            n1++;
-        }
     }
 
-    Graph* partGraph = new Graph(n0,n1,m);
-    for (auto& edge : edges){
-        partGraph->addEdge(edge.first, edge.second);
-    }
-
-    return partGraph;
+    return std::make_pair(solution, sumCrossings);
 }
 
-bool reduceCompleteReduction(Graph* g){
+bool reduceCompleteReduction(Graph* g) {
     int n0 = g->getN0();
     int n1 = g->getN1();
     int m = g->getM();
 
-    if (n0 * n1 == m){
+    if (n0 * n1 == m) {
         return true;
     }
 }
 
-bool reduceZeroEdgeReduction(Graph* g){
-    if (g->getM() == 0){
+bool reduceZeroEdgeReduction(Graph* g) {
+    if (g->getM() == 0) {
         return true;
     }
 }

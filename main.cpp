@@ -2,7 +2,7 @@
 #include "graph.h"
 #include "io.h"
 #include "stack.h"
-#include "performance.h"
+/*#include "performance.h"*/
 
 constexpr int MODE_COUNT = 4;
 
@@ -51,10 +51,12 @@ int main(int argc, char* argv[]) {
     //g->Median_Heuristic();
     //std::cout << "crossings MEDIAN_HEURISTIC: " << g->countCrossings() << std::endl;
 
-    
-    g->Partition();
+
+
     g->printGraph();
+    g->Partition();
     g->AP();
+    g->printGraph();
     
 
     if (g->verifier(verifier)) {
