@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE RELEASE)
 
 
-add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp)
+add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp)
 
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE my_lib)

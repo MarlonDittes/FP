@@ -13,5 +13,6 @@ void outputOrder(std::vector<Node*> order, std::string output);
 
 void writeHyperGraphToBipartiteGraph(int n0, int n1, int m, std::vector<std::pair<int, int>> edges, std::string output);
 void readHyperGraph(std::string hypergraph_file, std::string output);
+void readWeightedHyperGraph(std::string hypergraph_file, std::string output);
 
 #endif //IO_H
