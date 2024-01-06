@@ -65,7 +65,7 @@ void outputOrder(std::vector<Node*> order, std::string output) {
 
     for (const auto& node : order) {
         // Print the node id to the file
-        outputFile << node->id << std::endl;
+        outputFile << node->id + 1 << std::endl;
     }
 
     outputFile.close();

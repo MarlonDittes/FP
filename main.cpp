@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     auto resultBF = bruteForce(g);
     //auto resultBF = bruteForceParallel(*g);
     std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
-    //outputOrder(resultBF.first, "../output.txt");
+    outputOrder(resultBF.first, "../output.txt");
 
 
 
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 
 
 
-    g->printGraph();
+    //g->printGraph();
     g->Partition();
     g->AP();
     g->printGraph();

@@ -8,7 +8,7 @@ enum reduction_type { twin_reduction, cheap_reduction };
 struct general_reduction {
     general_reduction() {}
     virtual reduction_type get_reduction_type() const = 0;
-	virtual bool reduce(branch_and_reduce_algorithm* br_alg) = 0;
+	//virtual bool reduce(branch_and_reduce_algorithm* br_alg) = 0;
 };
 
 struct zeroCrossings_reduction : public general_reduction {

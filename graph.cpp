@@ -531,7 +531,6 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
 
 // CHANGE THIS TO BE SOMEWHERE ELSE; THIS SHOULDNT BE HERE
 enum Reduction { ZeroEdge, Complete };
-constexpr int BRUTE_CUTOFF = 10;
 
 
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
@@ -541,16 +540,42 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 
     std::vector<Node> g_nodes = g->getGraph();
     std::vector<std::pair<int, int>> edges;
-    for (auto& ind : partition) {
-        if (ind->id < g->getN0()) {
+
+    std::unordered_map<int, int> neighborIndexMap;
+
+    //Count n0, n1
+    for (auto& node : partition) {
+        if (node->id < g->getN0()) {
             n0++;
-            for (auto& neighbour : g_nodes[ind->id].neighbours) {
-                m++;
-                edges.push_back(std::make_pair(ind->id, neighbour));
-            }
         }
         else {
             n1++;
+        }
+    }
+
+    //Need index for edges
+    int indexN0 = 0;
+    int indexN1 = n0;
+
+    for (auto& node : partition) {
+        if (node->id < g->getN0()) {
+
+            // TODO
+            // NEED TO FIX: only add if actually is in partition
+            for (auto& neighbour : g_nodes[node->id].neighbours) {
+                m++;
+                if (neighborIndexMap.find(neighbour) != neighborIndexMap.end()){
+                    // Neighbor already in map
+                    int newNeighborIndex = neighborIndexMap[neighbour];
+                    edges.push_back(std::make_pair(indexN0, newNeighborIndex));
+                } else {
+                    // New neighbor
+                    neighborIndexMap[neighbour] = indexN1;
+                    indexN1++;
+                }
+                edges.push_back(std::make_pair(node->id, neighbour));
+            }
+            indexN0++;
         }
     }
 
@@ -568,13 +593,13 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
     g->Partition();
     g->AP();
 
-    std::vector<std::vector<Node*>> partitions = g->getPartitions();           // NEED TO ADJUST THIS PROBABLY TO BE VECTOR<NODE*> NOT VECTOR<INT>!!, wait for shai AP
+    std::vector<std::vector<Node*>> partitions = g->getPartitions();
     std::vector<std::pair<std::vector<Node*>, long>> results(0);
     for (auto part : partitions) {
         Graph* partGraph = createGraphByPartition(g, part);
 
         bool changed = false;
-        for (auto reduct : reductionTypes) {
+        //for (auto reduct : reductionTypes) {
             /*
             Need to implement this somehow
 
@@ -583,17 +608,45 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
                 changed = true;
             }
             */
-        }
+        //}
 
         //Check if need to brute force since no more reductions were applicable
         std::pair<std::vector<Node*>, long> result;
 
-        //decide if we should do this:
-        int numberOfVertices = g->getN0() + g->getN1();
-        bool otherCondition = numberOfVertices <= BRUTE_CUTOFF;
+        if (!changed) {
+            long bestCrossings = INFINITY;
+            std::vector<Node*> bestOrder(0);
 
-        if (changed == false || otherCondition) {
-            result = bruteForce(g);
+            // Run BranchAndReduce for each moveable node we fix
+            std::vector<Node> adjList = partGraph->getGraph();
+            for (auto& node : adjList){
+                if (node.id >= partGraph->getN0()){
+                    std::vector<Node*> branchSet;
+                    //Remove moveable node
+                    // TODO
+                    //Remove all fixed nodes that were only connected to removed moveable node
+                    // TODO
+
+                    // If we removed the last moveable node, there are no nodes left now
+                    if (branchSet.empty()){
+                        
+                    }
+
+                    Graph* branchGraph = createGraphByPartition(partGraph, branchSet);
+                    auto branchResult = BranchAndReduce(branchGraph, reductionTypes);
+
+                    // Now need to add back removed node to every possible position in orderArray??
+                    // TODO
+                    // Then check the best out of all of them in something like this:
+                    if (branchResult.second < bestCrossings){
+                        bestCrossings = branchResult.second;
+                        bestOrder = branchResult.first;
+                    }
+                }
+            }
+
+            //using the method above should decrease runtime, TODO: test if that's true
+            //result = bruteForce(g); 
         }
         else {
             result = BranchAndReduce(partGraph, reductionTypes);
@@ -602,6 +655,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
         results.push_back(result);
     }
 
+    // TODO: Map back to original node indices before concating
     std::vector<Node*> solution(0);
     long sumCrossings = 0;
     for (auto result : results) {
@@ -619,11 +673,15 @@ bool reduceCompleteReduction(Graph* g) {
 
     if (n0 * n1 == m) {
         return true;
+    } else {
+        return false;
     }
 }
 
 bool reduceZeroEdgeReduction(Graph* g) {
     if (g->getM() == 0) {
         return true;
+    } else {
+        return false;
     }
 }
