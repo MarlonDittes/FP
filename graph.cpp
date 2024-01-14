@@ -8,6 +8,7 @@
 #include <utility>
 #include <cmath>
 #include <omp.h>
+#include <unordered_set>
 
 
 //Constructor dependent on size of movable_nodes
@@ -78,6 +79,27 @@ long Graph::countCrossings() {
     return crossings;
 }
 
+long Graph::countCrossingsBranching() {
+    if (m == 0) {
+        return 0;
+    }
+    long crossings = 0;
+    //iterate through movable_nodes
+    for (int u = 0; u < order_nodes.size() - 1; u++) {
+        //iterate through movable_nodes+1
+        for (int v = u + 1; v < order_nodes.size(); v++) {
+            for (int i = order_nodes[u]->offset_visible_nodes; i < order_nodes[u]->neighbours.size(); i++) {
+                for (int j = order_nodes[v]->offset_visible_nodes; j < order_nodes[v]->neighbours.size(); j++) {
+                    if (order_nodes[u]->neighbours[i] > order_nodes[v]->neighbours[j]) {
+                        crossings++;
+                    }
+                }
+            }
+        }
+    }
+    return crossings;
+}
+
 int Graph::countCrossingsForPair(int a, int b) { //for a < b
     int crossings = 0;
     for (auto& i : order_nodes[a]->neighbours) {
@@ -93,6 +115,12 @@ int Graph::countCrossingsForPair(int a, int b) { //for a < b
 void Graph::swapNodes(int node0, int node1) {
     std::swap(order_nodes[node0]->order, order_nodes[node1]->order);
     std::swap(order_nodes[node0], order_nodes[node1]);
+}
+
+void Graph::swapNodesBranching(int node0, int node1) {
+    std::swap(order_nodes[node0]->order, order_nodes[node1]->order);
+    std::swap(order_nodes[node0], order_nodes[node1]);
+    std::swap(graph[order_nodes[node0]->id].order, graph[order_nodes[node1]->id].order);
 }
 
 
@@ -114,6 +142,27 @@ void Graph::makeNodeInvisible(int order_of_node) {
 
     //set visible counter to end of adjacency array -> as if all edges removed
     node->offset_visible_nodes = node->neighbours.size();
+}
+
+void Graph::makeNodeInvisibleBranching(int order_of_node) {
+    Node* node = order_nodes[order_of_node];
+    for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
+        Node* neighbour = &graph[node->neighbours[i]];
+
+        //make node invisible in all adjacencie lists of fixed neighbours
+        for (int j = neighbour->offset_visible_nodes; j < neighbour->neighbours.size(); j++) {
+            if (neighbour->neighbours[j] != node->id) {
+                continue;
+            }
+            //add node to invisible nodes and add visible counter
+            std::swap(neighbour->neighbours[j], neighbour->neighbours[neighbour->offset_visible_nodes]);
+            neighbour->offset_visible_nodes++;
+        }
+    }
+
+    //set visible counter to end of adjacency array -> as if all edges removed
+    node->offset_visible_nodes = node->neighbours.size();
+    graph[node->id].offset_visible_nodes = node->neighbours.size();
 }
 
 std::pair<std::vector<Node*>, long> Graph::Greedy() {
@@ -183,6 +232,7 @@ bool Graph::verifier(Graph check)
     return true;
 }
 
+//change function such that it works for degree 0 nodes.
 std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited) {
     // need to make sure at the beginning that all nodes with degree 0 are removed. we can do this since by setting their
     // order to be the right most position and adding an ignore marker.
@@ -206,6 +256,7 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
             //std::cout << "Visited " << current_node << " ";
             visited[current_node] = true;
             this->graph[current_node].partition = partition;
+            //this->graph[current_node].partition.push_back(partition);
             //this->partitions[partition].push_back(current_node);
         }
 
@@ -249,7 +300,6 @@ void Graph::Partition()
         partition++;
     }
 }
-
 
 // A recursive function that find articulation 
 // points using DFS traversal
@@ -317,12 +367,19 @@ void Graph::AP()
             APUtil(start_node_id, visited, disc, low, time, par, isAP);
         }
 
-    // Printing the APs
-    for (int start_node_id = 0; start_node_id < this->n0 + this->n1; start_node_id++) {
-        if (isAP[start_node_id]) {
-            std::cout << "Node id: " << start_node_id + 1 << " is AP" << std::endl;
+    // building the partitions vector.
+    for (int AP_node_id = 0; AP_node_id < n0; AP_node_id++) {
+        if (isAP[AP_node_id]) {
+            std::cout << "Node id: " << AP_node_id + 1 << " is AP" << std::endl;
         }
     }
+
+    /*for (int AP_node_id = 0; AP_node_id < n0; AP_node_id++) {
+        if (isAP[AP_node_id]) {
+            this->makeNodeInvisibleBranching(AP_node_id);
+            this->Partition();
+        }
+    }*/
 
     int partition_offset = 0;
     std::vector<int> order_AP;
@@ -352,6 +409,7 @@ void Graph::AP()
         }
         this->partitions[this->graph[i].partition + counter].push_back(&this->graph[i]);
     }
+
 
 }
 
@@ -425,6 +483,95 @@ void Graph::Sorted_straight_line_reduction() {
         std::cout << "sorted straight line reduction could not be done" << std::endl;
     }
 }
+
+
+void Graph::makeNodeVisible(int order_of_node) {
+    Node* node = order_nodes[order_of_node];
+    node->offset_visible_nodes = 0;
+    graph[node->id].offset_visible_nodes = 0;
+
+    for (int i = 0; i < node->neighbours.size(); i++) {
+        Node* neighbour = &graph[node->neighbours[i]];
+
+        //make node visible in all adjacencie lists of fixed neighbours
+        for (int j = 0; j < neighbour->offset_visible_nodes; j++) {
+            if (neighbour->neighbours[j] != node->id) {
+                continue;
+            }
+            //add node to visible nodes and reduce visible counter
+            std::swap(neighbour->neighbours[j], neighbour->neighbours[neighbour->offset_visible_nodes - 1]);
+            neighbour->offset_visible_nodes--;
+        }
+    }
+}
+
+
+void Branch_and_Bound(Graph* G) {
+    G->Median_Heuristic();
+    Graph verifier = *G;
+    std::vector<Node*>best_configuration = G->getOrderNodes();
+    int best_solution = G->countCrossingsBranching();
+
+    std::cout << "Median Heuristic : " << best_solution << std::endl;
+
+    Graph G_branch = *G;
+    for (int i = 1; i < G_branch.getOrderNodes().size(); i++) {
+        G_branch.makeNodeInvisibleBranching(i);
+    }
+    
+    exploreBranch(G_branch, *G, 0, best_solution, best_configuration);
+
+    std::cout << "best solution "<<best_solution << std::endl;
+    for (int i = 0; i < best_configuration.size(); i++) {
+        std::cout << best_configuration[i]->id << std::endl;
+    }
+
+    G->setOrderNodes(best_configuration);
+    std::cout << "num of crossings : " << G->countCrossings() << std::endl;
+
+    if (G->verifier(verifier)) {
+        std::cout << "Graph is valid" << std::endl;
+    }
+    else {
+        std::cout << "Graph is NOT valid" << std::endl;
+    }
+}
+
+void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solution, std::vector<Node*>& best_configuration) {
+
+    if (depth == G_original.getN1() - 1) {
+        int current_solution = G_branch.countCrossingsBranching();
+        if (current_solution < best_solution) {
+            best_solution = current_solution;
+            best_configuration = G_branch.getOrderNodes();
+        }
+        return;
+    }
+
+    G_branch.makeNodeVisible(depth + 1);
+
+    if (depth == 0) {
+        if (G_branch.countCrossingsBranching() <= best_solution) {
+            exploreBranch(G_branch, G_original, depth + 1, best_solution, best_configuration);
+        }
+        G_branch.swapNodesBranching(0, 1);
+        if (G_branch.countCrossingsBranching() <= best_solution) {
+            exploreBranch(G_branch, G_original, depth + 1, best_solution, best_configuration);
+        }
+    }
+    else {
+        if (G_branch.countCrossingsBranching() <= best_solution) {
+            exploreBranch(G_branch, G_original, depth + 1, best_solution, best_configuration);
+        }
+        for (int i = depth + 1; i > 0; i--) {
+            G_branch.swapNodesBranching(i, i - 1);
+            if (G_branch.countCrossingsBranching() <= best_solution) {
+                exploreBranch(G_branch, G_original, depth + 1, best_solution, best_configuration);
+            }
+        }
+    }
+}
+
 
 
 typedef std::vector<std::pair<Node*, Node*>> Twins;
@@ -541,41 +688,46 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     std::vector<Node> g_nodes = g->getGraph();
     std::vector<std::pair<int, int>> edges;
 
-    std::unordered_map<int, int> neighborIndexMap;
+    //Create set copy of partiton, to see if neighbour needs to be added later
+    std::unordered_set<int> neighbourSet;
 
     //Count n0, n1
     for (auto& node : partition) {
         if (node->id < g->getN0()) {
             n0++;
+            neighbourSet.insert(node->id);
         }
         else {
             n1++;
+            neighbourSet.insert(node->id);
         }
     }
 
-    //Need index for edges
+    //Assing new ID
     int indexN0 = 0;
     int indexN1 = n0;
-
     for (auto& node : partition) {
         if (node->id < g->getN0()) {
-
-            // TODO
-            // NEED TO FIX: only add if actually is in partition
-            for (auto& neighbour : g_nodes[node->id].neighbours) {
-                m++;
-                if (neighborIndexMap.find(neighbour) != neighborIndexMap.end()){
-                    // Neighbor already in map
-                    int newNeighborIndex = neighborIndexMap[neighbour];
-                    edges.push_back(std::make_pair(indexN0, newNeighborIndex));
-                } else {
-                    // New neighbor
-                    neighborIndexMap[neighbour] = indexN1;
-                    indexN1++;
-                }
-                edges.push_back(std::make_pair(node->id, neighbour));
-            }
+            node->newID = indexN0;
             indexN0++;
+        }
+        else {
+            node->newID = indexN1;
+            indexN1++;
+        }
+    }
+    
+    for (auto& node : partition) {
+        //Need this if to not add forward AND backward edge
+        if (node->id < g->getN0()) {
+            for (auto& neighbour : node->neighbours) {
+                //Only add edges from the partition
+                if (neighbourSet.find(neighbour) != neighbourSet.end()){
+                    int neighbourNewID = g_nodes[neighbour].newID;
+                    m++;
+                    edges.push_back(std::make_pair(node->newID, neighbourNewID));
+                }
+            }
         }
     }
 
@@ -595,6 +747,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
 
     std::vector<std::vector<Node*>> partitions = g->getPartitions();
     std::vector<std::pair<std::vector<Node*>, long>> results(0);
+
     for (auto part : partitions) {
         Graph* partGraph = createGraphByPartition(g, part);
 
@@ -610,40 +763,11 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
             */
         //}
 
-        //Check if need to brute force since no more reductions were applicable
+        //"Brute" solve if no more reductions applicable
         std::pair<std::vector<Node*>, long> result;
-
         if (!changed) {
-            long bestCrossings = INFINITY;
-            std::vector<Node*> bestOrder(0);
-
-            // Run BranchAndReduce for each moveable node we fix
-            std::vector<Node> adjList = partGraph->getGraph();
-            for (auto& node : adjList){
-                if (node.id >= partGraph->getN0()){
-                    std::vector<Node*> branchSet;
-                    //Remove moveable node
-                    // TODO
-                    //Remove all fixed nodes that were only connected to removed moveable node
-                    // TODO
-
-                    // If we removed the last moveable node, there are no nodes left now
-                    if (branchSet.empty()){
-                        
-                    }
-
-                    Graph* branchGraph = createGraphByPartition(partGraph, branchSet);
-                    auto branchResult = BranchAndReduce(branchGraph, reductionTypes);
-
-                    // Now need to add back removed node to every possible position in orderArray??
-                    // TODO
-                    // Then check the best out of all of them in something like this:
-                    if (branchResult.second < bestCrossings){
-                        bestCrossings = branchResult.second;
-                        bestOrder = branchResult.first;
-                    }
-                }
-            }
+            //This should somehow give back an order of moveable nodes
+            /*result = */ Branch_and_Bound(partGraph);
 
             //using the method above should decrease runtime, TODO: test if that's true
             //result = bruteForce(g); 
@@ -655,7 +779,6 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
         results.push_back(result);
     }
 
-    // TODO: Map back to original node indices before concating
     std::vector<Node*> solution(0);
     long sumCrossings = 0;
     for (auto result : results) {

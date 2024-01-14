@@ -18,6 +18,9 @@ int main(int argc, char* argv[]) {
     long crossing_count = g->countCrossings();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
 
+    long crossing_count_test = g->countCrossingsBranching();
+    std::cout << "number of crossings in default g: " << crossing_count_test << std::endl;
+
     /* // Reduction Stuff
     g->Sorted_straight_line_reduction();
     g->printGraph();
@@ -36,10 +39,10 @@ int main(int argc, char* argv[]) {
 
     // Testing Stuff
     // Brute Force (parallel)
-    auto resultBF = bruteForce(g);
+    //auto resultBF = bruteForce(g);
     //auto resultBF = bruteForceParallel(*g);
-    std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
-    outputOrder(resultBF.first, "../output.txt");
+    //std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
+    //outputOrder(resultBF.first, "../output.txt");
 
 
 
@@ -57,6 +60,9 @@ int main(int argc, char* argv[]) {
     g->Partition();
     g->AP();
     g->printGraph();
+
+
+    //Branch_and_Bound(g);
     
 
     if (g->verifier(verifier)) {
@@ -75,5 +81,6 @@ int main(int argc, char* argv[]) {
     */
 
     //readWeightedHyperGraph("../hypergraphs/4000_4_40_5.4.hgr", "../bipartitegraphs/4000_4_40_5.4.gr");
+
 }
 

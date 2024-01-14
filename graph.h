@@ -10,7 +10,12 @@ struct Node {
     int id = -1;
     int median = 0;
     int partition = -1;
+    //std::vector<int> partition;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
+    //std::vector<int> offset_neighbours_partition;
+
+    // Are we gonna use this?
+    int newID = -1;
 };
 
 typedef std::vector<std::pair<Node*, Node*>> Twins;
@@ -30,6 +35,7 @@ public:
     void addEdge(int y, int x);
 
     Node* getNodeByOrder(int order) { return order_nodes[order]; };
+    int getOrderByNode(int node_id) { return graph[node_id].order; }
     int getSizeOfOrder() { return order_nodes.size(); }
     std::vector<Node*> getOrderNodes() { return this->order_nodes; };
     void setOrderNodes(std::vector<Node*> order) { this->order_nodes = order; };
@@ -42,10 +48,15 @@ public:
 
     void printGraph();
     long countCrossings();
+    long countCrossingsBranching();
     int countCrossingsForPair(int order_a, int order_b);
     void sortNeighbours();
     void swapNodes(int order_a, int order_b);
+    void swapNodesBranching(int order_a, int order_b);
+
     void makeNodeInvisible(int order);
+    void makeNodeInvisibleBranching(int order);
+    void Interval_Partitioning(int start_node_id, int end_node_id);
 
     std::pair<std::vector<Node*>, long> Greedy();
     std::pair<int, int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
@@ -54,6 +65,7 @@ public:
     void AP();
     void Median_Heuristic();
     void Sorted_straight_line_reduction();
+    void makeNodeVisible(int order_of_node);
     bool DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visited);
     bool verifier(Graph check);
 };
@@ -63,6 +75,9 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
 // New stuff
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph G);
 bool reduceCliqueReduction(Graph* g);
+
+void Branch_and_Bound(Graph* G);
+void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solution, std::vector<Node*>& best_configuration);
 
 //reduction:
 Twins findTwins();
