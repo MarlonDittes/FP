@@ -763,13 +763,39 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
             */
         //}
 
-        //"Brute" solve if no more reductions applicable
+        //Reduce our instance if no more reductions applicable
         std::pair<std::vector<Node*>, long> result;
         if (!changed) {
-            //This should somehow give back an order of moveable nodes
-            /*result = */ Branch_and_Bound(partGraph);
+            if (part.size() > 2){
+                // Find highest degree node
+                int maxDegree = 0;
+                Node* maxDegreeNode = nullptr;
+                for (int i = 0; i < part.size(); i++){
+                    if (maxDegree < part[i]->neighbours.size()){
+                        maxDegree = part[i]->neighbours.size();
+                        maxDegreeNode = part[i];
+                    }
+                }
 
-            //using the method above should decrease runtime, TODO: test if that's true
+                // Remove element for now to solve on remaining nodes
+                auto it = std::find(part.begin(), part.end(), maxDegreeNode);
+                part.erase(it);
+
+                result = BranchAndReduce(partGraph, reductionTypes);
+            } else if (part.size() == 2){
+                
+            } else {
+                std::cerr << "This shouldn't happen." << std::endl;
+            }
+
+            //exploreBranch(G_branch, *G, 0, best_solution, best_configuration);
+            
+
+            
+
+
+
+            //TODO: test if using the method above decreases runtime
             //result = bruteForce(g); 
         }
         else {
