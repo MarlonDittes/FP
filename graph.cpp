@@ -15,20 +15,20 @@
 Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0 + n1), order_nodes(n1) {
 
     for (int i = 0; i < n0; i++) {
-        graph[i].id = i;
+        graph[i]->ID_Stack.push(i);
     }
     //initialize id and order in the graph
     for (int i = 0; i < order_nodes.size(); i++) {
-        graph[n0 + i].id = n0 + i;
-        graph[n0 + i].order = i;
+        graph[n0 + i]->ID_Stack.push(n0 + 1);
+        graph[n0 + i]->order = i;
         order_nodes[i] = &graph[n0 + i]; //link order to index (not id!)
     }
 }
 
 //adding Edges from movable_nodes to neighbours
 void Graph::addEdge(int x, int y) {
-    graph[x].neighbours.push_back(y);
-    graph[y].neighbours.push_back(x);
+    graph[x]->neighbours.push_back(y);
+    graph[y]->neighbours.push_back(x);
 }
 
 void Graph::printGraph() {
@@ -37,7 +37,7 @@ void Graph::printGraph() {
 
     //print in order_nodes of movable_nodes (B)
     for (int i = 0; i < order_nodes.size(); i++) {
-        std::cout << order_nodes[i]->id << " -> ";
+        std::cout << order_nodes[i]->ID_Stack.peek() << " -> ";
         for (int j = 0; j < order_nodes[i]->neighbours.size(); j++) {
             std::cout << order_nodes[i]->neighbours[j] << " ";
         }
@@ -46,7 +46,7 @@ void Graph::printGraph() {
 
     for (int i = 0; i < this->partitions.size(); i++) {
         for (int j = 0; j < this->partitions[i].size(); j++) {
-            std::cout << "node id : " << this->partitions[i][j]->id << " is in partition : " << i << std::endl;
+            std::cout << "node id : " << this->partitions[i][j]->ID_Stack.peek() << " is in partition : " << i << std::endl;
         }
     }
 }
@@ -54,7 +54,7 @@ void Graph::printGraph() {
 
 void Graph::sortNeighbours() {
     for (int i = 0; i < graph.size(); i++) {
-        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end());
+        std::sort(graph[i]->neighbours.begin(), graph[i]->neighbours.end());
     }
 }
 
@@ -120,18 +120,18 @@ void Graph::swapNodes(int node0, int node1) {
 void Graph::swapNodesBranching(int node0, int node1) {
     std::swap(order_nodes[node0]->order, order_nodes[node1]->order);
     std::swap(order_nodes[node0], order_nodes[node1]);
-    std::swap(graph[order_nodes[node0]->id].order, graph[order_nodes[node1]->id].order);
+    std::swap(graph[order_nodes[node0]->ID_Stack.peek()]->order, graph[order_nodes[node1]->ID_Stack.peek()]->order);
 }
 
 
 void Graph::makeNodeInvisible(int order_of_node) {
     Node* node = order_nodes[order_of_node];
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
-        Node* neighbour = &graph[node->neighbours[i]];
+        Node* neighbour = graph[node->neighbours[i]];
 
         //make node invisible in all adjacencie lists of fixed neighbours
         for (int j = neighbour->offset_visible_nodes; j < neighbour->neighbours.size(); j++) {
-            if (neighbour->neighbours[j] != node->id) {
+            if (neighbour->neighbours[j] != node->ID_Stack.peek()) {
                 continue;
             }
             //add node to invisible nodes and add visible counter
@@ -147,11 +147,11 @@ void Graph::makeNodeInvisible(int order_of_node) {
 void Graph::makeNodeInvisibleBranching(int order_of_node) {
     Node* node = order_nodes[order_of_node];
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
-        Node* neighbour = &graph[node->neighbours[i]];
+        Node* neighbour = graph[node->neighbours[i]];
 
         //make node invisible in all adjacencie lists of fixed neighbours
         for (int j = neighbour->offset_visible_nodes; j < neighbour->neighbours.size(); j++) {
-            if (neighbour->neighbours[j] != node->id) {
+            if (neighbour->neighbours[j] != node->ID_Stack.peek()) {
                 continue;
             }
             //add node to invisible nodes and add visible counter
@@ -162,7 +162,7 @@ void Graph::makeNodeInvisibleBranching(int order_of_node) {
 
     //set visible counter to end of adjacency array -> as if all edges removed
     node->offset_visible_nodes = node->neighbours.size();
-    graph[node->id].offset_visible_nodes = node->neighbours.size();
+    graph[node->ID_Stack.peek()]->offset_visible_nodes = node->neighbours.size();
 }
 
 std::pair<std::vector<Node*>, long> Graph::Greedy() {
@@ -212,16 +212,16 @@ bool Graph::verifier(Graph check)
     for (int i = 0; i < order_nodes.size(); i++) {
 
         //check every node id comes exactly once
-        if (unique_id_vec[this->order_nodes[i]->id - this->n0]) { return false; }
-        unique_id_vec[this->order_nodes[i]->id - this->n0] = true;
+        if (unique_id_vec[this->order_nodes[i]->ID_Stack.peek() - this->n0]) { return false; }
+        unique_id_vec[this->order_nodes[i]->ID_Stack.peek() - this->n0] = true;
 
         //check for "illegal node id's"
-        if (this->order_nodes[i]->id >= (check.n0 + check.n1)) { return false; }
+        if (this->order_nodes[i]->ID_Stack.peek() >= (check.n0 + check.n1)) { return false; }
 
         //neighbours of each node are the same as the graph at the beginning
         for (int j = 0; j < order_nodes[i]->neighbours.size(); j++) {
-            int id_check = this->order_nodes[i]->id;
-            if (this->order_nodes[i]->neighbours[j] != check.graph[id_check].neighbours[j]) { return false; }
+            int id_check = this->order_nodes[i]->ID_Stack.peek();
+            if (this->order_nodes[i]->neighbours[j] != check.graph[id_check]->neighbours[j]) { return false; }
         }
     }
 
@@ -255,14 +255,14 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
         if (!visited[current_node]) {
             //std::cout << "Visited " << current_node << " ";
             visited[current_node] = true;
-            this->graph[current_node].partition = partition;
+            this->graph[current_node]->partition = partition;
             //this->graph[current_node].partition.push_back(partition);
             //this->partitions[partition].push_back(current_node);
         }
 
-        for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
-            if (!visited[graph[current_node].neighbours[i]]) {
-                stack.push(graph[current_node].neighbours[i]);
+        for (int i = graph[current_node]->offset_visible_nodes; i < graph[current_node]->neighbours.size(); i++) {
+            if (!visited[graph[current_node]->neighbours[i]]) {
+                stack.push(graph[current_node]->neighbours[i]);
             }
         }
     }
@@ -273,7 +273,7 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
 
 void Graph::Partition()
 {
-    int start_node_fix = graph[0].id;
+    int start_node_fix = graph[0]->ID_Stack.peek();
     int partition = 0;
     int rounds_counter = 0;
 
@@ -324,26 +324,26 @@ void Graph::APUtil(int start_node_id, std::vector<int>& visited, std::vector<int
     disc[start_node_id] = low[start_node_id] = ++time;
 
     // Go through all vertices adjacent to this
-    for (int i = graph[start_node_id].offset_visible_nodes; i < graph[start_node_id].neighbours.size(); i++) {
+    for (int i = graph[start_node_id]->offset_visible_nodes; i < graph[start_node_id]->neighbours.size(); i++) {
         // If v is not visited yet, then make it a child of u
         // in DFS tree and recur for it
-        if (!visited[graph[start_node_id].neighbours[i]]) {
+        if (!visited[graph[start_node_id]->neighbours[i]]) {
             children++;
-            APUtil(graph[start_node_id].neighbours[i], visited, disc, low, time, start_node_id, isAP);
+            APUtil(graph[start_node_id]->neighbours[i], visited, disc, low, time, start_node_id, isAP);
 
             // Check if the subtree rooted with v has
             // a connection to one of the ancestors of u
-            low[start_node_id] = std::min(low[start_node_id], low[graph[start_node_id].neighbours[i]]);
+            low[start_node_id] = std::min(low[start_node_id], low[graph[start_node_id]->neighbours[i]]);
 
             // If start_node_id is not root and low value of one of
             // its child is more than discovery value of u.
-            if (parent != -1 && low[graph[start_node_id].neighbours[i]] >= disc[start_node_id])
+            if (parent != -1 && low[graph[start_node_id]->neighbours[i]] >= disc[start_node_id])
                 isAP[start_node_id] = true;
         }
 
         // Update low value of start_node_id for parent function calls.
-        else if (graph[start_node_id].neighbours[i] != parent)
-            low[start_node_id] = std::min(low[start_node_id], disc[graph[start_node_id].neighbours[i]]);
+        else if (graph[start_node_id]->neighbours[i] != parent)
+            low[start_node_id] = std::min(low[start_node_id], disc[graph[start_node_id]->neighbours[i]]);
     }
 
     // If start_node_id is root of DFS tree and has two or more children.
@@ -386,17 +386,17 @@ void Graph::AP()
     std::vector<Node*> tmp;
     this->partitions.push_back(tmp);
     for (int i = 0; i < isAP.size() - n1; i++) {
-        if (this->graph[i].partition + partition_offset == this->partitions.size()) {
+        if (this->graph[i]->partition + partition_offset == this->partitions.size()) {
             this->partitions.push_back(tmp);
         }
 
-        this->partitions[this->graph[i].partition + partition_offset].push_back(&this->graph[i]);
+        this->partitions[this->graph[i]->partition + partition_offset].push_back(this->graph[i]);
 
         if (isAP[i] && i < this->n0) {
             this->partitions.push_back(tmp);
             order_AP.push_back(i);
             partition_offset++;
-            this->partitions[this->graph[i].partition + partition_offset].push_back(&this->graph[i]);
+            this->partitions[this->graph[i]->partition + partition_offset].push_back(this->graph[i]);
         }
     }
 
@@ -407,7 +407,7 @@ void Graph::AP()
                 counter++;
             }
         }
-        this->partitions[this->graph[i].partition + counter].push_back(&this->graph[i]);
+        this->partitions[this->graph[i]->partition + counter].push_back(this->graph[i]);
     }
 
 
@@ -443,13 +443,13 @@ bool Graph::DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visi
             std::cout << "Visited " << current_node << " ";
             visited[current_node] = true;
         }
-        for (int i = 0; i < graph[current_node].neighbours.size(); i++) {
-            if ((graph[current_node].neighbours.size() - graph[current_node].offset_visible_nodes) > 2) {
+        for (int i = 0; i < graph[current_node]->neighbours.size(); i++) {
+            if ((graph[current_node]->neighbours.size() - graph[current_node]->offset_visible_nodes) > 2) {
                 std::cout << "node : " << current_node << " has more than 1 neighbour therefore straight line reduction can not be achieved " << std::endl;
                 return false;
             }
-            if (!visited[graph[current_node].neighbours[i]]) {
-                stack.push(graph[current_node].neighbours[i]);
+            if (!visited[graph[current_node]->neighbours[i]]) {
+                stack.push(graph[current_node]->neighbours[i]);
             }
         }
 
@@ -488,14 +488,14 @@ void Graph::Sorted_straight_line_reduction() {
 void Graph::makeNodeVisible(int order_of_node) {
     Node* node = order_nodes[order_of_node];
     node->offset_visible_nodes = 0;
-    graph[node->id].offset_visible_nodes = 0;
+    graph[node->ID_Stack.peek()]->offset_visible_nodes = 0;
 
     for (int i = 0; i < node->neighbours.size(); i++) {
-        Node* neighbour = &graph[node->neighbours[i]];
+        Node* neighbour = graph[node->neighbours[i]];
 
         //make node visible in all adjacencie lists of fixed neighbours
         for (int j = 0; j < neighbour->offset_visible_nodes; j++) {
-            if (neighbour->neighbours[j] != node->id) {
+            if (neighbour->neighbours[j] != node->ID_Stack.peek()) {
                 continue;
             }
             //add node to visible nodes and reduce visible counter
@@ -523,7 +523,7 @@ void Branch_and_Bound(Graph* G) {
 
     std::cout << "best solution "<<best_solution << std::endl;
     for (int i = 0; i < best_configuration.size(); i++) {
-        std::cout << best_configuration[i]->id << std::endl;
+        std::cout << best_configuration[i]->ID_Stack.peek() << std::endl;
     }
 
     G->setOrderNodes(best_configuration);
@@ -614,13 +614,17 @@ void Graph::cheapReduction() {
 }
 */
 
-bool compareNodePointers(Node* a, Node* b) {
-    return a->id < b->id;
+bool compareNodeID(Node* a, Node* b) {
+    return a->ID_Stack.peek() < b->ID_Stack.peek();
+}
+
+bool compareNodeOrder(Node* a, Node* b) {
+    return a->order < b->order;
 }
 
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g) {
     std::vector<Node*> baseOrder = g->getOrderNodes();
-    std::sort(baseOrder.begin(), baseOrder.end(), compareNodePointers);
+    std::sort(baseOrder.begin(), baseOrder.end(), compareNodeID);
 
     std::vector<Node*> bestOrder = baseOrder;
     long bestCrossings = g->countCrossings();
@@ -642,14 +646,14 @@ std::pair<std::vector<Node*>, long> bruteForce(Graph* g) {
             bestCrossings = crossings;
         }
 
-    } while (std::next_permutation(baseOrder.begin(), baseOrder.end(), compareNodePointers));
+    } while (std::next_permutation(baseOrder.begin(), baseOrder.end(), compareNodeID));
 
     return std::make_pair(bestOrder, bestCrossings);
 }
 
 std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end) {
     std::vector<Node*> baseOrder = g->getOrderNodes();
-    std::sort(baseOrder.begin() + begin, baseOrder.begin() + end, compareNodePointers);
+    std::sort(baseOrder.begin() + begin, baseOrder.begin() + end, compareNodeID);
 
     std::vector<Node*> bestOrder = baseOrder;
     long bestCrossings = g->countCrossings();
@@ -671,7 +675,7 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
             bestCrossings = crossings;
         }
 
-    } while (std::next_permutation(baseOrder.begin() + begin, baseOrder.begin() + end, compareNodePointers));
+    } while (std::next_permutation(baseOrder.begin() + begin, baseOrder.begin() + end, compareNodeID));
 
     return std::make_pair(bestOrder, bestCrossings);
 }
@@ -679,13 +683,14 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
 // CHANGE THIS TO BE SOMEWHERE ELSE; THIS SHOULDNT BE HERE
 enum Reduction { ZeroEdge, Complete };
 
-
+//TODO: doesnt work currently, need to update neighbours of each node? -> Probably need to change neighbours from int to Node* ?
+//TODO: code destructor for Graph in which we pop for each node the ID?
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     int n0 = 0;
     int n1 = 0;
     int m = 0;
 
-    std::vector<Node> g_nodes = g->getGraph();
+    std::vector<Node*> g_nodes = g->getGraph();
     std::vector<std::pair<int, int>> edges;
 
     //Create set copy of partiton, to see if neighbour needs to be added later
@@ -693,39 +698,39 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 
     //Count n0, n1
     for (auto& node : partition) {
-        if (node->id < g->getN0()) {
+        if (node->ID_Stack.peek() < g->getN0()) {
             n0++;
-            neighbourSet.insert(node->id);
+            neighbourSet.insert(node->ID_Stack.peek());
         }
         else {
             n1++;
-            neighbourSet.insert(node->id);
+            neighbourSet.insert(node->ID_Stack.peek());
         }
     }
 
-    //Assing new ID
+    //Assign new ID
     int indexN0 = 0;
     int indexN1 = n0;
     for (auto& node : partition) {
-        if (node->id < g->getN0()) {
-            node->newID = indexN0;
+        if (node->ID_Stack.peek() < g->getN0()) {
+            node->ID_Stack.push(indexN0);
             indexN0++;
         }
         else {
-            node->newID = indexN1;
+            node->ID_Stack.push(indexN1);
             indexN1++;
         }
     }
     
     for (auto& node : partition) {
-        //Need this if to not add forward AND backward edge
-        if (node->id < g->getN0()) {
+        //Need this so to not add forward AND backward edge
+        if (node->ID_Stack.peek() < n0) {
             for (auto& neighbour : node->neighbours) {
                 //Only add edges from the partition
                 if (neighbourSet.find(neighbour) != neighbourSet.end()){
-                    int neighbourNewID = g_nodes[neighbour].newID;
+                    int neighbourNewID = g_nodes[neighbour]->ID_Stack.peek();
                     m++;
-                    edges.push_back(std::make_pair(node->newID, neighbourNewID));
+                    edges.push_back(std::make_pair(node->ID_Stack.peek(), neighbourNewID));
                 }
             }
         }
@@ -739,6 +744,7 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     return partGraph;
 }
 
+//TODO: implement updating activeNodes, make all work with nodes which can be invisible
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduction> reductionTypes) {
     g->Median_Heuristic();
 
@@ -766,7 +772,8 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
         //Reduce our instance if no more reductions applicable
         std::pair<std::vector<Node*>, long> result;
         if (!changed) {
-            if (part.size() > 2){
+            auto activeNodes = partGraph->getActiveNodes();
+            if (activeNodes.size() > 2){
                 // Find highest degree node
                 int maxDegree = 0;
                 Node* maxDegreeNode = nullptr;
@@ -777,26 +784,60 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
                     }
                 }
 
-                // Remove element for now to solve on remaining nodes
-                auto it = std::find(part.begin(), part.end(), maxDegreeNode);
-                part.erase(it);
-
+                // Remove node for now
+                partGraph->makeNodeInvisible(maxDegreeNode->order);
+                // Solve on remaining nodes
                 result = BranchAndReduce(partGraph, reductionTypes);
-            } else if (part.size() == 2){
+                // Add node back
+                partGraph->makeNodeVisible(maxDegreeNode->order);
+
+                // Move node to the end of order_nodes
+                std::sort(activeNodes.begin(), activeNodes.end(), compareNodeOrder);
+                for (int i = 0; i < activeNodes.size(); i++){
+                    if (activeNodes[i] == maxDegreeNode){
+                        for (int j = i + 1; j < activeNodes.size(); j++){
+                            partGraph->swapNodes(maxDegreeNode->order, activeNodes[j]->order);
+                            std::swap(activeNodes[i], activeNodes[j]);
+                        }
+                    }
+                }
+
+                // Calculate Crossings for every possible position of node
+                int minCrossings = partGraph->countCrossings();
+                int minPosition = activeNodes.size()-1;
+                for (int i = activeNodes.size()-2; i >= 0; i--){
+                    partGraph->swapNodes(maxDegreeNode->order, activeNodes[i]->order);
+                    int crossings = partGraph->countCrossings();
+                    if (crossings < minCrossings){
+                        minCrossings = crossings;
+                        minPosition = i;
+                    }
+                }
+
+                // Reconstruct min position
+                for (int i = 1; i <= minPosition; i++){
+                    partGraph->swapNodes(maxDegreeNode->order, activeNodes[i]->order);
+                }
+
+                result = std::make_pair(partGraph->getOrderNodes(), minCrossings);
+
+            } else if (activeNodes.size() == 2){
+                int crossings1 = partGraph->countCrossings();
+                partGraph->swapNodes(activeNodes[0]->order, activeNodes[1]->order);
+                int crossings2 = partGraph->countCrossings();
+
+                // go back to previous order if it was better
+                if (crossings1 < crossings2){
+                    partGraph->swapNodes(activeNodes[0]->order, activeNodes[1]->order);
+                    result = std::make_pair(partGraph->getOrderNodes(), crossings1);
+                } else {
+                    result = std::make_pair(partGraph->getOrderNodes(), crossings2);
+                }
+
                 
             } else {
                 std::cerr << "This shouldn't happen." << std::endl;
-            }
-
-            //exploreBranch(G_branch, *G, 0, best_solution, best_configuration);
-            
-
-            
-
-
-
-            //TODO: test if using the method above decreases runtime
-            //result = bruteForce(g); 
+            }      
         }
         else {
             result = BranchAndReduce(partGraph, reductionTypes);

@@ -3,39 +3,38 @@
 
 #include <iostream>
 #include <vector>
+#include "stack.h"
 
 struct Node {
-    std::vector<int> neighbours; //name needs to be changed
+    std::vector<int> neighbours;
     int order = -1;
-    int id = -1;
+    Stack ID_Stack;
     int median = 0;
     int partition = -1;
     //std::vector<int> partition;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
     //std::vector<int> offset_neighbours_partition;
-
-    // Are we gonna use this?
-    int newID = -1;
 };
 
 typedef std::vector<std::pair<Node*, Node*>> Twins;
 
 class Graph {
 private:
-    std::vector<Node> graph;
+    std::vector<Node*> graph;
     std::vector<Node*> order_nodes;
     std::vector<std::vector<Node*>> partitions;
     int n0; //size fixed nodes
     int n1; //size movable nodes
     int m; //number of edges
     //std::vector<std::vector<int>> partitions;
+    std::vector<Node*> activeNodes;
 
 public:
     Graph(int n0, int n1, int m);
     void addEdge(int y, int x);
 
     Node* getNodeByOrder(int order) { return order_nodes[order]; };
-    int getOrderByNode(int node_id) { return graph[node_id].order; }
+    int getOrderByNode(int node_id) { return graph[node_id]->order; }
     int getSizeOfOrder() { return order_nodes.size(); }
     std::vector<Node*> getOrderNodes() { return this->order_nodes; };
     void setOrderNodes(std::vector<Node*> order) { this->order_nodes = order; };
@@ -44,7 +43,8 @@ public:
     int getN0() { return this->n0; };
     int getN1() { return this->n1; };
     int getM() { return this->m; };
-    std::vector<Node> getGraph() { return this->graph; };
+    std::vector<Node*> getGraph() { return this->graph; };
+    std::vector<Node*> getActiveNodes() { return this->activeNodes;}
 
     void printGraph();
     long countCrossings();
