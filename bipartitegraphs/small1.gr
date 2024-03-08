@@ -2,7 +2,7 @@ c first number: size X (A)
 c second number: size Y (B)
 c third number: number of edges (m)
 c following: adjacencies between X and Y as (x,y)
-p ocr 3 3 6
+p ocr 3 3 3
 1 5
 2 4
 3 6

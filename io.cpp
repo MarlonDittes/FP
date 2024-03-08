@@ -37,7 +37,7 @@ Graph* readGraph(std::string graph_file) {
     Graph* g = new Graph(n0, n1, m);
     //read adjacencies of the nodes in the graph file
     while (std::getline(file, line)) {
-        if (line[0] == 'c') {
+        if (line[0] == 'c' || line.empty()) {
             continue;
         }
         std::stringstream ss(line);
@@ -51,7 +51,8 @@ Graph* readGraph(std::string graph_file) {
     }
     file.close();
 
-    //g.printGraph();
+    //g->printGraph();
+    g->sortNeighbours();
     return g;
 }
 

@@ -13,64 +13,60 @@ int main(int argc, char* argv[]) {
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
-    g->sortNeighbours();
-    //g->printGraph();
-    long crossing_count = g->countCrossings();
+    g->printGraph();
+
+    long crossing_count = g->countCrossingsMarlon();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
 
-    long crossing_count_test = g->countCrossingsBranching();
-    std::cout << "number of crossings in default g: " << crossing_count_test << std::endl;
+    //Testing partitioning
+    auto nodes = g->getGraph();
+    std::vector<Node*> partition(0);
+    partition.push_back(&nodes[0]);
+    partition.push_back(&nodes[1]);
+    partition.push_back(&nodes[2]);
+    partition.push_back(&nodes[5]);
+    partition.push_back(&nodes[6]);
 
-    /* // Reduction Stuff
-    g->Sorted_straight_line_reduction();
-    g->printGraph();
-    std::cout << "number of crossings in g: " << g->countCrossings() << std::endl;
+    std::vector<Node*> partition2(0);
+    partition2.push_back(&nodes[2]);
+    partition2.push_back(&nodes[3]);
+    partition2.push_back(&nodes[4]);
+    partition2.push_back(&nodes[7]);
+    partition2.push_back(&nodes[8]);
 
-    Twins twins = g->findTwins();
-    std::cout << "twins size: " << twins.size() << std::endl;
+    auto partGraph = createGraphByPartition(g, partition);
+    partGraph->printGraph();
 
-    std::cout << "twins: " << std::endl;
-    for (auto& twin: twins) {
-        std::cout << twin.first->id << " - " << twin.second->id << std::endl;
+    auto partGraph2 = createGraphByPartition(g, partition2);
+    partGraph2->printGraph();
+
+    auto result1 = bruteForce(partGraph);
+    auto result2 = bruteForce(partGraph2);
+
+    std::vector<Node*> solution(0);
+    solution.insert(solution.end(), result1.first.begin(), result1.first.end());
+    solution.insert(solution.end(), result2.first.begin(), result2.first.end());
+
+    for (auto node : solution){
+        std::cout << node->id << " ";
     }
+    std::cout << std::endl;
 
-    std::cout << "crossings between 4, 5: " << g->countCrossingsForPair(1, 2) << std::endl;
-    */
+    auto result = bruteForce(g);
+    for (auto node : result.first){
+        std::cout << node->id << " ";
+    }
+    std::cout << std::endl;
 
-    // Testing Stuff
-    // Brute Force (parallel)
-    //auto resultBF = bruteForce(g);
-    //auto resultBF = bruteForceParallel(*g);
-    //std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
-    //outputOrder(resultBF.first, "../output.txt");
-
-
-
-    // Greedy
-    //auto resultGREEDY = g->Greedy();
-    //std::cout << "crossings GREEDY: " << resultGREEDY.second << std::endl;
-
-    // Median Heuristic
-    //g->Median_Heuristic();
-    //std::cout << "crossings MEDIAN_HEURISTIC: " << g->countCrossings() << std::endl;
-
-
-
-    //g->printGraph();
-    g->Partition();
-    g->AP();
-    g->printGraph();
-
-
-    //Branch_and_Bound(g);
     
 
+    /*
     if (g->verifier(verifier)) {
         std::cout << "Graph is valid"<<std::endl;
     }
     else {
         std::cout << "Graph is NOT valid" << std::endl;
-    }
+    }*/
 
     // Testing on test set
     /*
