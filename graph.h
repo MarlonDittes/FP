@@ -11,9 +11,8 @@ struct Node {
     int median = 0;
     int partition = -1;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
+    int multiplier = 1;
 };
-
-typedef std::vector<std::pair<Node*, Node*>> Twins;
 
 class Graph {
 private:
@@ -23,7 +22,7 @@ private:
     int n0; //size fixed nodes
     int n1; //size movable nodes
     int m; //number of edges
-    //std::vector<std::vector<int>> partitions;
+    bool optimal = 0; //for reduction of partitions -> true if partition is optimal
 
 public:
     Graph(int n0, int n1, int m);
@@ -39,15 +38,21 @@ public:
     int getN1() { return this->n1; };
     int getM() { return this->m; };
     std::vector<Node> getGraph() { return this->graph; };
+    bool getOptimal() { return this->optimal; };
+    void setOptimalTrue() { this->optimal = true; };
 
     void printGraph();
+    void printGraphByPartitions();
     long countCrossings();
     int countCrossingsForPair(int order_a, int order_b);
+    long countCrossingsWithMultiplier();
     void sortNeighbours();
     void swapNodes(int order_a, int order_b);
     void makeNodeInvisible(int order);
 
-    std::pair<std::vector<Node*>, int> Greedy();
+    std::pair<std::vector<Node*>, long> Greedy();
+    void Median_Heuristic();
+    bool verifier(Graph check);
     std::pair<int,int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
     void Partition();
     void APUtil(int start_node_id, std::vector<int>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
@@ -58,12 +63,9 @@ public:
 
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g);
 std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end);
+Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
 // New stuff
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph G);
 bool reduceCliqueReduction(Graph* g);
-
-//reduction:
-Twins findTwins();
-void cheapReduction();
 
 #endif //GRAPH_H

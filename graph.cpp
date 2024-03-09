@@ -42,22 +42,27 @@ void Graph::printGraph() {
         }
         std::cout << std::endl;
     }
+}
 
-    for (int i = 0; i < graph.size(); i++) {
+void Graph::printGraphByPartitions() {
+    for (int i = 0; i < partitions.size(); i++) {
+        std::cout << "Partition " << i << ": " << std::endl;
+        for (int j = 0; j < partitions[i].size(); j++) {
+            std::cout << partitions[i][j]->id << " -> "; 
+            for (int k = 0; k < partitions[i][j]->neighbours.size(); k++) {
+                std::cout << partitions[i][j]->neighbours[k] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+}
+   /*  for (int i = 0; i < graph.size(); i++) {
         std::cout << "Node Id: " << graph[i].id << " Partition : ";
         for (int j = 0; j < graph[i].partition.size(); j++) {
             std::cout << graph[i].partition[j] << " ";
         }
         std::cout << std::endl;
-    }
-}
-
-
-void Graph::sortNeighbours() {
-    for (int i = 0; i < graph.size(); i++) {
-        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end());
-    }
-}
+    }*/
 
 long Graph::countCrossings() {
     if (m == 0) {
@@ -86,6 +91,28 @@ int Graph::countCrossingsForPair(int a, int b) { //for a < b
         for (auto& j : order_nodes[b]->neighbours) {
             if (i > j) {
                 crossings++;
+            }
+        }
+    }
+    return crossings;
+}
+
+//beachte: berechnet crossings ohne die crossings in den twins selber
+long Graph::countCrossingsWithMultiplier() {
+    if (m == 0) {
+        return 0;
+    }
+    long crossings = 0;
+    //iterate trough movable nodes
+    for (int u = 0; u < order_nodes.size() - 1; u++) {
+        //iterate through movable_nodes+1
+        for (int v = u + 1; v < order_nodes.size(); v++) {
+            for (int i = order_nodes[u]->offset_visible_nodes; i < order_nodes[u]->neighbours.size(); i++) {
+                for (int j = order_nodes[v]->offset_visible_nodes; j < order_nodes[u]->neighbours.size(); j++) {
+                    if (order_nodes[u]->neighbours[i] > order_nodes[v]->neighbours[j]) {
+                        crossings += order_nodes[u]->multiplier * order_nodes[v]->multiplier;
+                    }
+                }
             }
         }
     }
@@ -430,47 +457,6 @@ void Graph::Sorted_straight_line_reduction() {
     }
 }
 
-
-typedef std::vector<std::pair<Node*, Node*>> Twins;
-
-Twins findTwins(Graph* g) {
-    Twins twins;
-    for (int i = 0; i < g->getSizeOfOrder()-1; i++) {
-        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
-            if (g->getNodeByOrder(i)->neighbours.size() != g->getNodeByOrder(j)->neighbours.size()) {
-                continue;
-            }
-
-            for (int k = 0; k < g->getNodeByOrder(i)->neighbours.size(); k++) {
-                if (g->getNodeByOrder(i)->neighbours[k] != g->getNodeByOrder(j)->neighbours[k]) {
-                    break;
-                }
-
-                //found twins
-                if (k == g->getNodeByOrder(i)->neighbours.size()-1) {
-                    std::pair<Node*, Node*> twin = std::make_pair(g->getNodeByOrder(i), g->getNodeByOrder(j)); 
-                    twins.push_back(twin); //twin_reduce()
-                }
-            }
-        }
-    }
-    return twins;
-}
-
-/*
-void Graph::cheapReduction() {
-    for (int a = 0; a < order_nodes.size()-1; a++) {
-        for (int b = a+1; b < order_nodes.size(); b++) {
-            int a_smaller_b = countCrossingsForPair(a, b);
-            int b_smaller_a = countCrossingsForPair(b, a);
-            if (a_smaller_b == 0 || b_smaller_a == 0) {
-
-            }
-        }
-    }
-}
-*/
-
 bool compareNodePointers(Node* a, Node* b) {
     return a->id < b->id;
 }
@@ -533,11 +519,6 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
     return std::make_pair(bestOrder, bestCrossings);
 }
 
-// CHANGE THIS TO BE SOMEWHERE ELSE; THIS SHOULDNT BE HERE
-enum Reduction { ZeroEdge, Complete };
-constexpr int BRUTE_CUTOFF = 10;
-
-
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     int n0 = 0;
     int n1 = 0;
@@ -564,98 +545,4 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     }
 
     return partGraph;
-}
-
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduction> reductionTypes) {
-    g->Median_Heuristic();
-
-    g->Partition();
-    g->AP();
-
-    std::vector<std::vector<Node*>> partitions = g->getPartitions();           // NEED TO ADJUST THIS PROBABLY TO BE VECTOR<NODE*> NOT VECTOR<INT>!!, wait for shai AP
-    std::vector<std::pair<std::vector<Node*>, long>> results(0);
-    for (auto part : partitions) {
-        Graph* partGraph = createGraphByPartition(g, part);
-
-        bool changed = false;
-        for (auto reduct : reductionTypes) {
-            /*
-            Need to implement this somehow
-
-            if (reduct.reduce()){
-                reduct.apply();
-                changed = true;
-            }
-            */
-        }
-
-        //Check if need to brute force since no more reductions were applicable
-        std::pair<std::vector<Node*>, long> result;
-
-        //decide if we should do this:
-        int numberOfVertices = g->getN0() + g->getN1();
-        bool otherCondition = numberOfVertices <= BRUTE_CUTOFF;
-
-        if (changed == false || otherCondition) {
-            result = bruteForce(g);
-        }
-        else {
-            result = BranchAndReduce(partGraph, reductionTypes);
-        }
-
-        results.push_back(result);
-    }
-
-    std::vector<Node*> solution(0);
-    long sumCrossings = 0;
-    for (auto result : results) {
-        solution.insert(solution.end(), result.first.begin(), result.first.end());
-        sumCrossings += result.second;
-    }
-
-    return std::make_pair(solution, sumCrossings);
-}
-
-bool reduceCompleteReduction(Graph* g) {
-    int n0 = g->getN0();
-    int n1 = g->getN1();
-    int m = g->getM();
-
-    if (n0 * n1 == m) {
-        return true;
-    }
-}
-
-bool reduceZeroEdgeReduction(Graph* g) {
-    if (g->getM() == 0) {
-        return true;
-    }
-}
-
-typedef std::vector<std::pair<Node*, Node*>> Twins;
-
-Twins findTwins(Graph* g) {
-    Twins twins;
-    for (int i = 0; i < g->getSizeOfOrder()-1; i++) {
-        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
-            if (g->getNodeByOrder(i)->neighbours.size() != g->getNodeByOrder(j)->neighbours.size()) {
-                continue;
-            }
-
-            for (int k = g->getNodeByOrder(i)->offset_visible_nodes; k < g->getNodeByOrder(i)->neighbours.size(); k++) {
-                if (g->getNodeByOrder(i)->neighbours[k] != g->getNodeByOrder(j)->neighbours[k]) {
-                    break;
-                }
-
-                //found twins
-                if (k == g->getNodeByOrder(i)->neighbours.size()-1) {
-                    std::pair<Node*, Node*> twin = std::make_pair(g->getNodeByOrder(i), g->getNodeByOrder(j)); 
-                    twins.push_back(twin); //twin_reduce()
-                    g->makeNodeInvisible(j); //j is made invisible 
-                    //!!! save crossings in i for both j and i as twins i and j are reduced to one node
-                }
-            }
-        }
-    }
-    return twins;
 }

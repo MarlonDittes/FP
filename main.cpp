@@ -2,6 +2,7 @@
 #include "graph.h"
 #include "io.h"
 #include "stack.h"
+#include "reductions.h"
 /*#include "performance.h"*/
 
 constexpr int MODE_COUNT = 4;
@@ -17,6 +18,12 @@ int main(int argc, char* argv[]) {
     //g->printGraph();
     long crossing_count = g->countCrossings();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
+
+    Twins_reduction twins;
+    twins.reduce(g);
+    std::cout << "crossings in g:" << g->countCrossingsWithMultiplier() << std::endl;
+    g->printGraph();
+    std::cout << g->getNodeByOrder(0)->offset_visible_nodes << std::endl;
 
     /* // Reduction Stuff
     g->Sorted_straight_line_reduction();
@@ -36,9 +43,9 @@ int main(int argc, char* argv[]) {
 
     // Testing Stuff
     // Brute Force (parallel)
-    auto resultBF = bruteForce(g);
+    //auto resultBF = bruteForce(g);
     //auto resultBF = bruteForceParallel(*g);
-    std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
+    //std::cout << "exact crossings BRUTE FORCE: " << resultBF.second << std::endl;
     //outputOrder(resultBF.first, "../output.txt");
 
 
@@ -53,10 +60,10 @@ int main(int argc, char* argv[]) {
 
 
 
-    g->printGraph();
+   /* g->printGraph();
     g->Partition();
     g->AP();
-    g->printGraph();
+    g->printGraphByPartitions();
     
 
     if (g->verifier(verifier)) {
@@ -64,7 +71,7 @@ int main(int argc, char* argv[]) {
     }
     else {
         std::cout << "Graph is NOT valid" << std::endl;
-    }
+    }*/
 
     // Testing on test set
     /*
