@@ -5,6 +5,9 @@
 #include <vector>
 #include "stack.h"
 
+// CHANGE THIS TO BE SOMEWHERE ELSE; THIS SHOULDNT BE HERE
+enum Reduction { ZeroEdge, Complete };
+
 struct Node {
     std::vector<int> neighbours;
     int order = -1;
@@ -14,6 +17,7 @@ struct Node {
     //std::vector<int> partition;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
     //std::vector<int> offset_neighbours_partition;
+    int old_id = -1;
 };
 
 typedef std::vector<std::pair<Node*, Node*>> Twins;
@@ -44,8 +48,10 @@ public:
     int getN0() { return this->n0; };
     int getN1() { return this->n1; };
     int getM() { return this->m; };
+    int getOffsetVisibleOrderNodes() { return this->offset_visible_order_nodes;};
     std::vector<Node> getGraph() { return this->graph; };
     //std::vector<Node*> getActiveNodes() { return this->activeNodes;}
+    void setOldID (int node_id, int old_id) { this->graph[node_id].old_id = old_id;};
 
     void printGraph();
     long countCrossingsMarlon();
@@ -59,6 +65,8 @@ public:
     void makeNodeInvisibleMarlon(int order_of_node);
     void makeNodeInvisible(int order);
     void makeNodeInvisibleBranching(int order);
+    void makeNodeVisibleMarlon();
+    void makeNodeVisible(int order_of_node);
     void Interval_Partitioning(int start_node_id, int end_node_id);
 
     std::pair<std::vector<Node*>, long> Greedy();
@@ -66,18 +74,21 @@ public:
     void Partition();
     void APUtil(int start_node_id, std::vector<int>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
     void AP();
+    void MedianHeuristicMarlon();
     void Median_Heuristic();
     void Sorted_straight_line_reduction();
-    void makeNodeVisible(int order_of_node);
     bool DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visited);
     bool verifier(Graph check);
+
+    void setNoPartitioning();
 };
 
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g);
 std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end);
 // New stuff
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph G);
+std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> reductionTypes);
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduction> reductionTypes);
 
 void Branch_and_Bound(Graph* G);
 void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solution, std::vector<Node*>& best_configuration);

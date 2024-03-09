@@ -18,6 +18,10 @@ int main(int argc, char* argv[]) {
     long crossing_count = g->countCrossingsMarlon();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
 
+    g->setNoPartitioning();
+
+    g->printGraph();
+    
     //Testing partitioning
     auto nodes = g->getGraph();
     std::vector<Node*> partition(0);
@@ -33,32 +37,23 @@ int main(int argc, char* argv[]) {
     partition2.push_back(&nodes[4]);
     partition2.push_back(&nodes[7]);
     partition2.push_back(&nodes[8]);
-
+    
     auto partGraph = createGraphByPartition(g, partition);
     partGraph->printGraph();
+    auto nodes1 = partGraph->getGraph();
+    for (auto node : nodes1){
+        std::cout << node.id << ", previously: " << node.old_id << std::endl;
+    }
 
     auto partGraph2 = createGraphByPartition(g, partition2);
     partGraph2->printGraph();
-
-    auto result1 = bruteForce(partGraph);
-    auto result2 = bruteForce(partGraph2);
-
-    std::vector<Node*> solution(0);
-    solution.insert(solution.end(), result1.first.begin(), result1.first.end());
-    solution.insert(solution.end(), result2.first.begin(), result2.first.end());
-
-    for (auto node : solution){
-        std::cout << node->id << " ";
+    auto nodes2 = partGraph2->getGraph();
+    for (auto node : nodes2){
+        std::cout << node.id << ", previously: " << node.old_id << std::endl;
     }
-    std::cout << std::endl;
 
-    auto result = bruteForce(g);
-    for (auto node : result.first){
-        std::cout << node->id << " ";
-    }
-    std::cout << std::endl;
 
-    
+
 
     /*
     if (g->verifier(verifier)) {
