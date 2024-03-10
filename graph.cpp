@@ -144,6 +144,8 @@ void Graph::swapNodesBranching(int node0, int node1) {
 }
 
 void Graph::makeNodeInvisibleMarlon(int order_of_node) {
+    assert(offset_visible_order_nodes <= order_of_node);
+    assert(order_of_node <= order_nodes.size() - 1);
     //Make sure node is not already invisible
     assert(order_nodes[order_of_node]->offset_visible_nodes != order_nodes[order_of_node]->neighbours.size());
 
@@ -215,6 +217,8 @@ void Graph::makeNodeInvisibleBranching(int order_of_node) {
 }
 
 void Graph::makeNodeVisibleMarlon() {
+    assert(offset_visible_order_nodes >= 1);
+
     int order_of_node = this->offset_visible_order_nodes - 1;
     //Make sure node is really invisible
     assert(order_nodes[order_of_node]->offset_visible_nodes == order_nodes[order_of_node]->neighbours.size());
@@ -279,16 +283,21 @@ std::pair<std::vector<Node*>, long> Graph::Greedy() {
 }
 
 void Graph::MedianHeuristicMarlon() {
-    for (int i = 0; i < order_nodes.size(); i++) {
+    for (int i = offset_visible_order_nodes; i < order_nodes.size(); i++) {
+        order_nodes[i]->median = 0;
         for (int j = order_nodes[i]->offset_visible_nodes; j < order_nodes[i]->neighbours.size(); j++) {
             order_nodes[i]->median += order_nodes[i]->neighbours[j];
         }
-
-        order_nodes[i]->median = order_nodes[i]->median / (order_nodes[i]->neighbours.size() - order_nodes[i]->offset_visible_nodes);
-        //std::cout << "id: " << order_nodes[i]->id << " median: " << order_nodes[i]->median << std::endl;
+        if ((order_nodes[i]->neighbours.size() - order_nodes[i]->offset_visible_nodes) != 0){
+            order_nodes[i]->median = order_nodes[i]->median / (order_nodes[i]->neighbours.size() - order_nodes[i]->offset_visible_nodes);
+            //std::cout << "id: " << order_nodes[i]->id << " median: " << order_nodes[i]->median << std::endl;
+        } else {
+            order_nodes[i]->median = 0;
+        }
+        
     }
 
-    std::sort(order_nodes.begin(), order_nodes.end(), [](const Node* a, const Node* b) {
+    std::sort(order_nodes.begin() + offset_visible_order_nodes, order_nodes.end(), [](const Node* a, const Node* b) {
         return a->median < b->median;
         });
 
@@ -606,6 +615,14 @@ void Graph::setNoPartitioning() {
     }
 }
 
+void Graph::setOrderNodes(std::vector<Node*> order){
+    this->order_nodes = order;
+
+    for (int i = offset_visible_order_nodes; i < order_nodes.size(); i++){
+        order_nodes[i]->order = i;
+    }
+}
+
 void Branch_and_Bound(Graph* G) {
     G->Median_Heuristic();
     Graph verifier = *G;
@@ -838,7 +855,7 @@ std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> 
         auto orderNodes = g->getOrderNodes();
         int visibleNodeOffset = g->getOffsetVisibleOrderNodes();
 
-        if ((orderNodes.size() - visibleNodeOffset) >= 2){
+        if ((orderNodes.size() - visibleNodeOffset) > 2){
             // Find highest degree visible moveable node
             Node* maxDegreeNode = orderNodes[visibleNodeOffset];
             int maxDegree = orderNodes[visibleNodeOffset]->neighbours.size() - orderNodes[visibleNodeOffset]->offset_visible_nodes;
@@ -858,28 +875,25 @@ std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> 
 
             // Calculate Crossings for every possible position of node
             int minCrossings = g->countCrossingsMarlon();
-            int minPosition = visibleNodeOffset;
+            auto minOrder = g->getOrderNodes();
             for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++){
                 g->swapNodes(maxDegreeNode->order, i);
                 int crossings = g->countCrossingsMarlon();
                 if (crossings < minCrossings){
                     minCrossings = crossings;
-                    minPosition = i;
+                    minOrder = g->getOrderNodes();
                 }
             }
 
-            // Reconstruct min position
-            for (int i = orderNodes.size() - 2; i >= minPosition; i--){
-                g->swapNodes(maxDegreeNode->order, i);
-            }
+            // Reconstruct min order
+            g->setOrderNodes(minOrder);
 
             result = std::make_pair(g->getOrderNodes(), minCrossings);
 
-        } else if ((orderNodes.size() - visibleNodeOffset) == 1){
-            int crossings1 = g->countCrossings();
+        } else if ((orderNodes.size() - visibleNodeOffset) == 2){
+            int crossings1 = g->countCrossingsMarlon();
             g->swapNodes(visibleNodeOffset, visibleNodeOffset + 1);
-            int crossings2 = g->countCrossings();
-
+            int crossings2 = g->countCrossingsMarlon();
             // go back to previous order if it was better
             if (crossings1 < crossings2){
                 g->swapNodes(visibleNodeOffset, visibleNodeOffset + 1);
@@ -887,10 +901,10 @@ std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> 
             } else {
                 result = std::make_pair(g->getOrderNodes(), crossings2);
             }
-
-            
+ 
         } else {
-            std::cerr << "This shouldn't happen." << std::endl;
+            std::cerr << "This shouldn't happen I think" << std::endl;
+            result = std::make_pair(g->getOrderNodes(), 0);
         }      
     }
     else {
@@ -910,10 +924,10 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
     std::vector<std::vector<Node*>> partitions = g->getPartitions();
     std::vector<Node*> solution(0);
     long sumCrossings = 0;
-
     if (partitions.size() > 1){
         std::vector<std::pair<std::vector<Node*>, long>> results(0);
 
+        // get sub solutions
         for (auto part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
 
@@ -926,6 +940,15 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
             solution.insert(solution.end(), result.first.begin(), result.first.end());
             sumCrossings += result.second;
         }
+
+        // Apply solution to original graph
+        std::vector<Node*> oldOrder = g->getOrderNodes();
+        auto nodes = g->getGraph();
+        std::vector<Node*> newOrder(oldOrder.begin(), oldOrder.begin() + g->getOffsetVisibleOrderNodes());
+        for (auto node : solution){
+            newOrder.push_back(&nodes[node->old_id]);
+        }
+        g->setOrderNodes(newOrder);
 
     } else {
         auto result = branching(g, reductionTypes);

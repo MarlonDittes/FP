@@ -13,6 +13,7 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                 2 Greedy
                 3 Baricenter
                 4 Baricenter + Greedy
+                5 BranchAndReduce
     */
 
     try {
@@ -41,6 +42,8 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                 std::pair<std::vector<Node *>, long> result;
                 auto stop = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
+
+                std::vector<Reduction> reductions;
 
                 switch (mode) {
                     // 1 BruteForce 
@@ -81,6 +84,16 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                         
                         outFile << testname << " " << duration.count() << " " << result.second << std::endl;
                         break;
+                    // 5 BranchAndReduce
+                    case 5:
+                        start = std::chrono::high_resolution_clock::now();
+                        result = BranchAndReduce(g, reductions);
+                        stop = std::chrono::high_resolution_clock::now();
+                        duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
+                        
+                        outFile << testname << " " << duration.count() << " " << result.second << std::endl;
+                        break;
+
                     default:
                         std::cout << "Select one of the following modes:" << std::endl;
                         std::cout << "1 BruteForce" << std::endl;

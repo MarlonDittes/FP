@@ -42,7 +42,7 @@ public:
     int getOrderByNode(int node_id) { return graph[node_id].order; }
     int getSizeOfOrder() { return order_nodes.size(); }
     std::vector<Node*> getOrderNodes() { return this->order_nodes; };
-    void setOrderNodes(std::vector<Node*> order) { this->order_nodes = order; };
+    void setOrderNodes(std::vector<Node*> order);
     // New getters, do we need?
     std::vector<std::vector<Node*>> getPartitions() { return this->partitions; };
     int getN0() { return this->n0; };
