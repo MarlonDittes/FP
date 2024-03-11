@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 
 
 
-    g->printGraph();
+    //g->printGraph();
     g->Partition();
     g->AP();
     g->printGraph();
