@@ -5,12 +5,14 @@
 #include <vector>
 
 struct Node {
-    std::vector<int> neighbours; //name needs to be changed
+    //std::vector<int> neighbours; //name needs to be changed
+    std::vector<int> neighbours;
+    std::vector<int> neighbors_partition;
     int order = -1;
     int id = -1;
     int median = 0;
-    int partition = -1;
-    //std::vector<int> partition;
+    //int partition = -1;
+    std::vector<int> partition;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
     //std::vector<int> offset_neighbours_partition;
 };
@@ -58,7 +60,8 @@ public:
     std::pair<std::vector<Node*>, long> Greedy();
     std::pair<int, int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
     void Partition();
-    void APUtil(int start_node_id, std::vector<int>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
+    void APUtil(int start_node_id, std::vector<bool>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
+    void CreatePartitionsVector(int AP_Node_ID, int start_node_fixed_id, int &partition_id, std::vector<bool>& visited);
     void AP();
     void Median_Heuristic();
     void Sorted_straight_line_reduction();
