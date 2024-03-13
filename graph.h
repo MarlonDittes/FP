@@ -21,9 +21,8 @@ struct Node {
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
     //std::vector<int> offset_neighbours_partition;
     int old_id = -1;
+    int multiplier = 1;
 };
-
-typedef std::vector<std::pair<Node*, Node*>> Twins;
 
 class Graph {
 private:
@@ -34,8 +33,8 @@ private:
     int n1; //size movable nodes
     int m; //number of edges
     //std::vector<std::vector<int>> partitions;
-    //std::vector<Node*> activeNodes;
     int offset_visible_order_nodes = 0;
+    bool optimal = 0; //for reduction of partitions -> true if partition is optimal
 
 public:
     Graph(int n0, int n1, int m);
@@ -56,11 +55,17 @@ public:
     //std::vector<Node*> getActiveNodes() { return this->activeNodes;}
     void setOldID (int node_id, int old_id) { this->graph[node_id].old_id = old_id;};
 
-    void printGraph();
     long countCrossingsMarlon();
+    bool getOptimal() { return this->optimal; };
+    void setOptimalTrue() { this->optimal = true; };
+
+    void printGraph();
+    void printGraphByPartitions();
+    
     long countCrossings();
     long countCrossingsBranching();
     int countCrossingsForPair(int order_a, int order_b);
+    long countCrossingsWithMultiplier();
     void sortNeighbours();
     void swapNodes(int order_a, int order_b);
     void swapNodesBranching(int order_a, int order_b);
@@ -73,7 +78,9 @@ public:
     void Interval_Partitioning(int start_node_id, int end_node_id);
 
     std::pair<std::vector<Node*>, long> Greedy();
-    std::pair<int, int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
+    void Median_Heuristic();
+    bool verifier(Graph check);
+    std::pair<int,int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
     void Partition();
     void APUtil(int start_node_id, std::vector<bool>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
     void CreatePartitionsVector(int start_node_fixed_id, int &partition_id, std::vector<bool>& visited);
@@ -89,6 +96,7 @@ public:
 
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g);
 std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end);
+Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
 // New stuff
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
 std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> reductionTypes);
@@ -97,8 +105,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduct
 void Branch_and_Bound(Graph* G);
 void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solution, std::vector<Node*>& best_configuration);
 
-//reduction:
-Twins findTwins();
-void cheapReduction();
+typedef std::vector<std::pair<Node*, Node*>> Twins;
+Twins findTwins(Graph* g);
 
 #endif //GRAPH_H

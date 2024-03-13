@@ -3,6 +3,7 @@
 #include "io.h"
 #include "stack.h"
 #include "performance.h"
+#include "reductions.h"
 
 int main(int argc, char* argv[]) {
     std::string graph_file = argv[1];
@@ -20,6 +21,15 @@ int main(int argc, char* argv[]) {
     
     //Testing Branching
     //g->makeNodeInvisibleMarlon(0);
+
+    // Tony Stuff
+    /*
+    Twins_reduction twins;
+    twins.reduce(g);
+    std::cout << "crossings in g:" << g->countCrossingsWithMultiplier() << std::endl;
+    g->printGraph();
+    std::cout << g->getNodeByOrder(0)->offset_visible_nodes << std::endl;
+    */
     
     auto result = BranchAndReduce(g, reductions);
     g->printGraph();

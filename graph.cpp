@@ -58,14 +58,20 @@ void Graph::printGraph() {
         for (int j = 0; j < this->partitions[i].size(); j++) {
             std::cout << this->partitions[i][j]->id +1<<" ";
         }
-        std::cout << std::endl;
     }
 }
 
-
-void Graph::sortNeighbours() {
-    for (int i = 0; i < graph.size(); i++) {
-        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end());
+void Graph::printGraphByPartitions() {
+    for (int i = 0; i < partitions.size(); i++) {
+        std::cout << "Partition " << i << ": " << std::endl;
+        for (int j = 0; j < partitions[i].size(); j++) {
+            std::cout << partitions[i][j]->id << " -> "; 
+            for (int k = 0; k < partitions[i][j]->neighbours.size(); k++) {
+                std::cout << partitions[i][j]->neighbours[k] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
     }
 }
 
@@ -142,6 +148,34 @@ int Graph::countCrossingsForPair(int a, int b) { //for a < b
         }
     }
     return crossings;
+}
+
+//beachte: berechnet crossings ohne die crossings in den twins selber
+long Graph::countCrossingsWithMultiplier() {
+    if (m == 0) {
+        return 0;
+    }
+    long crossings = 0;
+    //iterate trough movable nodes
+    for (int u = 0; u < order_nodes.size() - 1; u++) {
+        //iterate through movable_nodes+1
+        for (int v = u + 1; v < order_nodes.size(); v++) {
+            for (int i = order_nodes[u]->offset_visible_nodes; i < order_nodes[u]->neighbours.size(); i++) {
+                for (int j = order_nodes[v]->offset_visible_nodes; j < order_nodes[u]->neighbours.size(); j++) {
+                    if (order_nodes[u]->neighbours[i] > order_nodes[v]->neighbours[j]) {
+                        crossings += order_nodes[u]->multiplier * order_nodes[v]->multiplier;
+                    }
+                }
+            }
+        }
+    }
+    return crossings;
+}
+
+void Graph::sortNeighbours() {
+    for (int i = 0; i < graph.size(); i++) {
+        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end());
+    }
 }
 
 void Graph::swapNodes(int node0, int node1) {
@@ -657,7 +691,6 @@ void Graph::AP()
     }
 }
 
-
 bool Graph::DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visited) {
     // need to make sure at the beginning that all nodes with degree 0 are removed. we can do this since by setting their
     // order to be the right most position and adding an ignore marker.
@@ -702,8 +735,6 @@ bool Graph::DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visi
 
     return true;
 }
-
-
 
 void Graph::Sorted_straight_line_reduction() {
     // max 1 DFS
