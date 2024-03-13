@@ -501,7 +501,7 @@ void Graph::AP()
 
         if (stack.isEmpty()) {
             for (int i = 0; i < n0 + n1; i++) {
-                if (!visited[graph[i].id]) {
+                if (!visited[graph[i].id] && graph[i].offset_visible_nodes != graph[i].neighbours.size()) {
                     stack.push(i);
                     break;
                 }
