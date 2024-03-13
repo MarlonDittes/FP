@@ -524,6 +524,10 @@ void Graph::AP()
     for (int i = 0; i < partitions.size(); i++) {
         std::sort(partitions[i].begin(), partitions[i].end(), compareNodePointers);
     }
+
+    for (int i = 0; i < this->n0 + this->n1; i++) {
+        graph[i].isAP = false;
+    }
 }
 
 
