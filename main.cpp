@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     long crossing_count = g->countCrossingsMarlon();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
 
-    std::vector<Reduction> reductions;
+    std::vector<general_reduction*> reductions;
     
     //Testing Branching
     //g->makeNodeInvisibleMarlon(0);

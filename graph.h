@@ -3,10 +3,9 @@
 
 #include <iostream>
 #include <vector>
-#include "stack.h"
+#include "reductions.h"
 
-// CHANGE THIS TO BE SOMEWHERE ELSE; THIS SHOULDNT BE HERE
-enum Reduction { ZeroEdge, Complete };
+class general_reduction;
 
 struct Node {
     //std::vector<int> neighbours; //name needs to be changed
@@ -78,8 +77,6 @@ public:
     void Interval_Partitioning(int start_node_id, int end_node_id);
 
     std::pair<std::vector<Node*>, long> Greedy();
-    void Median_Heuristic();
-    bool verifier(Graph check);
     std::pair<int,int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
     void Partition();
     void APUtil(int start_node_id, std::vector<bool>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
@@ -99,13 +96,13 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
 // New stuff
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
-std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> reductionTypes);
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduction> reductionTypes);
+std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<general_reduction*> reductionTypes);
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes);
 
 void Branch_and_Bound(Graph* G);
 void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solution, std::vector<Node*>& best_configuration);
 
-typedef std::vector<std::pair<Node*, Node*>> Twins;
-Twins findTwins(Graph* g);
+typedef std::vector<std::pair<Node*, Node*>> TwinsType;
+TwinsType findTwins(Graph* g);
 
 #endif //GRAPH_H

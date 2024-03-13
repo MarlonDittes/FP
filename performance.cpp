@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include "graph.h"
+#include "reductions.h"
 #include "io.h"
 
 namespace fs = std::filesystem;
@@ -43,7 +44,7 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                 auto stop = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
-                std::vector<Reduction> reductions;
+                std::vector<general_reduction*> reductions;
 
                 switch (mode) {
                     // 1 BruteForce 

@@ -3,8 +3,9 @@
 #include <vector>
 #include "graph.h"
 
+class Graph;
+
 enum reduction_type { ZeroEdge, Complete, ZeroCrossings, Twins };
-constexpr int BRUTE_CUTOFF = 10;
 
 struct general_reduction {
     general_reduction() {}

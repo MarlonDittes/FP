@@ -58,6 +58,7 @@ void Graph::printGraph() {
         for (int j = 0; j < this->partitions[i].size(); j++) {
             std::cout << this->partitions[i][j]->id +1<<" ";
         }
+        std::cout << std::endl;
     }
 }
 
@@ -843,12 +844,8 @@ void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solut
     }
 }
 
-
-
-typedef std::vector<std::pair<Node*, Node*>> Twins;
-
-Twins findTwins(Graph* g) {
-    Twins twins;
+TwinsType findTwins(Graph* g) {
+    TwinsType twins;
     for (int i = 0; i < g->getSizeOfOrder() - 1; i++) {
         for (int j = i + 1; j < g->getSizeOfOrder(); j++) {
             if (g->getNodeByOrder(i)->neighbours.size() != g->getNodeByOrder(j)->neighbours.size()) {
@@ -982,22 +979,23 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     return partGraph;
 }
 
-std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> reductionTypes){
+std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<general_reduction*> reductionTypes){
     bool changed = false;
-    //for (auto reduct : reductionTypes) {
-        /*
-        Need to implement this somehow
-
-        if (reduct.reduce()){
-            reduct.apply();
-            changed = true;
-        }
-        */
-    //}
+    /*
+    for (auto& reduct : reductionTypes) {
+        changed = reduct->reduce(g);
+    }
+    */
     
     //Reduce our instance if no more reductions applicable
     std::pair<std::vector<Node*>, long> result;
-    if (!changed) {
+
+    if (g->getOptimal()) { //order already optimal, s.t. no recursion or bruteforce needed
+        result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon()); 
+        //BETTER: save crossing in partGraph instead of calculating it again, since it was calculated in reductions already
+    } else if (changed) {
+        result = BranchAndReduce(g, reductionTypes);
+    } else {
         auto orderNodes = g->getOrderNodes();
         int visibleNodeOffset = g->getOffsetVisibleOrderNodes();
 
@@ -1052,16 +1050,13 @@ std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> 
             // Less than two moveable nodes left -> nothing left to do
             //std::cout << "Only one moveable node."<< std::endl;
             result = std::make_pair(g->getOrderNodes(), 0);
-        }      
-    }
-    else {
-        result = BranchAndReduce(g, reductionTypes);
+        }
     }
 
     return result;
 }
 
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduction> reductionTypes) {
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes) {
     g->MedianHeuristicMarlon();
 
     g->Partition();
