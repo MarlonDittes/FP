@@ -40,23 +40,23 @@ void Graph::printGraph() {
     for (int i = 0; i < order_nodes.size(); i++) {
         std::cout << order_nodes[i]->id+1 << " -> ";
         for (int j = 0; j < order_nodes[i]->neighbours.size(); j++) {
-            std::cout << order_nodes[i]->neighbours[j] << " ";  
+            std::cout << order_nodes[i]->neighbours[j] +1<< " ";  
         }
         std::cout << std::endl;
     }
-
+    /*
     for (int i = 0; i < graph.size(); i++) {
         std::cout << graph[i].id << " partition :  ";
         for (int j = 0; j < graph[i].partition.size(); j++) {
             std::cout << graph[i].partition[j] << " ";
         }
         std::cout << std::endl;
-    }
+    }*/
 
     for (int i = 0; i < this->partitions.size(); i++) {
         std::cout << "partition : " << i <<" node in partition : ";
         for (int j = 0; j < this->partitions[i].size(); j++) {
-            std::cout << this->partitions[i][j]->id<<" ";
+            std::cout << this->partitions[i][j]->id +1<<" ";
         }
         std::cout << std::endl;
     }
@@ -363,6 +363,14 @@ bool Graph::verifier(Graph check)
         if (!unique_id_vec[i]) { return false; }
     }
     return true;
+}
+
+bool compareNodeID(Node* a, Node* b) {
+    return a->id < b->id;
+}
+
+bool compareNodeOrder(Node* a, Node* b) {
+    return a->order < b->order;
 }
 
 //change function such that it works for degree 0 nodes.
@@ -846,14 +854,6 @@ void Graph::cheapReduction() {
 }
 */
 
-bool compareNodeID(Node* a, Node* b) {
-    return a->id < b->id;
-}
-
-bool compareNodeOrder(Node* a, Node* b) {
-    return a->order < b->order;
-}
-
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g) {
     std::vector<Node*> baseOrder = g->getOrderNodes();
     std::sort(baseOrder.begin(), baseOrder.end(), compareNodeID);
@@ -1018,7 +1018,8 @@ std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> 
             }
  
         } else {
-            std::cerr << "This shouldn't happen I think" << std::endl;
+            // Less than two moveable nodes left -> nothing left to do
+            //std::cout << "Only one moveable node."<< std::endl;
             result = std::make_pair(g->getOrderNodes(), 0);
         }      
     }
@@ -1032,38 +1033,42 @@ std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<Reduction> 
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<Reduction> reductionTypes) {
     g->MedianHeuristicMarlon();
 
-    //g->Partition();
-    //g->AP();
-    g->setNoPartitioning();
+    g->Partition();
+    g->AP();
+    //g->setNoPartitioning();
 
-    std::vector<std::vector<Node*>> partitions = g->getPartitions();
+    std::vector<std::vector<Node*>>& partitions = g->getPartitions();
     std::vector<Node*> solution(0);
     long sumCrossings = 0;
     if (partitions.size() > 1){
         std::vector<std::pair<std::vector<Node*>, long>> results(0);
 
         // get sub solutions
-        for (auto part : partitions) {
+        for (auto& part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
 
             auto result = branching(partGraph, reductionTypes);
             results.push_back(result);
         }
 
-        // Construct solution
-        for (auto result : results) {
-            solution.insert(solution.end(), result.first.begin(), result.first.end());
+        // Combine sub solutions
+        std::vector<Node*> subSolutions(0);
+        for (auto& result : results) {
+            subSolutions.insert(subSolutions.end(), result.first.begin(), result.first.end());
             sumCrossings += result.second;
         }
 
         // Apply solution to original graph
         std::vector<Node*> oldOrder = g->getOrderNodes();
-        auto nodes = g->getGraph();
-        std::vector<Node*> newOrder(oldOrder.begin(), oldOrder.begin() + g->getOffsetVisibleOrderNodes());
-        for (auto node : solution){
-            newOrder.push_back(&nodes[node->old_id]);
+        auto& nodes = g->getGraph();
+        for (int i = 0; i < g->getOffsetVisibleOrderNodes(); i++){
+            solution.push_back(oldOrder[i]);
         }
-        g->setOrderNodes(newOrder);
+        for (auto& node : subSolutions){
+            solution.push_back(&nodes[node->old_id]);
+        }
+
+        g->setOrderNodes(solution);
 
     } else {
         auto result = branching(g, reductionTypes);

@@ -47,12 +47,12 @@ public:
     std::vector<Node*> getOrderNodes() { return this->order_nodes; };
     void setOrderNodes(std::vector<Node*> order);
     // New getters, do we need?
-    std::vector<std::vector<Node*>> getPartitions() { return this->partitions; };
+    std::vector<std::vector<Node*>>& getPartitions() { return this->partitions; };
     int getN0() { return this->n0; };
     int getN1() { return this->n1; };
     int getM() { return this->m; };
     int getOffsetVisibleOrderNodes() { return this->offset_visible_order_nodes;};
-    std::vector<Node> getGraph() { return this->graph; };
+    std::vector<Node>& getGraph() { return this->graph; };
     //std::vector<Node*> getActiveNodes() { return this->activeNodes;}
     void setOldID (int node_id, int old_id) { this->graph[node_id].old_id = old_id;};
 
