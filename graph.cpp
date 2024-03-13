@@ -8,6 +8,8 @@
 #include <utility>
 #include <cmath>
 #include <omp.h>
+#include <queue>
+
 
 
 //Constructor dependent on size of movable_nodes
@@ -52,9 +54,11 @@ void Graph::printGraph() {
     }
 
     for (int i = 0; i < this->partitions.size(); i++) {
+        std::cout << "partition : " << i <<" node in partition : ";
         for (int j = 0; j < this->partitions[i].size(); j++) {
-            std::cout << "node id : " << this->partitions[i][j]->id << " is in partition : " << i << std::endl;
+            std::cout << this->partitions[i][j]->id<<" ";
         }
+        std::cout << std::endl;
     }
 }
 
@@ -130,6 +134,9 @@ void Graph::swapNodesBranching(int node0, int node1) {
     std::swap(graph[order_nodes[node0]->id].order, graph[order_nodes[node1]->id].order);
 }
 
+bool compareNodePointers(Node* a, Node* b) {
+    return a->id < b->id;
+}
 
 void Graph::makeNodeInvisible(int order_of_node) {
     /*Node* node = order_nodes[order_of_node];
@@ -285,7 +292,6 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
     return std::make_pair(start_node_interval, last_node_interval);
 }
 
-
 void Graph::Partition()
 {
     int start_node_fix = graph[0].id;
@@ -366,9 +372,8 @@ void Graph::APUtil(int start_node_id, std::vector<bool>& visited, std::vector<in
         isAP[start_node_id] = true;
 }
 
-
 //change function such that it works for degree 0 nodes.
-void Graph::CreatePartitionsVector(int AP_Node_ID, int start_node_fixed_id, int &partition_id, std::vector<bool>& visited) {
+void Graph::CreatePartitionsVector(int start_node_fixed_id, int& partition_id, std::vector<bool>& visited) {
     // need to make sure at the beginning that all nodes with degree 0 are removed. we can do this since by setting their
     // order to be the right most position and adding an ignore marker.
     Stack stack;
@@ -379,7 +384,7 @@ void Graph::CreatePartitionsVector(int AP_Node_ID, int start_node_fixed_id, int 
         this->partitions.push_back(partition);
     }
 
-    bool partition_in_node_vector = false;
+    bool partition_id_in_node = false;
     bool partition_in_partition_vector = false;
 
     //move this to a seperate function called DFS
@@ -394,21 +399,23 @@ void Graph::CreatePartitionsVector(int AP_Node_ID, int start_node_fixed_id, int 
                 partition_id++;
             }
 
+            //change the partition vector in the node data structure if necessary
             for (int i = 0; i < graph[current_node].partition.size(); i++) {
                 if (graph[current_node].partition[i] == partition_id) {
-                    partition_in_node_vector = true;
+                    partition_id_in_node = true;
                 }
             }
-            
-            if (!partition_in_node_vector) {
-                if (current_node == AP_Node_ID) {
+
+            if (!partition_id_in_node) {
+                if (graph[current_node].isAP) {
                     graph[current_node].partition.push_back(partition_id);
                 }
                 else {
                     graph[current_node].partition[graph[current_node].partition.size() - 1] = partition_id;
                 }
             }
-            
+
+            //add node to partitionsvector
             for (int i = 0; i < partitions[partition_id].size(); i++) {
                 if (partitions[partition_id][i]->id == current_node) {
                     partition_in_partition_vector = true;
@@ -419,24 +426,27 @@ void Graph::CreatePartitionsVector(int AP_Node_ID, int start_node_fixed_id, int 
             }
         }
 
+        //add neighbours
         for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
             if (!visited[graph[current_node].neighbours[i]]) {
-                if (graph[current_node].neighbours[i] == AP_Node_ID) {
-                    
-                    partition_in_partition_vector = false;
-                    for (int j = 0; j < partitions[partition_id].size(); j++) {
-                        if (partitions[partition_id][j]->id == graph[current_node].neighbours[i]) {
-                            partition_in_partition_vector = true;
+                    if(graph[graph[current_node].neighbours[i]].isAP) {
+                        //just add the AP point to the partitions vector but not to the working stack
+                        partition_in_partition_vector = false;
+                        for (int j = 0; j < partitions[partition_id].size(); j++) {
+                            if (partitions[partition_id][j]->id == graph[current_node].neighbours[i]) {
+                                partition_in_partition_vector = true;
+                            }
                         }
-                    }
-                    if (!partition_in_partition_vector) {
-                        this->partitions[partition_id].push_back(&graph[graph[current_node].neighbours[i]]);
-                    }
+                        if (!partition_in_partition_vector) {
+                            this->partitions[partition_id].push_back(&graph[graph[current_node].neighbours[i]]);
+                        }
 
-                }
-                else {
-                    stack.push(graph[current_node].neighbours[i]);
-                }
+                        int node_partition_size = graph[graph[current_node].neighbours[i]].partition.size();
+                        graph[graph[current_node].neighbours[i]].partition[node_partition_size - 1] = partition_id;
+                    }
+                    else {
+                        stack.push(graph[current_node].neighbours[i]);
+                    }
             }
         }
     }
@@ -459,25 +469,60 @@ void Graph::AP()
             APUtil(start_node_id, visited, disc, low, time, par, isAP);
         }
 
-    // building the partitions vector.
-    /*for (int AP_node_id = 0; AP_node_id < n0; AP_node_id++) {
-        if (isAP[AP_node_id]) {
-            std::cout << "Node id: " << AP_node_id + 1 << " is AP" << std::endl;
-    }*/
+    visited = std::vector<bool>(this->n0 + this->n1, false);
+    std::vector<bool> visited_node_stack(this->n0 + this->n1, false);
+    int partition_id = 0;
 
-    //isolated nodes must be already taken care of.
-    for (int AP_node_id = 0; AP_node_id < n0; AP_node_id++) {
-        if (isAP[AP_node_id]) {
-            int partition_id = 0;
-            std::cout << "Node id: " << AP_node_id + 1 << " is AP" << std::endl;
-            visited = std::vector<bool>(this->n0 + this->n1, false);
-            for (int start_node_id = 0; start_node_id < this->n0 + this->n1; start_node_id++) {
-                if (!visited[start_node_id]) {
-                    CreatePartitionsVector(AP_node_id, start_node_id, partition_id, visited);
-                    partition_id++;
+    for (int i = 0; i < n0; i++) {
+        if (isAP[i]) { 
+            std::cout << "node : " << i << " is AP" << std::endl;
+            graph[i].isAP = true;
+        }
+    }
+
+    Stack stack;
+    stack.push(n0);
+
+    //move this to a seperate function called DFS
+    while (!stack.isEmpty()) {
+        int current_node = stack.peek();
+        stack.pop();
+
+        if (!visited[current_node]) {
+            CreatePartitionsVector(current_node, partition_id, visited);
+            partition_id++;
+        }
+
+        for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
+            if (!visited[graph[current_node].neighbours[i]]) {
+                stack.push(graph[current_node].neighbours[i]);
+            }
+        }
+
+        if (stack.isEmpty()) {
+            for (int i = 0; i < n0 + n1; i++) {
+                if (!visited[graph[i].id]) {
+                    stack.push(i);
+                    break;
                 }
             }
         }
+    }
+
+    /*CreatePartitionsVector(n0, partition_id, visited);
+    partition_id++;
+    CreatePartitionsVector(1, partition_id, visited);
+    partition_id++;
+
+    for (int start_node_id = 0; start_node_id < this->n0 + n1; start_node_id++) {
+        if (!visited[start_node_id]) {
+            CreatePartitionsVector(start_node_id, partition_id, visited);
+            partition_id++;
+        }
+    }*/
+
+    for (int i = 0; i < partitions.size(); i++) {
+        std::sort(partitions[i].begin(), partitions[i].end(), compareNodePointers);
     }
 }
 
@@ -681,10 +726,6 @@ void Graph::cheapReduction() {
     }
 }
 */
-
-bool compareNodePointers(Node* a, Node* b) {
-    return a->id < b->id;
-}
 
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g) {
     std::vector<Node*> baseOrder = g->getOrderNodes();

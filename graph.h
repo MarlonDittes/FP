@@ -11,6 +11,7 @@ struct Node {
     int order = -1;
     int id = -1;
     int median = 0;
+    bool isAP = false;
     //int partition = -1;
     std::vector<int> partition;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
@@ -61,7 +62,7 @@ public:
     std::pair<int, int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
     void Partition();
     void APUtil(int start_node_id, std::vector<bool>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<int>& isAP);
-    void CreatePartitionsVector(int AP_Node_ID, int start_node_fixed_id, int &partition_id, std::vector<bool>& visited);
+    void CreatePartitionsVector(int start_node_fixed_id, int &partition_id, std::vector<bool>& visited);
     void AP();
     void Median_Heuristic();
     void Sorted_straight_line_reduction();
