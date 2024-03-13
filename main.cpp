@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     std::string graph_file = argv[1];
     std::cout << graph_file << std::endl;
 
-    /*
+    
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
 
     std::vector<Reduction> reductions;
-    */
+    
 
     /*
     //Testing partitioning
@@ -62,14 +62,14 @@ int main(int argc, char* argv[]) {
     g->printGraph();
     */
 
-    /*
+    
     //Testing Branching
     
     auto result = BranchAndReduce(g, reductions);
     g->setOrderNodes(result.first);
 
     g->printGraph();
-    */
+    
 
 
 
@@ -91,9 +91,11 @@ int main(int argc, char* argv[]) {
     modes.push_back(4);
     modes.push_back(5);
 
+    /*
     for (auto mode : modes){
         calculatePerformance("../tiny_test_set", "../performance_data/" + std::to_string(mode), mode);
         std::cout << "Mode " << mode << " done." << std::endl;
-    } 
+    }
+    */ 
 }
 
