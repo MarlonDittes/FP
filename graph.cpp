@@ -222,26 +222,6 @@ void Graph::makeNodeInvisibleMarlon(int order_of_node) {
     this->offset_visible_order_nodes++;
 }
 
-void Graph::makeNodeInvisible(int order_of_node) {
-    /*Node* node = order_nodes[order_of_node];
-    for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
-        Node* neighbour = &graph[node->neighbours[i]];
-
-        //make node invisible in all adjacencie lists of fixed neighbours
-        for (int j = neighbour->offset_visible_nodes; j < neighbour->neighbours.size(); j++) {
-            if (neighbour->neighbours[j] != node->id) {
-                continue;
-            }
-            //add node to invisible nodes and add visible counter
-            std::swap(neighbour->neighbours[j], neighbour->neighbours[neighbour->offset_visible_nodes]);
-            neighbour->offset_visible_nodes++;
-        }
-    }
-
-    //set visible counter to end of adjacency array -> as if all edges removed
-    node->offset_visible_nodes = node->neighbours.size();*/
-}
-
 void Graph::makeNodeInvisibleBranching(int order_of_node) {
     Node* node = order_nodes[order_of_node];
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
@@ -844,44 +824,6 @@ void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solut
     }
 }
 
-TwinsType findTwins(Graph* g) {
-    TwinsType twins;
-    for (int i = 0; i < g->getSizeOfOrder() - 1; i++) {
-        for (int j = i + 1; j < g->getSizeOfOrder(); j++) {
-            if (g->getNodeByOrder(i)->neighbours.size() != g->getNodeByOrder(j)->neighbours.size()) {
-                continue;
-            }
-
-            for (int k = 0; k < g->getNodeByOrder(i)->neighbours.size(); k++) {
-                if (g->getNodeByOrder(i)->neighbours[k] != g->getNodeByOrder(j)->neighbours[k]) {
-                    break;
-                }
-
-                //found twins
-                if (k == g->getNodeByOrder(i)->neighbours.size() - 1) {
-                    std::pair<Node*, Node*> twin = std::make_pair(g->getNodeByOrder(i), g->getNodeByOrder(j));
-                    twins.push_back(twin); //twin_reduce()
-                }
-            }
-        }
-    }
-    return twins;
-}
-
-/*
-void Graph::cheapReduction() {
-    for (int a = 0; a < order_nodes.size()-1; a++) {
-        for (int b = a+1; b < order_nodes.size(); b++) {
-            int a_smaller_b = countCrossingsForPair(a, b);
-            int b_smaller_a = countCrossingsForPair(b, a);
-            if (a_smaller_b == 0 || b_smaller_a == 0) {
-
-            }
-        }
-    }
-}
-*/
-
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g) {
     std::vector<Node*> baseOrder = g->getOrderNodes();
     std::sort(baseOrder.begin(), baseOrder.end(), compareNodeID);
@@ -1051,6 +993,7 @@ std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<general_red
             //std::cout << "Only one moveable node."<< std::endl;
             result = std::make_pair(g->getOrderNodes(), 0);
         }
+        //APPLY REDUCTIONS
     }
 
     return result;

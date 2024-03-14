@@ -93,7 +93,6 @@ public:
 
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g);
 std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end);
-Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
 // New stuff
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
 std::pair<std::vector<Node*>, long> branching (Graph* g, std::vector<general_reduction*> reductionTypes);
@@ -101,8 +100,5 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
 
 void Branch_and_Bound(Graph* G);
 void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solution, std::vector<Node*>& best_configuration);
-
-typedef std::vector<std::pair<Node*, Node*>> TwinsType;
-TwinsType findTwins(Graph* g);
 
 #endif //GRAPH_H
