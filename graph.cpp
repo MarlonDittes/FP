@@ -470,7 +470,6 @@ void Graph::AP()
         }
 
     visited = std::vector<bool>(this->n0 + this->n1, false);
-    std::vector<bool> visited_node_stack(this->n0 + this->n1, false);
     int partition_id = 0;
 
     for (int i = 0; i < n0; i++) {
@@ -481,9 +480,8 @@ void Graph::AP()
     }
 
     Stack stack;
-    stack.push(n0);
+    stack.push(graph[0].neighbours[graph[0].offset_visible_nodes]);
 
-    //move this to a seperate function called DFS
     while (!stack.isEmpty()) {
         int current_node = stack.peek();
         stack.pop();
@@ -493,11 +491,30 @@ void Graph::AP()
             partition_id++;
         }
 
+        /*for (int i = graph[current_node].neighbours.size() - graph[current_node].offset_visible_nodes - 1; i >= 0; i--) {
+            if (!visited[graph[current_node].neighbours[i]]) {
+                stack.push(graph[current_node].neighbours[i]);
+            }
+        }*/
+        
         for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
             if (!visited[graph[current_node].neighbours[i]]) {
                 stack.push(graph[current_node].neighbours[i]);
             }
         }
+
+        /*bool found = false;
+        if (stack.isEmpty()) {
+            for (int i = 0; !found && i < n0; i++) {
+                for (int j = graph[i].offset_visible_nodes; j < graph[i].neighbours.size(); j++) {
+                    if (!visited[graph[i].neighbours[j]]) {
+                        stack.push(graph[i].neighbours[j]);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }*/
 
         if (stack.isEmpty()) {
             for (int i = 0; i < n0 + n1; i++) {
@@ -509,15 +526,15 @@ void Graph::AP()
         }
     }
 
-    /*CreatePartitionsVector(n0, partition_id, visited);
-    partition_id++;
-    CreatePartitionsVector(1, partition_id, visited);
-    partition_id++;
-
-    for (int start_node_id = 0; start_node_id < this->n0 + n1; start_node_id++) {
-        if (!visited[start_node_id]) {
-            CreatePartitionsVector(start_node_id, partition_id, visited);
-            partition_id++;
+    /*for (int fix_node = 0; fix_node < n0; fix_node++) {
+        for (int fix_node_neighbour = graph[fix_node].offset_visible_nodes; fix_node_neighbour < graph[fix_node].neighbours.size(); fix_node_neighbour++) {
+            if (!visited[graph[fix_node].neighbours[fix_node_neighbour]]) {
+                CreatePartitionsVector(graph[fix_node].neighbours[fix_node_neighbour], partition_id, visited);
+                partition_id++;
+                if (!visited[fix_node]) {
+                    CreatePartitionsVector(fix_node, partition_id, visited);
+                }
+            }
         }
     }*/
 
