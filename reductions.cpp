@@ -122,7 +122,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
     g->Partition();
     g->AP();
 
-    std::vector<std::vector<Node*>> partitions = g->getPartitions();    // NEED TO ADJUST THIS PROBABLY TO BE VECTOR<NODE*> NOT VECTOR<INT>!!, wait for shai AP
+    std::vector<std::vector<Node*>> partitions = g->getPartitions();           // NEED TO ADJUST THIS PROBABLY TO BE VECTOR<NODE*> NOT VECTOR<INT>!!, wait for shai AP
     std::vector<std::pair<std::vector<Node*>, long>> results(0);
     for (auto part : partitions) {
         Graph* partGraph = createGraphByPartition(g, part);
