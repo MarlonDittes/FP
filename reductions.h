@@ -11,6 +11,7 @@ struct general_reduction {
     general_reduction() {}
     virtual reduction_type get_reduction_type() const = 0;
 	virtual bool reduce(Graph* g) = 0;
+    virtual void apply(Graph* g, int n = 0) {}
 };
 
 //naive reduction = graph is optimal and will be no more reduced, no apply function
@@ -34,6 +35,7 @@ struct ZeroCrossings_reduction : public general_reduction {
 struct Twins_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::Twins; }
     virtual bool reduce(Graph* g) override;
+    virtual void apply(Graph* g, int twinsCount) override;
 
     private:
 	    struct restore_data {
