@@ -1,7 +1,8 @@
 #include "reductions.h"
 
 bool ZeroEdge_reduction::reduce(Graph* g) {
-    if (g->getM() == 0) {
+    if (g->getActiveEdges() == 0) {
+        //std::cout << "Zero Edge works \n";
         g->setOptimalTrue();
         return true;
     }
@@ -10,20 +11,21 @@ bool ZeroEdge_reduction::reduce(Graph* g) {
 
 bool Complete_reduction::reduce(Graph* g) {
     int n0 = g->getN0();
-    int n1 = g->getN1();
-    int m = g->getM();
+    int n1 = g->getN1() - g->getOffsetVisibleOrderNodes();
+    int m = g->getActiveEdges();
 
     if (n0 * n1 == m) {
+        //std::cout << "Complete works \n";
         g->setOptimalTrue();
-        std::cout << "GRAPH IS COMPLETE" << std::endl;
         return true;
     }
     return false;
 }
 
 bool ZeroCrossings_reduction::reduce(Graph* g) {
-    int crossings = g->countCrossings();
+    int crossings = g->countCrossingsMarlon();
     if (crossings == 0) {
+        //std::cout << "Zero Crossing works \n";
         g->setOptimalTrue();
         return true;
     }
@@ -33,8 +35,8 @@ bool ZeroCrossings_reduction::reduce(Graph* g) {
 bool Twins_reduction::reduce(Graph* g) {
     bool foundTwins = false;
 
-    for (int i = 0; i < g->getSizeOfOrder()-1; i++) {
-        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
+    for (int i = 0; i < g->getN1()-1; i++) {
+        for (int j = i+1; j < g->getN1(); j++) {
             if (g->getNodeByOrder(i)->neighbours.size() != g->getNodeByOrder(j)->neighbours.size()) {
                 continue;
             }
@@ -48,16 +50,31 @@ bool Twins_reduction::reduce(Graph* g) {
                 if (k == g->getNodeByOrder(i)->neighbours.size()-1) {
                     foundTwins = true;
                     restore_vec.push_back({g->getNodeByOrder(i)->id, g->getNodeByOrder(j)->id}); //save twins
-                    g->makeNodeInvisible(j); //j is made invisible 
+                    g->makeNodeInvisibleMarlon(j); //j is made invisible 
                     g->getNodeByOrder(i)->multiplier++;
                     //!!! save crossings in i for both j and i, as twins i and j are reduced to one node
                 }
             }
         }
     }
+    /*
     std::cout << "number of twins: " << restore_vec.size() << std::endl;
     for (int i = 0; i < restore_vec.size(); i++) {
         std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << std::endl;
     }
+    */
     return foundTwins;
+}
+
+void Twins_reduction::apply(Graph* g, int twinsCount){
+    auto& adjList = g->getGraph();
+    while (twinsCount > 0){
+        g->makeNodeVisibleMarlon();
+        auto pair = restore_vec[restore_vec.size()-1];
+        restore_vec.pop_back();
+
+        g->setOrderByNode(pair.twin, g->getOrderByNode(pair.main));
+        twinsCount--;
+    }
+    g->sortOrderNodesByOrder();
 }

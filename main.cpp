@@ -17,22 +17,17 @@ int main(int argc, char* argv[]) {
     long crossing_count = g->countCrossingsMarlon();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
 
+    // Which reductions to use
     std::vector<general_reduction*> reductions;
+    //reductions.push_back(new ZeroEdge_reduction);
+    //reductions.push_back(new Complete_reduction);
+    //reductions.push_back(new ZeroCrossings_reduction);
+    //reductions.push_back(new Twins_reduction);
     
-    //Testing Branching
-    //g->makeNodeInvisibleMarlon(0);
-
-    // Tony Stuff
-    /*
-    Twins_reduction twins;
-    twins.reduce(g);
-    std::cout << "crossings in g:" << g->countCrossingsWithMultiplier() << std::endl;
-    g->printGraph();
-    std::cout << g->getNodeByOrder(0)->offset_visible_nodes << std::endl;
-    */
-    
+    std::cout << std::endl;
     auto result = BranchAndReduce(g, reductions);
     g->printGraph();
+    std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
     
     if (g->verifier(verifier)) {
         std::cout << "Graph is valid"<<std::endl;

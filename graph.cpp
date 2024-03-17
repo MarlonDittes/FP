@@ -13,7 +13,7 @@
 
 
 //Constructor dependent on size of movable_nodes
-Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0 + n1), order_nodes(n1), partitions(1) {
+Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0 + n1), order_nodes(n1), partitions(1), activeEdges(m) {
 
     for (int i = 0; i < n0; i++) {
         graph[i].id = i;
@@ -73,6 +73,16 @@ void Graph::printGraphByPartitions() {
             std::cout << std::endl;
         }
         std::cout << std::endl;
+    }
+}
+
+void Graph::sortOrderNodesByOrder() {
+    std::sort(order_nodes.begin() + offset_visible_order_nodes, order_nodes.end(), [](const Node* a, const Node* b) {
+        return a->order < b->order;
+        });
+
+    for (int i = offset_visible_order_nodes; i < order_nodes.size(); i++){
+        order_nodes[i]->order = i;
     }
 }
 
@@ -197,6 +207,7 @@ void Graph::makeNodeInvisibleMarlon(int order_of_node) {
     assert(order_nodes[order_of_node]->offset_visible_nodes != order_nodes[order_of_node]->neighbours.size());
 
     Node* node = order_nodes[order_of_node];
+    this->activeEdges -= node->neighbours.size();
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
         Node* neighbour = &graph[node->neighbours[i]];
 
@@ -943,12 +954,15 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes) {
     bool changed = false;
-    /*
+    int oldOffset = g->getOffsetVisibleOrderNodes(); 
+    
     for (auto& reduct : reductionTypes) {
-        changed = reduct->reduce(g);
+        if (!g->getOptimal()){
+            changed = reduct->reduce(g);
+        }
     }
-    */
-
+    int foundTwins = g->getOffsetVisibleOrderNodes() - oldOffset;
+    
     //Reduce our instance if no more reductions applicable
     std::pair<std::vector<Node*>, long> result;
 
@@ -1018,7 +1032,10 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             //std::cout << "Only one moveable node."<< std::endl;
             result = std::make_pair(g->getOrderNodes(), 0);
         }
-        //APPLY REDUCTIONS
+    }
+    if (foundTwins > 0){
+        reductionTypes[3]->apply(g, foundTwins);
+        result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());
     }
 
     return result;
@@ -1029,7 +1046,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
 
     g->Partition();
     g->AP();
-    //g->setNoPartitioning();
+    g->printGraph();
 
     std::vector<std::vector<Node*>>& partitions = g->getPartitions();
     std::vector<Node*> solution(0);
