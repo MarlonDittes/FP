@@ -2,7 +2,7 @@
 
 bool ZeroEdge_reduction::reduce(Graph* g) {
     if (g->getActiveEdges() == 0) {
-        //std::cout << "Zero Edge works \n";
+        std::cout << "Zero Edge works \n";
         g->setOptimalTrue();
         return true;
     }
@@ -15,7 +15,7 @@ bool Complete_reduction::reduce(Graph* g) {
     int m = g->getActiveEdges();
 
     if (n0 * n1 == m) {
-        //std::cout << "Complete works \n";
+        std::cout << "Complete works \n";
         g->setOptimalTrue();
         return true;
     }
@@ -25,7 +25,7 @@ bool Complete_reduction::reduce(Graph* g) {
 bool ZeroCrossings_reduction::reduce(Graph* g) {
     int crossings = g->countCrossingsMarlon();
     if (crossings == 0) {
-        //std::cout << "Zero Crossing works \n";
+        std::cout << "Zero Crossing works \n";
         g->setOptimalTrue();
         return true;
     }

@@ -7,7 +7,17 @@
 
 int main(int argc, char* argv[]) {
     std::string graph_file = argv[1];
-    //std::cout << graph_file << std::endl;
+
+    //Random graph
+    /*
+    int sizeX = 5;
+    int sizeY = 5;
+    std::string output = "../bipartitegraphs/test3.gr";
+    auto edges = generateBipartiteGraph(sizeX, sizeY);
+    writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
+    */
+    
+
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
@@ -19,14 +29,14 @@ int main(int argc, char* argv[]) {
 
     // Which reductions to use
     std::vector<general_reduction*> reductions;
-    //reductions.push_back(new ZeroEdge_reduction);
-    //reductions.push_back(new Complete_reduction);
-    //reductions.push_back(new ZeroCrossings_reduction);
-    //reductions.push_back(new Twins_reduction);
+    reductions.push_back(new ZeroEdge_reduction);
+    reductions.push_back(new Complete_reduction);
+    reductions.push_back(new ZeroCrossings_reduction);
+    reductions.push_back(new Twins_reduction);
     
     std::cout << std::endl;
     auto result = BranchAndReduce(g, reductions);
-    g->printGraph();
+    //g->printGraph();
     std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
     
     if (g->verifier(verifier)) {

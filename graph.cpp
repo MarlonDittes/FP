@@ -44,14 +44,14 @@ void Graph::printGraph() {
         }
         std::cout << std::endl;
     }
-
+    /*
     for (int i = 0; i < graph.size(); i++) {
         std::cout << graph[i].id << " partition :  ";
         for (int j = 0; j < graph[i].partition.size(); j++) {
             std::cout << graph[i].partition[j] << " ";
         }
         std::cout << std::endl;
-    }
+    }*/
 
     for (int i = 0; i < this->partitions.size(); i++) {
         std::cout << "partition : " << i << " node in partition : ";
@@ -630,7 +630,7 @@ void Graph::AP()
 
     for (int i = 0; i < n0; i++) {
         if (isAP[i]) {
-            std::cout << "node : " << i << " is AP" << std::endl;
+            std::cout << "node : " << i + 1 << " is AP" << std::endl;
             graph[i].isAP = true;
         }
     }

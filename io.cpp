@@ -1,5 +1,9 @@
 #include "io.h"
+#include <iostream>
 #include <vector>
+#include <random>
+#include <algorithm>
+#include <unordered_set>
 
 Graph* readGraph(std::string graph_file) {
     //std::cout << "Reading graph..." << std::endl;
@@ -72,7 +76,7 @@ void outputOrder(std::vector<Node*> order, std::string output) {
     outputFile.close();
 }
 
-void writeHyperGraphToBipartiteGraph(int n0, int n1, int m, std::vector<std::pair<int, int>> edges, std::string output){
+void writeGraphToBipartiteGraph(int n0, int n1, int m, std::vector<std::pair<int, int>> edges, std::string output){
     std::ofstream outputFile(output);
 
     if (!outputFile.is_open()) {
@@ -145,7 +149,7 @@ void readHyperGraph(std::string hypergraph_file, std::string output){
         edge_index++;
     }
     
-    writeHyperGraphToBipartiteGraph(n0, n1, edges_in_bipartite_graph.size(), edges_in_bipartite_graph, output); 
+    writeGraphToBipartiteGraph(n0, n1, edges_in_bipartite_graph.size(), edges_in_bipartite_graph, output); 
 
     file.close();
     return;
@@ -201,8 +205,55 @@ void readWeightedHyperGraph(std::string hypergraph_file, std::string output){
         edge_index++;
     }
     
-    writeHyperGraphToBipartiteGraph(n0, n1, edges_in_bipartite_graph.size(), edges_in_bipartite_graph, output); 
+    writeGraphToBipartiteGraph(n0, n1, edges_in_bipartite_graph.size(), edges_in_bipartite_graph, output); 
 
     file.close();
     return;
+}
+
+std::vector<std::pair<int, int>> generateBipartiteGraph(int sizeX, int sizeY) {
+    std::vector<std::pair<int, int>> edges;
+
+    // Create vectors to store nodes in each partition
+    std::vector<int> partitionA(sizeX);
+    std::vector<int> partitionB(sizeY);
+
+    // Fill partition vectors with node indices
+    std::iota(partitionA.begin(), partitionA.end(), 1);
+    std::iota(partitionB.begin(), partitionB.end(), sizeX + 1);
+
+    // Shuffle the partition vectors randomly
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(partitionA.begin(), partitionA.end(), gen);
+    std::shuffle(partitionB.begin(), partitionB.end(), gen);
+
+    // Create a uniform distribution for the number of edges per node
+    std::uniform_int_distribution<> disEdges(1, std::min(sizeY, 5));
+
+    // Generate random edges between partitions
+    for (int x : partitionA) {
+        // Generate a random number of edges for node x
+        int numEdges = disEdges(gen);
+        
+        // Create a set to keep track of already chosen nodes in partition B
+        std::unordered_set<int> chosenNodes;
+        
+        // Generate random edges for node x
+        for (int i = 0; i < numEdges; ++i) {
+            int y = partitionB[gen() % sizeY]; // Random node in partition B
+            
+            // Ensure uniqueness of edges
+            while (chosenNodes.count(y) > 0) {
+                y = partitionB[gen() % sizeY];
+            }
+            chosenNodes.insert(y);
+            
+            edges.push_back({x, y});
+        }
+    }
+
+    std::sort(edges.begin(), edges.end());
+
+    return edges;
 }
