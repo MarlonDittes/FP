@@ -699,10 +699,9 @@ void Graph::AP()
     // disconnected graph
     for (int start_node_id = 0; start_node_id < this->n0 + this->n1; start_node_id++)
         if (!visited[start_node_id]) {
-            //APUtil(start_node_id, visited, disc, low, time, par, isAP);
+            APUtil(start_node_id, visited, disc, low, time, par, isAP);
 
-            //bei mehrfachen partitionierung gibt es noch probleme. 
-            APUtilIterative(start_node_id, visited, disc, low, parent, isAP);
+            //APUtilIterative(start_node_id, visited, disc, low, parent, isAP);
         }
 
     visited = std::vector<bool>(this->n0 + this->n1, false);
