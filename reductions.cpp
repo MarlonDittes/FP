@@ -2,7 +2,7 @@
 
 bool ZeroEdge_reduction::reduce(Graph* g) {
     if (g->getActiveEdges() == 0) {
-        std::cout << "Zero Edge works \n";
+        //std::cout << "Zero Edge works \n";
         g->setOptimalTrue();
         return true;
     }
@@ -15,7 +15,7 @@ bool Complete_reduction::reduce(Graph* g) {
     int m = g->getActiveEdges();
 
     if (n0 * n1 == m) {
-        std::cout << "Complete works \n";
+        //std::cout << "Complete works \n";
         g->setOptimalTrue();
         return true;
     }
@@ -25,7 +25,7 @@ bool Complete_reduction::reduce(Graph* g) {
 bool ZeroCrossings_reduction::reduce(Graph* g) {
     int crossings = g->countCrossingsMarlon();
     if (crossings == 0) {
-        std::cout << "Zero Crossing works \n";
+        //std::cout << "Zero Crossing works \n";
         g->setOptimalTrue();
         return true;
     }
@@ -48,6 +48,7 @@ bool Twins_reduction::reduce(Graph* g) {
 
                 //found twins
                 if (k == g->getNodeByOrder(i)->neighbours.size()-1) {
+                    //std::cout << "found Twins: " << g->getNodeByOrder(i)->id << " and "<< g->getNodeByOrder(j)->id << std::endl;
                     foundTwins = true;
                     restore_vec.push_back({g->getNodeByOrder(i)->id, g->getNodeByOrder(j)->id}); //save twins
                     g->makeNodeInvisibleMarlon(j); //j is made invisible 
@@ -56,11 +57,12 @@ bool Twins_reduction::reduce(Graph* g) {
             }
         }
     }
-    
+    /*
     std::cout << "number of twins: " << restore_vec.size() << std::endl;
     for (int i = 0; i < restore_vec.size(); i++) {
         std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << std::endl;
     }
+    */
     
     return foundTwins;
 }

@@ -10,9 +10,9 @@ int main(int argc, char* argv[]) {
 
     //Random graph
     /*
-    int sizeX = 1000;
-    int sizeY = 1000;
-    std::string output = "../bipartitegraphs/test4.gr";
+    int sizeX = 500;
+    int sizeY = 500;
+    std::string output = "../bipartitegraphs/test6.gr";
     auto edges = generateBipartiteGraph(sizeX, sizeY);
     writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
     */
@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
-    g->printGraph();
+    //g->printGraph();
 
     long crossing_count = g->countCrossingsMarlon();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;

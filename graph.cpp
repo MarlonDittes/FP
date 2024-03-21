@@ -14,7 +14,7 @@
 
 
 //Constructor dependent on size of movable_nodes
-Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0 + n1), order_nodes(n1), partitions(1) {
+Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), activeEdges(m), graph(n0 + n1), order_nodes(n1), partitions(1) {
 
     for (int i = 0; i < n0; i++) {
         graph[i].id = i;
@@ -209,6 +209,7 @@ void Graph::makeNodeInvisibleMarlon(int order_of_node) {
     assert(order_nodes[order_of_node]->offset_visible_nodes != order_nodes[order_of_node]->neighbours.size());
 
     Node* node = order_nodes[order_of_node];
+    this->activeEdges -= node->neighbours.size();
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
         Node* neighbour = &graph[node->neighbours[i]];
 
@@ -224,8 +225,7 @@ void Graph::makeNodeInvisibleMarlon(int order_of_node) {
     }
 
     //set visible counter to end of adjacency array -> as if all edges removed
-    node->offset_visible_nodes = node->neighbours.size();
-    this->activeEdges = 
+    node->offset_visible_nodes = node->neighbours.size(); 
 
     //move invisible node to beginning of order_nodes
     while (node->order != this->offset_visible_order_nodes) {
@@ -264,6 +264,7 @@ void Graph::makeNodeVisibleMarlon() {
     assert(order_nodes[order_of_node]->offset_visible_nodes == order_nodes[order_of_node]->neighbours.size());
 
     Node* node = order_nodes[order_of_node];
+    activeEdges += node->neighbours.size();
     node->offset_visible_nodes = 0;
 
     for (int i = 0; i < node->neighbours.size(); i++) {
@@ -711,7 +712,7 @@ void Graph::AP()
 
     for (int i = 0; i < n0; i++) {
         if (isAP[i]) {
-            std::cout << "node : " << i << " is AP" << std::endl;
+            //std::cout << "node : " << i << " is AP" << std::endl;
             graph[i].isAP = true;
             if (!(graph[i].offset_visible_nodes == graph[i].neighbours.size())) {
                 graph[i].partition = { };
@@ -1095,7 +1096,6 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
     int oldOffset = g->getOffsetVisibleOrderNodes(); 
     
     for (auto& reduct : reductionTypes) {
-        std::cout << reduct->get_reduction_type() << std::endl;
         if (!g->getOptimal()){
             changed = reduct->reduce(g);
         }
@@ -1171,10 +1171,10 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             //std::cout << "Only one moveable node."<< std::endl;
             result = std::make_pair(g->getOrderNodes(), 0);
         }
-        if (foundTwins > 0){
-            reductionTypes[3]->apply(g, foundTwins);
-            result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());
-        }
+    }
+    if (foundTwins > 0){
+        reductionTypes[3]->apply(g, foundTwins);
+        result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());
     }
 
     return result;
@@ -1183,9 +1183,9 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes) {
     g->MedianHeuristicMarlon();
 
-    //g->Partition();
-    //g->AP();
-    g->printGraph();
+    g->Partition();
+    g->AP();
+    //g->printGraph();
 
     std::vector<std::vector<Node*>>& partitions = g->getPartitions();
     std::vector<Node*> solution(0);
