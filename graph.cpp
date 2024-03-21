@@ -28,8 +28,8 @@ Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), graph(n0 + n1), orde
 
 //adding Edges from movable_nodes to neighbours
 void Graph::addEdge(int x, int y) {
-    graph[x].neighbours.push_back(y);
-    graph[y].neighbours.push_back(x);
+    graph[x].neighbours.push_back({y, 1});
+    graph[y].neighbours.push_back({x, 1});
 }
 
 void Graph::printGraph() {
@@ -40,7 +40,7 @@ void Graph::printGraph() {
     for (int i = 0; i < order_nodes.size(); i++) {
         std::cout << order_nodes[i]->id+1 << " -> ";
         for (int j = 0; j < order_nodes[i]->neighbours.size(); j++) {
-            std::cout << order_nodes[i]->neighbours[j] +1<< " ";  
+            std::cout << order_nodes[i]->neighbours[j].neighbour_id +1<< " ";  
         }
         std::cout << std::endl;
     }
@@ -68,7 +68,7 @@ void Graph::printGraphByPartitions() {
         for (int j = 0; j < partitions[i].size(); j++) {
             std::cout << partitions[i][j]->id << " -> "; 
             for (int k = 0; k < partitions[i][j]->neighbours.size(); k++) {
-                std::cout << partitions[i][j]->neighbours[k] << " ";
+                std::cout << partitions[i][j]->neighbours[k].neighbour_id << " ";
             }
             std::cout << std::endl;
         }
@@ -87,7 +87,7 @@ long Graph::countCrossingsMarlon() {
         for (int v = u + 1; v < order_nodes.size(); v++) {
             for (auto& u_neighbour : order_nodes[u]->neighbours) {
                 for (auto& v_neighbour : order_nodes[v]->neighbours) {
-                    if (u_neighbour > v_neighbour) {
+                    if (u_neighbour.neighbour_id > v_neighbour.neighbour_id) {
                         crossings++;
                     }
                 }
@@ -108,7 +108,7 @@ long Graph::countCrossings() {
         for (int v = u + 1; v < order_nodes.size(); v++) {
             for (auto& i : order_nodes[u]->neighbours) {
                 for (auto& j : order_nodes[v]->neighbours) {
-                    if (i > j) {
+                    if (i.neighbour_id > j.neighbour_id) {
                         crossings++;
                     }
                 }
@@ -129,7 +129,7 @@ long Graph::countCrossingsBranching() {
         for (int v = u + 1; v < order_nodes.size(); v++) {
             for (int i = order_nodes[u]->offset_visible_nodes; i < order_nodes[u]->neighbours.size(); i++) {
                 for (int j = order_nodes[v]->offset_visible_nodes; j < order_nodes[v]->neighbours.size(); j++) {
-                    if (order_nodes[u]->neighbours[i] > order_nodes[v]->neighbours[j]) {
+                    if (order_nodes[u]->neighbours[i].neighbour_id > order_nodes[v]->neighbours[j].neighbour_id) {
                         crossings++;
                     }
                 }
@@ -143,7 +143,7 @@ int Graph::countCrossingsForPair(int a, int b) { //for a < b
     int crossings = 0;
     for (auto& i : order_nodes[a]->neighbours) {
         for (auto& j : order_nodes[b]->neighbours) {
-            if (i > j) {
+            if (i.neighbour_id > j.neighbour_id) {
                 crossings++;
             }
         }
@@ -152,19 +152,19 @@ int Graph::countCrossingsForPair(int a, int b) { //for a < b
 }
 
 //beachte: berechnet crossings ohne die crossings in den twins selber
-long Graph::countCrossingsWithMultiplier() {
+long Graph::countCrossingsWithEdgeWeights() {
     if (m == 0) {
         return 0;
     }
     long crossings = 0;
-    //iterate trough movable nodes
-    for (int u = 0; u < order_nodes.size() - 1; u++) {
-        //iterate through movable_nodes+1
+    //iterate through visible movable_nodes
+    for (int u = offset_visible_order_nodes; u < order_nodes.size() - 1; u++) {
+        //iterate through visible movable_nodes+1
         for (int v = u + 1; v < order_nodes.size(); v++) {
-            for (int i = order_nodes[u]->offset_visible_nodes; i < order_nodes[u]->neighbours.size(); i++) {
-                for (int j = order_nodes[v]->offset_visible_nodes; j < order_nodes[u]->neighbours.size(); j++) {
-                    if (order_nodes[u]->neighbours[i] > order_nodes[v]->neighbours[j]) {
-                        crossings += order_nodes[u]->multiplier * order_nodes[v]->multiplier;
+            for (auto& u_neighbour : order_nodes[u]->neighbours) {
+                for (auto& v_neighbour : order_nodes[v]->neighbours) {
+                    if (u_neighbour.neighbour_id > v_neighbour.neighbour_id) {
+                        crossings += u_neighbour.edge_weight * v_neighbour.edge_weight;
                     }
                 }
             }
@@ -175,7 +175,7 @@ long Graph::countCrossingsWithMultiplier() {
 
 void Graph::sortNeighbours() {
     for (int i = 0; i < graph.size(); i++) {
-        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end());
+        std::sort(graph[i].neighbours.begin(), graph[i].neighbours.end(), compareNeighbours);
     }
 }
 
@@ -198,15 +198,15 @@ void Graph::makeNodeInvisibleMarlon(int order_of_node) {
 
     Node* node = order_nodes[order_of_node];
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
-        Node* neighbour = &graph[node->neighbours[i]];
+        Node* neighbour = &graph[node->neighbours[i].neighbour_id];
 
         //make node invisible in all adjacencie lists of fixed neighbours
         for (int j = neighbour->offset_visible_nodes; j < neighbour->neighbours.size(); j++) {
-            if (neighbour->neighbours[j] != node->id) {
+            if (neighbour->neighbours[j].neighbour_id != node->id) {
                 continue;
             }
             //add node to invisible nodes and add visible counter
-            std::swap(neighbour->neighbours[j], neighbour->neighbours[neighbour->offset_visible_nodes]);
+            std::swap(neighbour->neighbours[j].neighbour_id, neighbour->neighbours[neighbour->offset_visible_nodes].neighbour_id);
             neighbour->offset_visible_nodes++;
         }
     }
@@ -225,15 +225,15 @@ void Graph::makeNodeInvisibleMarlon(int order_of_node) {
 void Graph::makeNodeInvisibleBranching(int order_of_node) {
     Node* node = order_nodes[order_of_node];
     for (int i = node->offset_visible_nodes; i < node->neighbours.size(); i++) {
-        Node* neighbour = &graph[node->neighbours[i]];
+        Node* neighbour = &graph[node->neighbours[i].neighbour_id];
 
         //make node invisible in all adjacencie lists of fixed neighbours
         for (int j = neighbour->offset_visible_nodes; j < neighbour->neighbours.size(); j++) {
-            if (neighbour->neighbours[j] != node->id) {
+            if (neighbour->neighbours[j].neighbour_id != node->id) {
                 continue;
             }
             //add node to invisible nodes and asdd visible counter
-            std::swap(neighbour->neighbours[j], neighbour->neighbours[neighbour->offset_visible_nodes]);
+            std::swap(neighbour->neighbours[j].neighbour_id, neighbour->neighbours[neighbour->offset_visible_nodes].neighbour_id);
             neighbour->offset_visible_nodes++;
         }
     }
@@ -254,15 +254,15 @@ void Graph::makeNodeVisibleMarlon() {
     node->offset_visible_nodes = 0;
 
     for (int i = 0; i < node->neighbours.size(); i++) {
-        Node* neighbour = &graph[node->neighbours[i]];
+        Node* neighbour = &graph[node->neighbours[i].neighbour_id];
 
         //make node visible in all adjacencie lists of fixed neighbours
         for (int j = 0; j < neighbour->offset_visible_nodes; j++) {
-            if (neighbour->neighbours[j] != node->id) {
+            if (neighbour->neighbours[j].neighbour_id != node->id) {
                 continue;
             }
             //add node to visible nodes and reduce visible counter
-            std::swap(neighbour->neighbours[j], neighbour->neighbours[neighbour->offset_visible_nodes - 1]);
+            std::swap(neighbour->neighbours[j].neighbour_id, neighbour->neighbours[neighbour->offset_visible_nodes - 1].neighbour_id);
             neighbour->offset_visible_nodes--;
         }
     }
@@ -276,15 +276,15 @@ void Graph::makeNodeVisible(int order_of_node) {
     graph[node->id].offset_visible_nodes = 0;
 
     for (int i = 0; i < node->neighbours.size(); i++) {
-        Node* neighbour = &graph[node->neighbours[i]];
+        Node* neighbour = &graph[node->neighbours[i].neighbour_id];
 
         //make node visible in all adjacencie lists of fixed neighbours
         for (int j = 0; j < neighbour->offset_visible_nodes; j++) {
-            if (neighbour->neighbours[j] != node->id) {
+            if (neighbour->neighbours[j].neighbour_id != node->id) {
                 continue;
             }
             //add node to visible nodes and reduce visible counter
-            std::swap(neighbour->neighbours[j], neighbour->neighbours[neighbour->offset_visible_nodes - 1]);
+            std::swap(neighbour->neighbours[j].neighbour_id, neighbour->neighbours[neighbour->offset_visible_nodes - 1].neighbour_id);
             neighbour->offset_visible_nodes--;
         }
     }
@@ -313,7 +313,7 @@ void Graph::MedianHeuristicMarlon() {
     for (int i = offset_visible_order_nodes; i < order_nodes.size(); i++) {
         order_nodes[i]->median = 0;
         for (int j = order_nodes[i]->offset_visible_nodes; j < order_nodes[i]->neighbours.size(); j++) {
-            order_nodes[i]->median += order_nodes[i]->neighbours[j];
+            order_nodes[i]->median += order_nodes[i]->neighbours[j].neighbour_id;
         }
         if ((order_nodes[i]->neighbours.size() - order_nodes[i]->offset_visible_nodes) != 0){
             order_nodes[i]->median = order_nodes[i]->median / (order_nodes[i]->neighbours.size() - order_nodes[i]->offset_visible_nodes);
@@ -336,7 +336,7 @@ void Graph::MedianHeuristicMarlon() {
 void Graph::Median_Heuristic() {
     for (int i = 0; i < order_nodes.size(); i++) {
         for (int j = 0; j < order_nodes[i]->neighbours.size(); j++) {
-            order_nodes[i]->median += order_nodes[i]->neighbours[j];
+            order_nodes[i]->median += order_nodes[i]->neighbours[j].neighbour_id;
         }
 
         order_nodes[i]->median = order_nodes[i]->median / order_nodes[i]->neighbours.size();
@@ -369,7 +369,7 @@ bool Graph::verifier(Graph check)
         //neighbours of each node are the same as the graph at the beginning
         for (int j = 0; j < order_nodes[i]->neighbours.size(); j++) {
             int id_check = this->order_nodes[i]->id;
-            if (this->order_nodes[i]->neighbours[j] != check.graph[id_check].neighbours[j]) { return false; }
+            if (this->order_nodes[i]->neighbours[j].neighbour_id != check.graph[id_check].neighbours[j].neighbour_id) { return false; }
         }
     }
 
@@ -425,8 +425,8 @@ std::pair<int, int> Graph::DFSforPartition(int start_node_fixed_id, int partitio
         }
 
         for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
-            if (!visited[graph[current_node].neighbours[i]]) {
-                stack.push(graph[current_node].neighbours[i]);
+            if (!visited[graph[current_node].neighbours[i].neighbour_id]) {
+                stack.push(graph[current_node].neighbours[i].neighbour_id);
             }
         }
     }
@@ -490,23 +490,23 @@ void Graph::APUtil(int start_node_id, std::vector<bool>& visited, std::vector<in
     for (int i = graph[start_node_id].offset_visible_nodes; i < graph[start_node_id].neighbours.size(); i++) {
         // If v is not visited yet, then make it a child of u
         // in DFS tree and recur for it
-        if (!visited[graph[start_node_id].neighbours[i]]) {
+        if (!visited[graph[start_node_id].neighbours[i].neighbour_id]) {
             children++;
-            APUtil(graph[start_node_id].neighbours[i], visited, disc, low, time, start_node_id, isAP);
+            APUtil(graph[start_node_id].neighbours[i].neighbour_id, visited, disc, low, time, start_node_id, isAP);
 
             // Check if the subtree rooted with v has
             // a connection to one of the ancestors of u
-            low[start_node_id] = std::min(low[start_node_id], low[graph[start_node_id].neighbours[i]]);
+            low[start_node_id] = std::min(low[start_node_id], low[graph[start_node_id].neighbours[i].neighbour_id]);
 
             // If start_node_id is not root and low value of one of
             // its child is more than discovery value of u.
-            if (parent != -1 && low[graph[start_node_id].neighbours[i]] >= disc[start_node_id])
+            if (parent != -1 && low[graph[start_node_id].neighbours[i].neighbour_id] >= disc[start_node_id])
                 isAP[start_node_id] = true;
         }
 
         // Update low value of start_node_id for parent function calls.
-        else if (graph[start_node_id].neighbours[i] != parent)
-            low[start_node_id] = std::min(low[start_node_id], disc[graph[start_node_id].neighbours[i]]);
+        else if (graph[start_node_id].neighbours[i].neighbour_id != parent)
+            low[start_node_id] = std::min(low[start_node_id], disc[graph[start_node_id].neighbours[i].neighbour_id]);
     }
 
     // If start_node_id is root of DFS tree and has two or more children.
@@ -570,24 +570,24 @@ void Graph::CreatePartitionsVector(int start_node_fixed_id, int& partition_id, s
 
         //add neighbours
         for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
-            if (!visited[graph[current_node].neighbours[i]]) {
-                    if(graph[graph[current_node].neighbours[i]].isAP) {
+            if (!visited[graph[current_node].neighbours[i].neighbour_id]) {
+                    if(graph[graph[current_node].neighbours[i].neighbour_id].isAP) {
                         //just add the AP point to the partitions vector but not to the working stack
                         partition_in_partition_vector = false;
                         for (int j = 0; j < partitions[partition_id].size(); j++) {
-                            if (partitions[partition_id][j]->id == graph[current_node].neighbours[i]) {
+                            if (partitions[partition_id][j]->id == graph[current_node].neighbours[i].neighbour_id) {
                                 partition_in_partition_vector = true;
                             }
                         }
                         if (!partition_in_partition_vector) {
-                            this->partitions[partition_id].push_back(&graph[graph[current_node].neighbours[i]]);
+                            this->partitions[partition_id].push_back(&graph[graph[current_node].neighbours[i].neighbour_id]);
                         }
 
-                        int node_partition_size = graph[graph[current_node].neighbours[i]].partition.size();
-                        graph[graph[current_node].neighbours[i]].partition[node_partition_size - 1] = partition_id;
+                        int node_partition_size = graph[graph[current_node].neighbours[i].neighbour_id].partition.size();
+                        graph[graph[current_node].neighbours[i].neighbour_id].partition[node_partition_size - 1] = partition_id;
                     }
                     else {
-                        stack.push(graph[current_node].neighbours[i]);
+                        stack.push(graph[current_node].neighbours[i].neighbour_id);
                     }
             }
         }
@@ -622,7 +622,7 @@ void Graph::AP()
     }
 
     Stack stack;
-    stack.push(graph[0].neighbours[graph[0].offset_visible_nodes]);
+    stack.push(graph[0].neighbours[graph[0].offset_visible_nodes].neighbour_id);
 
     while (!stack.isEmpty()) {
         int current_node = stack.peek();
@@ -634,14 +634,14 @@ void Graph::AP()
         }
 
         /*for (int i = graph[current_node].neighbours.size() - graph[current_node].offset_visible_nodes - 1; i >= 0; i--) {
-            if (!visited[graph[current_node].neighbours[i]]) {
-                stack.push(graph[current_node].neighbours[i]);
+            if (!visited[graph[current_node].neighbours[i].neighbour_id]) {
+                stack.push(graph[current_node].neighbours[i].neighbour_id);
             }
         }*/
         
         for (int i = graph[current_node].offset_visible_nodes; i < graph[current_node].neighbours.size(); i++) {
-            if (!visited[graph[current_node].neighbours[i]]) {
-                stack.push(graph[current_node].neighbours[i]);
+            if (!visited[graph[current_node].neighbours[i].neighbour_id]) {
+                stack.push(graph[current_node].neighbours[i].neighbour_id);
             }
         }
 
@@ -649,8 +649,8 @@ void Graph::AP()
         if (stack.isEmpty()) {
             for (int i = 0; !found && i < n0; i++) {
                 for (int j = graph[i].offset_visible_nodes; j < graph[i].neighbours.size(); j++) {
-                    if (!visited[graph[i].neighbours[j]]) {
-                        stack.push(graph[i].neighbours[j]);
+                    if (!visited[graph[i].neighbours[j].neighbour_id]) {
+                        stack.push(graph[i].neighbours[j].neighbour_id);
                         found = true;
                         break;
                     }
@@ -723,8 +723,8 @@ bool Graph::DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visi
                 std::cout << "node : " << current_node << " has more than 1 neighbour therefore straight line reduction can not be achieved " << std::endl;
                 return false;
             }
-            if (!visited[graph[current_node].neighbours[i]]) {
-                stack.push(graph[current_node].neighbours[i]);
+            if (!visited[graph[current_node].neighbours[i].neighbour_id]) {
+                stack.push(graph[current_node].neighbours[i].neighbour_id);
             }
         }
 
@@ -930,7 +930,7 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
         //Need this so to not add forward AND backward edge
         if (partition[i]->id >= originalN0) {
             for (int j = partition[i]->offset_visible_nodes; j < partition[i]->neighbours.size(); j++){
-                partGraph->addEdge(i, std::distance(partitionIndices.begin(), std::find(partitionIndices.begin(), partitionIndices.end(), partition[i]->neighbours[j])));
+                partGraph->addEdge(i, std::distance(partitionIndices.begin(), std::find(partitionIndices.begin(), partitionIndices.end(), partition[i]->neighbours[j].neighbour_id)));
             }
         }
     }

@@ -7,9 +7,14 @@
 
 class general_reduction;
 
+struct Edge {
+    int neighbour_id;
+    int edge_weight;
+};
+
 struct Node {
     //std::vector<int> neighbours; //name needs to be changed
-    std::vector<int> neighbours;
+    std::vector<Edge> neighbours;
     std::vector<int> neighbors_partition;
     int order = -1;
     int id;
@@ -64,8 +69,9 @@ public:
     long countCrossings();
     long countCrossingsBranching();
     int countCrossingsForPair(int order_a, int order_b);
-    long countCrossingsWithMultiplier();
+    long countCrossingsWithEdgeWeights();
     void sortNeighbours();
+    static bool compareNeighbours(const Edge& a, const Edge& b) { return a.neighbour_id < b.neighbour_id;}
     void swapNodes(int order_a, int order_b);
     void swapNodesBranching(int order_a, int order_b);
 

@@ -5,7 +5,7 @@
 
 class Graph;
 
-enum reduction_type { ZeroEdge, Complete, ZeroCrossings, Twins };
+enum reduction_type { ZeroEdge, Complete, ZeroCrossings, Twins, AlmostTwins };
 constexpr int BRUTE_CUTOFF = 10;
 
 struct general_reduction {

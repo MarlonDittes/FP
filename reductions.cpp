@@ -40,7 +40,7 @@ bool Twins_reduction::reduce(Graph* g) {
             }
 
             for (int k = g->getNodeByOrder(i)->offset_visible_nodes; k < g->getNodeByOrder(i)->neighbours.size(); k++) {
-                if (g->getNodeByOrder(i)->neighbours[k] != g->getNodeByOrder(j)->neighbours[k]) {
+                if (g->getNodeByOrder(i)->neighbours[k].neighbour_id != g->getNodeByOrder(j)->neighbours[k].neighbour_id) {
                     break;
                 }
 
@@ -48,10 +48,10 @@ bool Twins_reduction::reduce(Graph* g) {
                 if (k == g->getNodeByOrder(i)->neighbours.size()-1) {
                     found_Twins = true;
                     restore_vec.push_back({g->getNodeByOrder(i)->id, g->getNodeByOrder(j)->id}); //save twins
-                    g->makeNodeInvisible(j); //j is made invisible
-                    //!!! CHANGE to set edge weights 
-                    g->getNodeByOrder(i)->multiplier++; 
-                    //!!! save crossings in i for both j and i, as twins i and j are reduced to one node
+                    for (auto& edge : g->getNodeByOrder(i)->neighbours) {
+                        edge.edge_weight++;
+                    }
+                    g->makeNodeInvisibleMarlon(j); //j is made invisible
                 }
             }
         }
@@ -60,19 +60,25 @@ bool Twins_reduction::reduce(Graph* g) {
     for (int i = 0; i < restore_vec.size(); i++) {
         std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << std::endl;
     }
+    std::cout << "edge weights: " << std::endl;
+    for (auto& node : g->getOrderNodes()) {
+        std::cout << "node: " << node->id << ", ";
+        for (auto& neighbour : node->neighbours) {
+            std::cout << "neighbour: " << neighbour.neighbour_id << ", edge_weight: " << neighbour.edge_weight << std::endl;
+        }
+    }
     return found_Twins;
 }
 
 //NOT TESTED YET
 bool AlmostTwin_reduction::reduce(Graph* g) {
     bool found_AlmostTwins = false;
-    //work as if offset order array is included
-    int orderOffset;
 
-    for (int i = orderOffset; i < g->getSizeOfOrder()-1; i++) {
+    for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
         for (int j = i+1; j < g->getSizeOfOrder(); j++) {
             if (g->getNodeByOrder(i)->neighbours.size() == g->getNodeByOrder(j)->neighbours.size()+1
             || g->getNodeByOrder(i)->neighbours.size()+1 == g->getNodeByOrder(j)->neighbours.size()) {
+                std::cout << "IF STATEMENT TRUE" << std::endl;
                 //find the node with less nodes
                 int less = j; //node at order j has less neighbours -> i is main
                 int more = i;
@@ -80,86 +86,81 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
                     less = i; //i has less nodes
                     more = j;
                 }
+                std::cout << "LESS: " << g->getNodeByOrder(less)->id << std::endl;
+                std::cout << "MORE: " << g->getNodeByOrder(more)->id << std::endl;
                 //first neighbour identical -> if j is almost twin it has to be on the left side of i
-                if (g->getNodeByOrder(i)->neighbours[0] == g->getNodeByOrder(j)->neighbours[0]) {
-                    //check if all other neighbours are the same
-                    for (int k = 1; k < g->getNodeByOrder(less)->neighbours.size(); k++) {
-                        if (g->getNodeByOrder(i)->neighbours[k] != g->getNodeByOrder(j)->neighbours[k]) {
-                            break;
+                if (g->getNodeByOrder(i)->neighbours[0].neighbour_id == g->getNodeByOrder(j)->neighbours[0].neighbour_id) {
+                    std::cout << "FIRST NEIGHBOUR IDENTICAL" << std::endl;
+                    // need tmp variable for this edge case
+                    bool tmp = false;
+                    if (g->getNodeByOrder(less)->neighbours.size() == 1) {
+                        tmp = true;
+                    }
+                    else {
+                        for (int k = 1; k < g->getNodeByOrder(less)->neighbours.size(); k++) {
+                            if (g->getNodeByOrder(i)->neighbours[k].neighbour_id != g->getNodeByOrder(j)->neighbours[k].neighbour_id) { break; }
+                            //found Almost Twins
+                            if (k == g->getNodeByOrder(less)->neighbours.size()-1) { tmp = true; }
                         }
-                        //found Almost Twins
-                        if (k == g->getNodeByOrder(less)->neighbours.size()-1) {
-                            found_AlmostTwins = true;
-                            restore_vec.push_back({g->getNodeByOrder(more)->id, g->getNodeByOrder(less)->id, 0});
-                            //SET EDGE WEIGHTS  
+                    }
+
+                    if (tmp) {
+                        std::cout << " FOUND ALMOST TWINS" << std::endl;
+                        found_AlmostTwins = true;
+                        restore_vec.push_back({g->getNodeByOrder(more)->id, g->getNodeByOrder(less)->id, 0});
+                        //SET EDGE WEIGHTS  
+                        for (int l = 0; l < g->getNodeByOrder(less)->neighbours.size(); l++) {
+                            g->getNodeByOrder(more)->neighbours[l].edge_weight += g->getNodeByOrder(less)->neighbours[l].edge_weight;
                         }
+                        g->makeNodeInvisibleMarlon(less);
+                        break;
                     }
                 }
                 //last neighbour identical -> if j almost twin, it has to be on the right of i 
-                else if (g->getNodeByOrder(i)->neighbours[g->getNodeByOrder(i)->neighbours.size()-1] == g->getNodeByOrder(j)->neighbours[g->getNodeByOrder(i)->neighbours.size()-1]) {
-                    //check if all others neighbours before are the same
-                    for (int k = 1; k < g->getNodeByOrder(less)->neighbours.size()-1; k++) {
-                        if (g->getNodeByOrder(i)->neighbours[k] != g->getNodeByOrder(j)->neighbours[k]) {
-                            break;
-                        }
-                        //found Almost Twins
-                        if (k == g->getNodeByOrder(less)->neighbours.size()-2 || g->getNodeByOrder(less)->neighbours.size() == 1) {
-                            found_AlmostTwins = true;
-                            restore_vec.push_back({g->getNodeByOrder(more)->id, g->getNodeByOrder(less)->id, 1});
-                            //SET EDGE WEIGHTS
+                else if (g->getNodeByOrder(i)->neighbours[g->getNodeByOrder(i)->neighbours.size()-1].neighbour_id == g->getNodeByOrder(j)->neighbours[g->getNodeByOrder(j)->neighbours.size()-1].neighbour_id) {
+                    std::cout << "LAST NEIGHBOUR IDENTICAL" << std::endl;
+                    bool tmp = false;
+                    if (g->getNodeByOrder(less)->neighbours.size() == 1) {
+                        tmp = true;
+                    }
+                    else {
+                        //check if all other neighbours before are the same
+                        for (int k = 0; k < g->getNodeByOrder(less)->neighbours.size()-1; k++) {
+                            if (g->getNodeByOrder(less)->neighbours[k].neighbour_id != g->getNodeByOrder(more)->neighbours[k+1].neighbour_id) { break; }
+                            //found Almost Twins
+                            if (k == g->getNodeByOrder(less)->neighbours.size()-2) { tmp = true; }
                         }
                     }
+
+                    if (tmp) {
+                        std::cout << " FOUND ALMOST TWINS" << std::endl;
+                        found_AlmostTwins = true;
+                        restore_vec.push_back({g->getNodeByOrder(more)->id, g->getNodeByOrder(less)->id, 1});
+                        //SET EDGE WEIGHTS
+                        for (int l = 1; l < g->getNodeByOrder(more)->neighbours.size(); l++) {
+                            g->getNodeByOrder(more)->neighbours[l].edge_weight += g->getNodeByOrder(less)->neighbours[l-1].edge_weight;
+                        }
+                        g->makeNodeInvisibleMarlon(less);
+                        break;
+                    }
+                      
                 }
+
             }
         }
     }
+
+    std::cout << "number of almost_twins: " << restore_vec.size() << std::endl;
+    for (int i = 0; i < restore_vec.size(); i++) {
+        std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << ", side: " << restore_vec[i].side << std::endl;
+    }
+    std::cout << "edge weights: " << std::endl;
+    for (auto& node : g->getOrderNodes()) {
+        std::cout << "node: " << node->id << ", ";
+        for (auto& neighbour : node->neighbours) {
+            std::cout << "neighbour: " << neighbour.neighbour_id << ", edge_weight: " << neighbour.edge_weight << std::endl;
+        }
+    }
+
     return found_AlmostTwins;
-}
-
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes) {
-    g->Median_Heuristic();
-
-    g->Partition();
-    g->AP();
-
-    std::vector<std::vector<Node*>> partitions = g->getPartitions();           // NEED TO ADJUST THIS PROBABLY TO BE VECTOR<NODE*> NOT VECTOR<INT>!!, wait for shai AP
-    std::vector<std::pair<std::vector<Node*>, long>> results(0);
-    for (auto part : partitions) {
-        Graph* partGraph = createGraphByPartition(g, part);
-
-        bool changed = false;
-        for (auto& reduct : reductionTypes) {
-            changed = reduct->reduce(partGraph);
-        }
-
-        //Check if need to brute force since no more reductions were applicable
-        std::pair<std::vector<Node*>, long> result;
-
-        if (partGraph->getOptimal()) { //order already optimal, s.t. no recursion or bruteforce needed
-            result = std::make_pair(part, partGraph->countCrossings()); //BETTER: save crossing in partGraph instead of calculating it again, since it was calculated in reductions already
-        }
-        else {
-            //decide if we should do this:
-            int numberOfVertices = g->getN0() + g->getN1();
-            bool otherCondition = numberOfVertices <= BRUTE_CUTOFF;
-
-            if (changed == false || otherCondition) {
-                result = bruteForce(g);
-            }
-            else {
-                result = BranchAndReduce(partGraph, reductionTypes);
-            }  
-        }
-        
-        results.push_back(result);
-    }
-
-    std::vector<Node*> solution(0);
-    long sumCrossings = 0;
-    for (auto result : results) {
-        solution.insert(solution.end(), result.first.begin(), result.first.end());
-        sumCrossings += result.second;
-    }
-
-    return std::make_pair(solution, sumCrossings);
 }
