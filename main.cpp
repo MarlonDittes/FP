@@ -9,13 +9,11 @@ int main(int argc, char* argv[]) {
     std::string graph_file = argv[1];
 
     //Random graph
-
-    /*int sizeX = 100;
-    int sizeY = 100;
+    int sizeX = 1000;
+    int sizeY = 1000;
     std::string output = "../.Run/graph.txt";
     auto edges = generateBipartiteGraph(sizeX, sizeY);
-    writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);*/
-
+    writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;

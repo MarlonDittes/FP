@@ -670,7 +670,7 @@ int Graph::CreatePartitionsVector(int start_node_fixed_id, int& partition_id, st
 
 void Graph::AP()
 {
-    std::cout << "new AP call" << std::endl;
+    //std::cout << "new AP call" << std::endl;
     std::vector<int> disc(this->n0 + this->n1, 0);
     std::vector<int> low(this->n0 + this->n1);
     std::vector<bool> visited(this->n0 + this->n1, false);
@@ -803,7 +803,7 @@ void Graph::AP()
         graph[i].isAP = false;
     }
 
-    std::cout << "end AP" << std::endl;
+    //std::cout << "end AP" << std::endl;
 
     /*for (int i = 0; i < graph.size(); i++) {
         if (graph[i].offset_visible_nodes == graph[i].neighbours.size()) {
