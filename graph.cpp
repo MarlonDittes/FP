@@ -225,6 +225,7 @@ void Graph::makeNodeInvisibleMarlon(int order_of_node) {
 
     //set visible counter to end of adjacency array -> as if all edges removed
     node->offset_visible_nodes = node->neighbours.size();
+    this->activeEdges = 
 
     //move invisible node to beginning of order_nodes
     while (node->order != this->offset_visible_order_nodes) {
@@ -1094,6 +1095,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
     int oldOffset = g->getOffsetVisibleOrderNodes(); 
     
     for (auto& reduct : reductionTypes) {
+        std::cout << reduct->get_reduction_type() << std::endl;
         if (!g->getOptimal()){
             changed = reduct->reduce(g);
         }
@@ -1181,9 +1183,9 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes) {
     g->MedianHeuristicMarlon();
 
-    g->Partition();
-    g->AP();
-    //g->printGraph();
+    //g->Partition();
+    //g->AP();
+    g->printGraph();
 
     std::vector<std::vector<Node*>>& partitions = g->getPartitions();
     std::vector<Node*> solution(0);

@@ -52,7 +52,6 @@ bool Twins_reduction::reduce(Graph* g) {
                     restore_vec.push_back({g->getNodeByOrder(i)->id, g->getNodeByOrder(j)->id}); //save twins
                     g->makeNodeInvisibleMarlon(j); //j is made invisible 
                     g->getNodeByOrder(i)->multiplier++;
-                    //!!! save crossings in i for both j and i, as twins i and j are reduced to one node
                 }
             }
         }
@@ -67,7 +66,6 @@ bool Twins_reduction::reduce(Graph* g) {
 }
 
 void Twins_reduction::apply(Graph* g, int twinsCount){
-    auto& adjList = g->getGraph();
     while (twinsCount > 0){
         g->makeNodeVisibleMarlon();
         auto pair = restore_vec[restore_vec.size()-1];

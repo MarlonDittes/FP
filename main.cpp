@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
-    //g->printGraph();
+    g->printGraph();
 
     long crossing_count = g->countCrossingsMarlon();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
 
     auto result = BranchAndReduce(g, reductions);
-    outputOrder(result.first, "../output.txt");
+    //outputOrder(result.first, "../output.txt");
     //g->printGraph();
     
     //std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
