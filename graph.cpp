@@ -45,7 +45,7 @@ void Graph::printGraph() {
         }
         std::cout << std::endl;
     }
-
+    /*
     for (int i = 0; i < graph.size(); i++) {
         std::cout << graph[i].id << " partition :  ";
         for (int j = 0; j < graph[i].partition.size(); j++) {
@@ -53,6 +53,7 @@ void Graph::printGraph() {
         }
         std::cout << std::endl;
     }
+    */
 
     for (int i = 0; i < this->partitions.size(); i++) {
         std::cout << "partition : " << i << " node in partition : ";
@@ -1208,22 +1209,21 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
         // Apply solution to original graph
         std::vector<Node*> oldOrder = g->getOrderNodes();
         auto& nodes = g->getGraph();
-        for (int i = 0; i < g->getOffsetVisibleOrderNodes(); i++) {
-            solution.push_back(oldOrder[i]);
+
+        // Fixed 0 edge issue: We remember all nodes that are invisible OR don't have any edges
+        for (auto& node : oldOrder) {
+            if (node->offset_visible_nodes == node->neighbours.size()){
+                solution.push_back(node);
+            }
         }
         for (auto& node : subSolutions) {
             solution.push_back(&nodes[node->old_id]);
-        }
-
-        if (oldOrder.size() != solution.size()) {
-            std::cout << "herre" << std::endl;
         }
 
         g->setOrderNodes(solution);
 
     }
     else {
-
         auto result = branching(g, reductionTypes);
         solution = result.first;
         sumCrossings = result.second;

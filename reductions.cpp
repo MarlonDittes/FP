@@ -57,12 +57,12 @@ bool Twins_reduction::reduce(Graph* g) {
             }
         }
     }
-    /*
+    
     std::cout << "number of twins: " << restore_vec.size() << std::endl;
     for (int i = 0; i < restore_vec.size(); i++) {
         std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << std::endl;
     }
-    */
+    
     return foundTwins;
 }
 

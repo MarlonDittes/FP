@@ -107,5 +107,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
 void Branch_and_Bound(Graph* G);
 void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solution, std::vector<Node*>& best_configuration);
 
+
+
 #endif //GRAPH_H
 

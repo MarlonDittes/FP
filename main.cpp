@@ -9,11 +9,13 @@ int main(int argc, char* argv[]) {
     std::string graph_file = argv[1];
 
     //Random graph
+    /*
     int sizeX = 1000;
     int sizeY = 1000;
-    std::string output = "../.Run/graph.txt";
+    std::string output = "../bipartitegraphs/test4.gr";
     auto edges = generateBipartiteGraph(sizeX, sizeY);
-    //writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
+    writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
+    */
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
@@ -33,21 +35,11 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
 
     auto result = BranchAndReduce(g, reductions);
-    //g->Partition();
-    //g->AP();
+    outputOrder(result.first, "../output.txt");
     //g->printGraph();
-
-
-    //cheap fix for degree 0 nodes later move it into the branchandreduce algorithm
-    for (int i = 0; i < verifier.getOrderNodes().size(); i++) {
-        if (verifier.getOrderNodes()[i]->neighbours.size() == 0) {
-            result.first.push_back(verifier.getOrderNodes()[i]);
-        }
-    }
-    g->setOrderNodes(result.first);
-
-    //g->printGraph();
-    std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
+    
+    //std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
+    std::cout << "Newly calculated crossings after BranchAndReduce: " << g->countCrossingsMarlon() << std::endl;
 
     if (g->verifier(verifier)) {
         std::cout << "Graph is valid" << std::endl;
