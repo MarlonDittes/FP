@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     int sizeY = 1000;
     std::string output = "../.Run/graph.txt";
     auto edges = generateBipartiteGraph(sizeX, sizeY);
-    writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
+    //writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
@@ -25,10 +25,10 @@ int main(int argc, char* argv[]) {
 
     // Which reductions to use
     std::vector<general_reduction*> reductions;
-    //reductions.push_back(new ZeroEdge_reduction);
-    //reductions.push_back(new Complete_reduction);
-    //reductions.push_back(new ZeroCrossings_reduction);
-    //reductions.push_back(new Twins_reduction);
+    reductions.push_back(new ZeroEdge_reduction);
+    reductions.push_back(new Complete_reduction);
+    reductions.push_back(new ZeroCrossings_reduction);
+    reductions.push_back(new Twins_reduction);
 
     std::cout << std::endl;
 

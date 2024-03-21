@@ -8,7 +8,6 @@
 class general_reduction;
 
 struct Node {
-    //std::vector<int> neighbours; //name needs to be changed
     std::vector<int> neighbours;
     std::vector<int> neighbors_partition;
     int order = -1;
@@ -32,6 +31,7 @@ private:
     int n1; //size movable nodes
     int m; //number of edges
     //std::vector<std::vector<int>> partitions;
+    int activeEdges;
     int offset_visible_order_nodes = 0;
     bool optimal = 0; //for reduction of partitions -> true if partition is optimal
 
@@ -42,6 +42,7 @@ public:
 
     Node* getNodeByOrder(int order) { return order_nodes[order]; };
     int getOrderByNode(int node_id) { return graph[node_id].order; }
+    void setOrderByNode(int node_id, int newOrder) { graph[node_id].order = newOrder; };
     int getSizeOfOrder() { return order_nodes.size(); }
     std::vector<Node*> getOrderNodes() { return this->order_nodes; };
     void setOrderNodes(std::vector<Node*> order);
@@ -52,8 +53,11 @@ public:
     int getM() { return this->m; };
     int getOffsetVisibleOrderNodes() { return this->offset_visible_order_nodes; };
     std::vector<Node>& getGraph() { return this->graph; };
-    //std::vector<Node*> getActiveNodes() { return this->activeNodes;}
     void setOldID(int node_id, int old_id) { this->graph[node_id].old_id = old_id; };
+    void setActiveEdges (int count) { this->activeEdges = count;};
+    int getActiveEdges () { return this->activeEdges;};
+
+    void sortOrderNodesByOrder();
 
     long countCrossingsMarlon();
     bool getOptimal() { return this->optimal; };
