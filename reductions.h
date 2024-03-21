@@ -5,7 +5,8 @@
 
 class Graph;
 
-enum reduction_type { ZeroEdge, Complete, ZeroCrossings, Twins };
+enum reduction_type { ZeroEdge, Complete, ZeroCrossings, Twins, AlmostTwins };
+constexpr int BRUTE_CUTOFF = 10;
 
 struct general_reduction {
     general_reduction() {}
@@ -41,6 +42,20 @@ struct Twins_reduction : public general_reduction {
 	    struct restore_data {
 		    int main; //save nodeID
 		    int twin;
+	    };
+
+	std::vector<restore_data> restore_vec; //saves twins as pairs of main and twin in a vector
+};
+
+struct AlmostTwin_reduction : public general_reduction {
+    virtual reduction_type get_reduction_type() const final { return reduction_type::AlmostTwins; }
+    virtual bool reduce(Graph* g) override;
+
+    private:
+	    struct restore_data {
+		    int main; //save nodeID ->maybe needs to be changed to Nodes
+		    int twin;
+            bool side; //which side to place twin s. t. optimal: 0 = left, 1 = right
 	    };
 
 	std::vector<restore_data> restore_vec; //saves twins as pairs of main and twin in a vector
