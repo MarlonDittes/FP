@@ -9,13 +9,12 @@ int main(int argc, char* argv[]) {
     std::string graph_file = argv[1];
 
     //Random graph
-    /*
-    int sizeX = 500;
-    int sizeY = 500;
-    std::string output = "../bipartitegraphs/test6.gr";
+
+    int sizeX = 100;
+    int sizeY = 100;
+    std::string output = "../.Run/graph.txt";
     auto edges = generateBipartiteGraph(sizeX, sizeY);
     writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
-    */
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
@@ -34,10 +33,12 @@ int main(int argc, char* argv[]) {
 
     std::cout << std::endl;
 
-    auto result = BranchAndReduce(g, reductions);
+    //auto result = BranchAndReduce(g, reductions);
     //outputOrder(result.first, "../output.txt");
+
+    //g->AP_Intervall();
     //g->printGraph();
-    
+
     //std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
     std::cout << "Newly calculated crossings after BranchAndReduce: " << g->countCrossingsMarlon() << std::endl;
 
