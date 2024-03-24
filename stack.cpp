@@ -2,28 +2,14 @@
 #include <iostream>
 #include <stdexcept>
 
-Stack::Stack() : top(nullptr) {}
-
-    // Destructor to deallocate memory
-Stack::~Stack() {
-    while (top != nullptr) {
-        Stack_Node* temp = top;
-        top = top->next;
-        delete temp;
-    }
-}
-
-    // Push element onto stack
+// Push element onto stack
 void Stack::push(int data) {
-    Stack_Node* newNode = new Stack_Node;
-    newNode->data = data;
-    newNode->next = top;
-    top = newNode;
+    data_vec.push_back(data);
 }
 
 // Check if the stack is empty
 bool Stack::isEmpty() const {
-    return top == nullptr;
+    return data_vec.size() == 0;
 }
 
 // Pop element from stack
@@ -32,11 +18,9 @@ int Stack::pop() {
         throw std::out_of_range("Stack Underflow");
     }
 
-    Stack_Node* temp = top;
-    int poppedValue = top->data;
-    top = top->next;
-    delete temp;
-    return poppedValue;
+    int to_return_value = data_vec[data_vec.size() - 1];
+    data_vec.pop_back();
+    return to_return_value;
 }
 
 // Peek at the top element of stack
@@ -45,6 +29,6 @@ int Stack::peek() const {
         throw std::out_of_range("Stack is Empty");
     }
 
-    return top->data;
+    return data_vec[data_vec.size() - 1];
 }
 
