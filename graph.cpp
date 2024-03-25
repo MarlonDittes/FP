@@ -31,6 +31,7 @@ Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), activeEdges(m), grap
 void Graph::addEdge(int x, int y) {
     graph[x].edges.push_back({y, 1});
     graph[y].edges.push_back({x, 1});
+    graph[y].hash += x+1; //add 1 because id starts at 0
 }
 
 void Graph::printGraph() {
