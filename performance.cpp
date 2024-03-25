@@ -11,10 +11,9 @@ namespace fs = std::filesystem;
 
 void calculatePerformance(std::string folderPath, std::string outputFile, int mode){
     /* Modes:   1 BruteForce 
-                2 Greedy
-                3 Barycenter
-                4 Barycenter + Greedy
-                5 BranchAndReduce
+                2 Barycenter
+                3 Median
+                4 BranchAndReduce
     */
 
     try {
@@ -45,6 +44,10 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                 auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
                 std::vector<general_reduction*> reductions;
+                reductions.push_back(new ZeroEdge_reduction);
+                reductions.push_back(new Complete_reduction);
+                reductions.push_back(new ZeroCrossings_reduction);
+                reductions.push_back(new Twins_reduction);
 
                 switch (mode) {
                     // 1 BruteForce 
@@ -56,37 +59,28 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
 
                         outFile << testname << " " << duration.count() << " " << result.second << std::endl;
                         break;
-                    // 2 Greedy
+                    // 2 Barycenter
                     case 2:
                         start = std::chrono::high_resolution_clock::now();
-                        result = g->Greedy();
-                        stop = std::chrono::high_resolution_clock::now();
-                        duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-
-                        outFile << testname << " " << duration.count() << " " << result.second << std::endl;
-                        break;
-                    // 3 Barycenter
-                    case 3:
-                        start = std::chrono::high_resolution_clock::now();
-                        g->Barycenter_Heuristic();
+                        g->BarycenterHeuristicMarlon();
                         result = std::make_pair(g->getOrderNodes(), g->countCrossings());
                         stop = std::chrono::high_resolution_clock::now();
                         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
                         outFile << testname << " " << duration.count() << " " << result.second << std::endl;
                         break;
-                    // 4 Barycenter + Greedy
-                    case 4:
+                    // 3 Median
+                    case 3:
                         start = std::chrono::high_resolution_clock::now();
-                        g->Barycenter_Heuristic();
-                        result = g->Greedy();
+                        g->MedianHeuristic();
+                        result = std::make_pair(g->getOrderNodes(), g->countCrossings());
                         stop = std::chrono::high_resolution_clock::now();
                         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-                        
+
                         outFile << testname << " " << duration.count() << " " << result.second << std::endl;
                         break;
-                    // 5 BranchAndReduce
-                    case 5:
+                    // 4 BranchAndReduce
+                    case 4:
                         start = std::chrono::high_resolution_clock::now();
                         result = BranchAndReduce(g, reductions);
                         stop = std::chrono::high_resolution_clock::now();
@@ -98,9 +92,9 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                     default:
                         std::cout << "Select one of the following modes:" << std::endl;
                         std::cout << "1 BruteForce" << std::endl;
-                        std::cout << "2 Greedy" << std::endl;
-                        std::cout << "3 Baricenter" << std::endl;
-                        std::cout << "4 Baricenter + Greedy" << std::endl;
+                        std::cout << "2 Barycenter" << std::endl;
+                        std::cout << "3 Median" << std::endl;
+                        std::cout << "4 BranchAndReduce" << std::endl;
                         return;
                 }
             }

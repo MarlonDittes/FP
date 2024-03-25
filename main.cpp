@@ -69,7 +69,6 @@ int main(int argc, char* argv[]) {
     modes.push_back(2);
     modes.push_back(3);
     modes.push_back(4);
-    modes.push_back(5);
 
 
     for (auto mode : modes){
