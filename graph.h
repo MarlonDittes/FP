@@ -23,7 +23,8 @@ struct Node {
     int id;
     int old_id = -1; // refers to previous ID of this node in bigger graph
     int order = -1;
-    int median = 0;
+    double barycenter_pos = 0;
+    double median_pos = 0;
 
     // Partition stuff
     bool isAP = false;
@@ -115,8 +116,9 @@ public:
 
     // Solving
     std::pair<std::vector<Node*>, long> Greedy();
-    void MedianHeuristicMarlon();
-    void Median_Heuristic();
+    void MedianHeuristic();
+    void BarycenterHeuristicMarlon();
+    void Barycenter_Heuristic();
     void Sorted_straight_line_reduction();
     bool DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visited);
 

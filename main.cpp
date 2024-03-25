@@ -19,11 +19,21 @@ int main(int argc, char* argv[]) {
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
+    Graph* copy = readGraph(graph_file);
 
     //g->printGraph();
+    //std::cout << std::endl;
 
     long crossing_count = g->countCrossingsMarlon();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
+
+    g->BarycenterHeuristicMarlon();
+    crossing_count = g->countCrossingsMarlon();
+    std::cout << "number of crossings with BarycenterHeuristic g: " << crossing_count << std::endl;
+
+    copy->MedianHeuristic();
+    crossing_count = copy->countCrossingsMarlon();
+    std::cout << "number of crossings with MedianHeuristic g: " << crossing_count << std::endl;
 
     // Which reductions to use
     std::vector<general_reduction*> reductions;

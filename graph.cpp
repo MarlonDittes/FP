@@ -324,43 +324,74 @@ std::pair<std::vector<Node*>, long> Graph::Greedy() {
     return std::make_pair(this->order_nodes, crossings);
 }
 
-void Graph::MedianHeuristicMarlon() {
+void Graph::MedianHeuristic(){
+    this->sortNeighbours();
+    // Iterate through moveable nodes
     for (int i = offset_visible_order_nodes; i < order_nodes.size(); i++) {
-        order_nodes[i]->median = 0;
+        auto& current_node = order_nodes[i];
+        current_node->median_pos = 0;
+        // If there are neighbours, select the median id
+        if (current_node->offset_visible_nodes != current_node->edges.size()){
+            std::vector<int> neighbourIDs(0);
+            for (int i = current_node->offset_visible_nodes; i < current_node->edges.size(); i++){
+                neighbourIDs.push_back(current_node->edges[i].neighbour_id);
+            }
+
+            int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
+            current_node->median_pos = neighbourIDs[pos_index];
+            // If even degree, further to the right
+            if (neighbourIDs.size() % 2 == 0){
+                current_node->median_pos += 0.1;
+            }
+        }
+    }
+
+    std::sort(order_nodes.begin() + offset_visible_order_nodes, order_nodes.end(), [](const Node* a, const Node* b) {
+        return a->median_pos < b->median_pos;
+        });
+
+    for (int i = offset_visible_order_nodes; i < order_nodes.size(); i++) {
+        order_nodes[i]->order = i;
+    }
+}
+
+void Graph::BarycenterHeuristicMarlon() {
+    for (int i = offset_visible_order_nodes; i < order_nodes.size(); i++) {
+        order_nodes[i]->barycenter_pos = 0;
         for (int j = order_nodes[i]->offset_visible_nodes; j < order_nodes[i]->edges.size(); j++) {
-            order_nodes[i]->median += order_nodes[i]->edges[j].neighbour_id;
+            order_nodes[i]->barycenter_pos += order_nodes[i]->edges[j].neighbour_id;
         }
         if ((order_nodes[i]->edges.size() - order_nodes[i]->offset_visible_nodes) != 0) {
-            order_nodes[i]->median = order_nodes[i]->median / (order_nodes[i]->edges.size() - order_nodes[i]->offset_visible_nodes);
-            //std::cout << "id: " << order_nodes[i]->id << " median: " << order_nodes[i]->median << std::endl;
+            order_nodes[i]->barycenter_pos = order_nodes[i]->barycenter_pos / (order_nodes[i]->edges.size() - order_nodes[i]->offset_visible_nodes);
+            //std::cout << "id: " << order_nodes[i]->id << " barycenter_pos: " << order_nodes[i]->barycenter_pos << std::endl;
         }
         else {
-            order_nodes[i]->median = 0;
+            order_nodes[i]->barycenter_pos = 0;
         }
 
     }
 
     std::sort(order_nodes.begin() + offset_visible_order_nodes, order_nodes.end(), [](const Node* a, const Node* b) {
-        return a->median < b->median;
+        return a->barycenter_pos < b->barycenter_pos;
         });
 
-    for (int i = 0; i < order_nodes.size(); i++) {
+    for (int i = offset_visible_order_nodes; i < order_nodes.size(); i++) {
         order_nodes[i]->order = i;
     }
 }
 
-void Graph::Median_Heuristic() {
+void Graph::Barycenter_Heuristic() {
     for (int i = 0; i < order_nodes.size(); i++) {
         for (int j = 0; j < order_nodes[i]->edges.size(); j++) {
-            order_nodes[i]->median += order_nodes[i]->edges[j].neighbour_id;
+            order_nodes[i]->barycenter_pos += order_nodes[i]->edges[j].neighbour_id;
         }
 
-        order_nodes[i]->median = order_nodes[i]->median / order_nodes[i]->edges.size();
-        //std::cout << "id: " << order_nodes[i]->id << " median: " << order_nodes[i]->median << std::endl;
+        order_nodes[i]->barycenter_pos = order_nodes[i]->barycenter_pos / order_nodes[i]->edges.size();
+        //std::cout << "id: " << order_nodes[i]->id << " barycenter_pos: " << order_nodes[i]->barycenter_pos << std::endl;
     }
 
     std::sort(order_nodes.begin(), order_nodes.end(), [](const Node* a, const Node* b) {
-        return a->median < b->median;
+        return a->barycenter_pos < b->barycenter_pos;
         });
 
     for (int i = 0; i < order_nodes.size(); i++) {
@@ -893,8 +924,8 @@ void Graph::Sorted_straight_line_reduction() {
     // this can be done using a mod 2 if statement to check if the node we are about the visit is a fix node or not
     // all nodes must have a max of 1 neighbour. to make sure of this after 1 DFS check all nodes were visited.
 
-    // after we have found out that it is a straight line input that can lead to 0 crossings --> use median Heuristic,
-    // to calculate the median of their neighbours, which then in turn gives us the order of the moveable nodes.
+    // after we have found out that it is a straight line input that can lead to 0 crossings --> use barycenter_pos Heuristic,
+    // to calculate the barycenter_pos of their neighbours, which then in turn gives us the order of the moveable nodes.
     int start_node_id = 0;
     std::vector<bool> visited(n0 + n1);
     if (DFS_for_sorted_straight_line(start_node_id, visited)) {
@@ -903,7 +934,7 @@ void Graph::Sorted_straight_line_reduction() {
                 std::cout << "not a sorted straight line reduction, not all nodes in this given partition/graph can be visited" << std::endl;
             }
         }
-        Median_Heuristic();
+        Barycenter_Heuristic();
     }
     else {
         std::cout << "sorted straight line reduction could not be done" << std::endl;
@@ -929,7 +960,7 @@ void Graph::setOrderNodes(std::vector<Node*> order) {
 }
 
 void Branch_and_Bound(Graph* G) {
-    G->Median_Heuristic();
+    G->Barycenter_Heuristic();
     Graph verifier = *G;
     std::vector<Node*>best_configuration = G->getOrderNodes();
     int best_solution = G->countCrossingsBranching();
@@ -1181,7 +1212,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 }
 
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes) {
-    g->MedianHeuristicMarlon();
+    g->MedianHeuristic();
 
     g->Partition();
     g->AP();

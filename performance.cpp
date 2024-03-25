@@ -12,8 +12,8 @@ namespace fs = std::filesystem;
 void calculatePerformance(std::string folderPath, std::string outputFile, int mode){
     /* Modes:   1 BruteForce 
                 2 Greedy
-                3 Baricenter
-                4 Baricenter + Greedy
+                3 Barycenter
+                4 Barycenter + Greedy
                 5 BranchAndReduce
     */
 
@@ -65,20 +65,20 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
 
                         outFile << testname << " " << duration.count() << " " << result.second << std::endl;
                         break;
-                    // 3 Baricenter
+                    // 3 Barycenter
                     case 3:
                         start = std::chrono::high_resolution_clock::now();
-                        g->Median_Heuristic();
+                        g->Barycenter_Heuristic();
                         result = std::make_pair(g->getOrderNodes(), g->countCrossings());
                         stop = std::chrono::high_resolution_clock::now();
                         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 
                         outFile << testname << " " << duration.count() << " " << result.second << std::endl;
                         break;
-                    // 4 Baricenter + Greedy
+                    // 4 Barycenter + Greedy
                     case 4:
                         start = std::chrono::high_resolution_clock::now();
-                        g->Median_Heuristic();
+                        g->Barycenter_Heuristic();
                         result = g->Greedy();
                         stop = std::chrono::high_resolution_clock::now();
                         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
