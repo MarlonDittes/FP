@@ -57,7 +57,7 @@ bool Twins_reduction::reduce(Graph* g) {
 
                 //found twins
                 if (k == g->getNodeByOrder(i)->edges.size()-1) {
-                    //std::cout << "found Twins: " << g->getNodeByOrder(i)->id << " and "<< g->getNodeByOrder(j)->id << std::endl;
+                    //std::cout << "found Twins: " << g->getNodeByOrder(i)->id + 1 << " and "<< g->getNodeByOrder(j)->id + 1<< std::endl;
                     found_Twins = true;
                     restore_vec.push_back({g->getNodeByOrder(i)->id, g->getNodeByOrder(j)->id}); //save twins
                     for (auto& edge : g->getNodeByOrder(i)->edges) {

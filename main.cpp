@@ -10,16 +10,15 @@ int main(int argc, char* argv[]) {
 
     //Random graph
     /*
-    int sizeX = 500;
-    int sizeY = 500;
-    std::string output = "../bipartitegraphs/test6.gr";
+    int sizeX = 100;
+    int sizeY = 100;
+    std::string output = "../.Run/graph.txt";
     auto edges = generateBipartiteGraph(sizeX, sizeY);
     writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
     */
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
-    Graph* copy = readGraph(graph_file);
 
     //g->printGraph();
     //std::cout << std::endl;
@@ -27,14 +26,18 @@ int main(int argc, char* argv[]) {
     long crossing_count = g->countCrossingsMarlon();
     std::cout << "number of crossings in default g: " << crossing_count << std::endl;
 
-    g->BarycenterHeuristicMarlon();
-    crossing_count = g->countCrossingsMarlon();
+    Graph* copy = readGraph(graph_file);
+    copy->BarycenterHeuristicMarlon();
+    crossing_count = copy->countCrossingsMarlon();
     std::cout << "number of crossings with BarycenterHeuristic g: " << crossing_count << std::endl;
 
-    copy->MedianHeuristic();
-    crossing_count = copy->countCrossingsMarlon();
+    Graph* copy2 = readGraph(graph_file);
+    copy2->MedianHeuristic();
+    crossing_count = copy2->countCrossingsMarlon();
     std::cout << "number of crossings with MedianHeuristic g: " << crossing_count << std::endl;
 
+    std::cout << std::endl;
+    
     // Which reductions to use
     std::vector<general_reduction*> reductions;
     reductions.push_back(new ZeroEdge_reduction);
@@ -42,14 +45,14 @@ int main(int argc, char* argv[]) {
     reductions.push_back(new ZeroCrossings_reduction);
     reductions.push_back(new Twins_reduction);
 
-    std::cout << std::endl;
-
     auto result = BranchAndReduce(g, reductions);
     //outputOrder(result.first, "../output.txt");
-    //g->printGraph();
-    
-    //std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
-    std::cout << "Newly calculated crossings after BranchAndReduce: " << g->countCrossingsMarlon() << std::endl;
+
+    if (result.second != g->countCrossingsMarlon()){
+        std::cout << "Crossings didn't sum up!" << std::endl;
+    } else {
+        std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
+    }
 
     if (g->verifier(verifier)) {
         std::cout << "Graph is valid" << std::endl;

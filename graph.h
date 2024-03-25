@@ -31,6 +31,18 @@ struct Node {
     std::vector<int> partition;    
 };
 
+struct Partition_Intervall {
+
+    Partition_Intervall() {};
+
+    Partition_Intervall(int low, int high) : interval_high(high), interval_low(low) {};
+
+    std::vector<int> nodes;
+    int interval_high = 0;
+    int interval_low = 0;
+    bool ignore = false;
+};
+
 class Graph {
 private:
     std::vector<Node> graph;            // Adjacency List
@@ -46,7 +58,7 @@ private:
     bool optimal = 0; //for reduction of partitions -> true if partition is optimal
 
 public:
-    int global_partition = 0;
+
     Graph(int n0, int n1, int m);   //Constructor
     void addEdge(int y, int x);
 
@@ -69,8 +81,8 @@ public:
     int getN1() { return this->n1; };
     int getM() { return this->m; };
     int getOffsetVisibleOrderNodes() { return this->offset_visible_order_nodes; };
-    void setActiveEdges (int count) { this->activeEdges = count;};
-    int getActiveEdges () { return this->activeEdges;};
+    void setActiveEdges(int count) { this->activeEdges = count; };
+    int getActiveEdges() { return this->activeEdges; };
 
     bool getOptimal() { return this->optimal; };
     void setOptimalTrue() { this->optimal = true; };
@@ -82,7 +94,7 @@ public:
     // Sort
     void sortOrderNodesByOrder();
     void sortNeighbours();
-    static bool compareNeighbours(const Edge& a, const Edge& b) { return a.neighbour_id < b.neighbour_id;}
+    static bool compareNeighbours(const Edge& a, const Edge& b) { return a.neighbour_id < b.neighbour_id; }
 
     // Count crossings
     long countCrossingsMarlon();
@@ -113,6 +125,9 @@ public:
     void APUtilIterative(int start_node_id, std::vector<bool>& visited, std::vector<int>& disc, std::vector<int>& low, std::vector<int>& parent, std::vector<bool>& isAP);
     int CreatePartitionsVector(int start_node_fixed_id, int& partition_id, std::vector<bool>& visited);
     void AP();
+    void AP_Intervall();
+    int CreatePartitionsVectorNew(int start_node_fixed_id, int& partition_id, std::vector<bool>& visited, std::vector<std::vector<Node*>>& partitions_temp);
+    void DFS_AP_nodes(int start_node, std::vector<bool>& visited, std::vector<Partition_Intervall>& partition_intervall);
 
     // Solving
     std::pair<std::vector<Node*>, long> Greedy();

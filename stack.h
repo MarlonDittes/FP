@@ -1,22 +1,12 @@
 #pragma once
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 class Stack {
-    struct Stack_Node {
-        int data;
-        Stack_Node* next;
-    };
-
-    Stack_Node* top;
-
+private:
+    std::vector<int> data_vec;
 public:
-    
-    Stack();
-
-    // Destructor to deallocate memory
-    ~Stack();
-
     // Push element onto stack
     void push(int data);
 
