@@ -17,6 +17,7 @@ struct Node {
     std::vector<Edge> edges;
     std::vector<int> neighbors_partition;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
+    int hash = 0;
    
     // ID stuff 
     int id;
@@ -26,10 +27,7 @@ struct Node {
 
     // Partition stuff
     bool isAP = false;
-    std::vector<int> partition;
-    
-    
-    int multiplier = 1; //REMOVE WHEN EDGE SYSTEM READY
+    std::vector<int> partition;    
 };
 
 class Graph {

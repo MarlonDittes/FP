@@ -35,13 +35,22 @@ bool ZeroCrossings_reduction::reduce(Graph* g) {
 bool Twins_reduction::reduce(Graph* g) {
     bool found_Twins = false;
 
-    for (int i = 0; i < g->getN1()-1; i++) {
-        for (int j = i+1; j < g->getN1(); j++) {
+    for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
+        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
+            if (g->getNodeByOrder(i)->edges.size() == g->getNodeByOrder(i)->offset_visible_nodes ||
+                g->getNodeByOrder(j)->edges.size() == g->getNodeByOrder(j)->offset_visible_nodes) {
+                    continue;
+            }
+            //compare number of edges
             if (g->getNodeByOrder(i)->edges.size() != g->getNodeByOrder(j)->edges.size()) {
                 continue;
             }
+            //compare hash value
+            if (g->getNodeByOrder(i)->hash != g->getNodeByOrder(j)->hash) {
+                continue;
+            }
 
-            for (int k = g->getNodeByOrder(i)->offset_visible_nodes; k < g->getNodeByOrder(i)->edges.size(); k++) {
+            for (int k = 0; k < g->getNodeByOrder(i)->edges.size(); k++) {
                 if (g->getNodeByOrder(i)->edges[k].neighbour_id != g->getNodeByOrder(j)->edges[k].neighbour_id) {
                     break;
                 }
@@ -54,12 +63,12 @@ bool Twins_reduction::reduce(Graph* g) {
                     for (auto& edge : g->getNodeByOrder(i)->edges) {
                         edge.edge_weight++;
                     }
-                    g->makeNodeInvisibleMarlon(j); //j is made invisible
+                    g->makeNodeInvisibleMarlon(j);
                 }
             }
         }
     }
-    /*
+/*    
     std::cout << "number of twins: " << restore_vec.size() << std::endl;
     for (int i = 0; i < restore_vec.size(); i++) {
         std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << std::endl;
@@ -176,3 +185,15 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
 
     return found_AlmostTwins;
 }
+
+/*bool Domination_reduction::reduce(Graph* g) {
+    bool found_Domination = false;
+
+    for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
+        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
+            if (g->getNodeByOrder(i)->offset_visible_nodes == g->getNodeByOrder(i)->edges.size() || 
+                g->getNodeByOrder(j)->offset_visible_nodes == g->getNodeByOrder(j)->edges.size()) {
+                    continue;
+                }
+
+}*/
