@@ -119,9 +119,7 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
                 if (g->getNodeByOrder(i)->edges[0].neighbour_id == g->getNodeByOrder(j)->edges[0].neighbour_id) {
                     // need tmp variable for this edge case
                     bool tmp = false;
-                    if (g->getNodeByOrder(less)->edges.size() == 1) {
-                        tmp = true;
-                    }
+                    if (g->getNodeByOrder(less)->edges.size() == 1) { tmp = true; }
                     else {
                         for (int k = 1; k < g->getNodeByOrder(less)->edges.size(); k++) {
                             if (g->getNodeByOrder(i)->edges[k].neighbour_id != g->getNodeByOrder(j)->edges[k].neighbour_id) { break; }
@@ -143,9 +141,7 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
                 //last neighbour identical -> if j almost twin, it has to be on the right of i 
                 else if (g->getNodeByOrder(i)->edges[g->getNodeByOrder(i)->edges.size()-1].neighbour_id == g->getNodeByOrder(j)->edges[g->getNodeByOrder(j)->edges.size()-1].neighbour_id) {
                     bool tmp = false;
-                    if (g->getNodeByOrder(less)->edges.size() == 1) {
-                        tmp = true;
-                    }
+                    if (g->getNodeByOrder(less)->edges.size() == 1) { tmp = true; }
                     else {
                         //check if all other neighbours before are the same
                         for (int k = 0; k < g->getNodeByOrder(less)->edges.size()-1; k++) {
@@ -188,6 +184,7 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
 
 /*bool Domination_reduction::reduce(Graph* g) {
     bool found_Domination = false;
+    int p = 2; //parameter, size of domination
 
     for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
         for (int j = i+1; j < g->getSizeOfOrder(); j++) {
@@ -195,5 +192,24 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
                 g->getNodeByOrder(j)->offset_visible_nodes == g->getNodeByOrder(j)->edges.size()) {
                     continue;
                 }
+
+            if (g->getNodeByOrder(i)->edges.size() == g->getNodeByOrder(j)->edges.size()+p ||
+                g->getNodeByOrder(i)->edges.size()+p == g->getNodeByOrder(j)->edges.size()) {
+                //find the node with less nodes
+                int less = j; //node at order j has less neighbours -> i is main
+                int more = i;
+                if (g->getNodeByOrder(i)->edges.size() < g->getNodeByOrder(j)->edges.size()) {
+                    less = i; //i has less nodes
+                    more = j;
+                }
+            for (int k = 0; k <= g->getNodeByOrder(more)->edges.size()-p; k++) {
+                if (g->getNodeByOrder(i)->edges[k].neighbour_id != g->getNodeByOrder(j)->edges[k].neighbour_id) {
+                    continue;
+                }
+                for (int l = 0; l < g->getNodeByOrder(less)->edges.size(); l++) {
+                    if (g->getNodeByOrder(more)->edges[k+l].neighbour_id != g->getNodeByOrder(less)->edges[k])
+                }
+            }
+            
 
 }*/
