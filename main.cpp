@@ -61,6 +61,10 @@ int main(int argc, char* argv[]) {
         std::cout << "Graph is NOT valid" << std::endl;
     }
 
+    for (auto& reduct : reductions){
+        std::cout << reduct->get_reduction_type() << " was used " << reduct->usage_count << " times." << std::endl;
+    }
+
     //Testing on test set
 
     /*

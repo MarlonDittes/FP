@@ -1307,14 +1307,19 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes) {
     bool changed = false;
-    int oldOffset = g->getOffsetVisibleOrderNodes();
+    int twins_count = 0;
+    int almostTwins_count = 0;
 
     for (auto& reduct : reductionTypes) {
         if (!g->getOptimal()) {
+            if (reduct->get_reduction_type() == Twins){
+                twins_count = reduct->reduce(g);
+            } else if (reduct->get_reduction_type() == AlmostTwins){
+                almostTwins_count = reduct->reduce(g);
+            }
             changed = reduct->reduce(g);
         }
     }
-    int foundTwins = g->getOffsetVisibleOrderNodes() - oldOffset;
 
     //Reduce our instance if no more reductions applicable
     std::pair<std::vector<Node*>, long> result;
@@ -1349,7 +1354,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             // Add node back
             g->makeNodeVisibleMarlon();
 
-            // Calculate Crossings for every possible position of node
+            // Method 1: Calculate Crossings for every possible position of node
             int minCrossings = g->countCrossingsMarlon();
             auto minOrder = g->getOrderNodes();
             for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
@@ -1360,6 +1365,27 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                     minOrder = g->getOrderNodes();
                 }
             }
+
+            // Method 2: Place node at median position
+            // Can we even do this tho?
+            /*
+            int median = 0;
+            if (maxDegreeNode->offset_visible_nodes != maxDegreeNode->edges.size()){
+                std::vector<int> neighbourIDs(0);
+                for (int i = maxDegreeNode->offset_visible_nodes; i < maxDegreeNode->edges.size(); i++){
+                    neighbourIDs.push_back(maxDegreeNode->edges[i].neighbour_id);
+                }
+
+                int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
+                median = neighbourIDs[pos_index];
+                // If even degree, further to the right
+                if (neighbourIDs.size() % 2 == 0){
+                    median += 0.1;
+                }
+            }
+            std::cout << "Med " <<median << std::endl;
+            std::cout << "Vis " << visibleNodeOffset << std::endl;
+            */
 
             // Reconstruct min order
             g->setOrderNodes(minOrder);
@@ -1387,9 +1413,14 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             result = std::make_pair(g->getOrderNodes(), 0);
         }
     }
-    if (foundTwins > 0) {
-        reductionTypes[3]->apply(g, foundTwins);
-        result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());
+
+    // Apply reductions
+    for (auto& reduct : reductionTypes) {
+        bool applied = reduct->apply(g, twins_count);
+        // Update result if there were changes made to order nodes
+        if (applied){
+            result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());
+        }  
     }
 
     return result;

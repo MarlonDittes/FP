@@ -1,15 +1,16 @@
 #include "reductions.h"
 
-bool ZeroEdge_reduction::reduce(Graph* g) {
+int ZeroEdge_reduction::reduce(Graph* g) {
     if (g->getActiveEdges() == 0) {
         //std::cout << "Zero Edge works \n";
         g->setOptimalTrue();
-        return true;
+        this->usage_count++;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
-bool Complete_reduction::reduce(Graph* g) {
+int Complete_reduction::reduce(Graph* g) {
     int n0 = g->getN0();
     int n1 = g->getN1() - g->getOffsetVisibleOrderNodes();
     int m = g->getActiveEdges();
@@ -17,23 +18,25 @@ bool Complete_reduction::reduce(Graph* g) {
     if (n0 * n1 == m) {
         //std::cout << "Complete works \n";
         g->setOptimalTrue();
-        return true;
+        this->usage_count++;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
-bool ZeroCrossings_reduction::reduce(Graph* g) {
+int ZeroCrossings_reduction::reduce(Graph* g) {
     int crossings = g->countCrossingsMarlon();
     if (crossings == 0) {
         //std::cout << "Zero Crossing works \n";
         g->setOptimalTrue();
-        return true;
+        this->usage_count++;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
-bool Twins_reduction::reduce(Graph* g) {
-    bool found_Twins = false;
+int Twins_reduction::reduce(Graph* g) {
+    int found_Twins = 0;
 
     for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
         for (int j = i+1; j < g->getSizeOfOrder(); j++) {
@@ -58,12 +61,13 @@ bool Twins_reduction::reduce(Graph* g) {
                 //found twins
                 if (k == g->getNodeByOrder(i)->edges.size()-1) {
                     //std::cout << "found Twins: " << g->getNodeByOrder(i)->id + 1 << " and "<< g->getNodeByOrder(j)->id + 1<< std::endl;
-                    found_Twins = true;
+                    found_Twins++;
+                    this->usage_count++;
                     restore_vec.push_back({g->getNodeByOrder(i)->id, g->getNodeByOrder(j)->id}); //save twins
                     for (auto& edge : g->getNodeByOrder(i)->edges) {
                         edge.edge_weight++;
                     }
-                    g->makeNodeInvisibleMarlon(j);
+                    g->makeNodeInvisibleMarlon(j);         
                 }
             }
         }
@@ -84,20 +88,25 @@ bool Twins_reduction::reduce(Graph* g) {
     */
     return found_Twins;
 }
-void Twins_reduction::apply(Graph* g, int twinsCount){
-    while (twinsCount > 0){
-        g->makeNodeVisibleMarlon();
-        auto pair = restore_vec[restore_vec.size()-1];
-        restore_vec.pop_back();
+bool Twins_reduction::apply(Graph* g, int twins_count){
+    if (twins_count > 0){
+        while (twins_count > 0){
+            g->makeNodeVisibleMarlon();
+            auto pair = restore_vec[restore_vec.size()-1];
+            restore_vec.pop_back();
 
-        g->setOrderByNode(pair.twin, g->getOrderByNode(pair.main));
-        twinsCount--;
+            g->setOrderByNode(pair.twin, g->getOrderByNode(pair.main));
+            twins_count--;
+        }
+        g->sortOrderNodesByOrder();
+        return true;
+    } else {
+        return false;
     }
-    g->sortOrderNodesByOrder();
 }
 
-bool AlmostTwin_reduction::reduce(Graph* g) {
-    bool found_AlmostTwins = false;
+int AlmostTwin_reduction::reduce(Graph* g) {
+    int found_AlmostTwins = 0;
 
     for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
         for (int j = i+1; j < g->getSizeOfOrder(); j++) {
@@ -131,13 +140,14 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
                     }
 
                     if (tmp) {
-                        found_AlmostTwins = true;
+                        found_AlmostTwins++;
                         restore_vec.push_back({g->getNodeByOrder(more)->id, g->getNodeByOrder(less)->id, 0});
                         //SET EDGE WEIGHTS  
                         for (int l = 0; l < g->getNodeByOrder(less)->edges.size(); l++) {
                             g->getNodeByOrder(more)->edges[l].edge_weight += g->getNodeByOrder(less)->edges[l].edge_weight;
                         }
                         g->makeNodeInvisibleMarlon(less);
+                        this->usage_count++;
                     }
                 }
                 //last neighbour identical -> if j almost twin, it has to be on the right of i 
@@ -156,13 +166,14 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
                     }
 
                     if (tmp) {
-                        found_AlmostTwins = true;
+                        found_AlmostTwins++;
                         restore_vec.push_back({g->getNodeByOrder(more)->id, g->getNodeByOrder(less)->id, 1});
                         //SET EDGE WEIGHTS
                         for (int l = 1; l < g->getNodeByOrder(more)->edges.size(); l++) {
                             g->getNodeByOrder(more)->edges[l].edge_weight += g->getNodeByOrder(less)->edges[l-1].edge_weight;
                         }
                         g->makeNodeInvisibleMarlon(less);
+                        this->usage_count++;
                     }
                       
                 }
