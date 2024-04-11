@@ -70,6 +70,9 @@ struct Domination_reduction : public general_reduction {
 		    int main; //save nodeID ->maybe needs to be changed to Nodes
 		    int part;
             bool side; //which side to place twin s. t. optimal: 0 = left, 1 = right
+            //save additional information for apply function:
+            int domination_size; //number of identical neighbours
+            int start; //id of first identical neighbour
 	    };
 
 	std::vector<restore_data> restore_vec; //saves twins as pairs of main and twin in a vector
