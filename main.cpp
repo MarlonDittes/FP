@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
     reductions.push_back(new ZeroCrossings_reduction);
     reductions.push_back(new Twins_reduction);
     reductions.push_back(new AlmostTwin_reduction);
+    //reductions.push_back(new Domination_reduction);
 
     auto result = BranchAndReduce(g, reductions);
     //outputOrder(result.first, "../output.txt");

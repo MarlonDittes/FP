@@ -67,18 +67,20 @@ int Twins_reduction::reduce(Graph* g) {
                     for (auto& edge : g->getNodeByOrder(i)->edges) {
                         edge.edge_weight++;
                     }
-                    g->makeNodeInvisibleMarlon(j);         
+                    g->makeNodeInvisibleMarlon(j);
+                    i++;
                 }
             }
         }
     }
-/*    
+    /*
     std::cout << "number of twins: " << restore_vec.size() << std::endl;
     for (int i = 0; i < restore_vec.size(); i++) {
         std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << std::endl;
     }
+    */
 
-    std::cout << "edge weights: " << std::endl;
+    /*std::cout << "edge weights: " << std::endl;
     for (auto& node : g->getOrderNodes()) {
         std::cout << "node: " << node->id << ", ";
         for (auto& neighbour : node->neighbours) {
@@ -148,6 +150,7 @@ int AlmostTwin_reduction::reduce(Graph* g) {
                         }
                         g->makeNodeInvisibleMarlon(less);
                         this->usage_count++;
+                        i++;
                     }
                 }
                 //last neighbour identical -> if j almost twin, it has to be on the right of i 
@@ -174,6 +177,7 @@ int AlmostTwin_reduction::reduce(Graph* g) {
                         }
                         g->makeNodeInvisibleMarlon(less);
                         this->usage_count++;
+                        i++;
                     }
                       
                 }
@@ -221,14 +225,89 @@ bool AlmostTwin_reduction::apply(Graph* g, int twins_count) {
     }
 }
 
-/*bool Domination_reduction::reduce(Graph* g) {
-    bool found_Domination = false;
+int Domination_reduction::reduce(Graph* g) {
+    int found_Domination = 0;
+    int p = 2; //parameter
 
-    for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
-        for (int j = i+1; j < g->getSizeOfOrder(); j++) {
-            if (g->getNodeByOrder(i)->offset_visible_nodes == g->getNodeByOrder(i)->edges.size() || 
-                g->getNodeByOrder(j)->offset_visible_nodes == g->getNodeByOrder(j)->edges.size()) {
-                    continue;
+    while (p <= 10) {
+        for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
+            for (int j = i+1; j < g->getSizeOfOrder(); j++) {
+                if (g->getNodeByOrder(i)->offset_visible_nodes == g->getNodeByOrder(i)->edges.size() || 
+                    g->getNodeByOrder(j)->offset_visible_nodes == g->getNodeByOrder(j)->edges.size()) {
+                        continue;
+                    }
+                if (g->getNodeByOrder(i)->edges.size() == g->getNodeByOrder(j)->edges.size()+p ||
+                    g->getNodeByOrder(i)->edges.size()+p == g->getNodeByOrder(j)->edges.size()) {
+                    //find the node with less nodes
+                    int less = j; //node at order j has less neighbours -> i is main
+                    int more = i;
+                    if (g->getNodeByOrder(i)->edges.size() < g->getNodeByOrder(j)->edges.size()) {
+                        less = i; //i has less nodes
+                        more = j;
+                    }
+                    //find first identical node
+                    for (int k = 0; k <= g->getNodeByOrder(more)->edges.size() - g->getNodeByOrder(less)->edges.size(); k++) {
+                        bool tmp = false;
+                        if (g->getNodeByOrder(more)->edges[k].neighbour_id != g->getNodeByOrder(less)->edges[0].neighbour_id) {
+                            continue;
+                        }
+                        if (g->getNodeByOrder(less)->edges.size() == 1) { tmp = true; }
+                        //check if all other neighbours the same
+                        for (int l = 1; l < g->getNodeByOrder(less)->edges.size(); l++) { 
+                            if (g->getNodeByOrder(more)->edges[k+l].neighbour_id != g->getNodeByOrder(less)->edges[l].neighbour_id) {
+                                break;
+                            }
+                           //found Domination
+                            if (l == g->getNodeByOrder(less)->edges.size()-1) { tmp = true; }
+                        }
+
+                        if (tmp) {
+                            found_Domination++;
+                            if (k <= g->getNodeByOrder(more)->edges.size()-k-g->getNodeByOrder(less)->edges.size()) {
+                                //place invisible node on the left side
+                                restore_vec.push_back({g->getNodeByOrder(more)->id, g->getNodeByOrder(less)->id, 0, (int)g->getNodeByOrder(less)->edges.size(), g->getNodeByOrder(more)->edges[k].neighbour_id});
+                            } else {
+                                //place it on the right side
+                                restore_vec.push_back({g->getNodeByOrder(more)->id, g->getNodeByOrder(less)->id, 1, (int)g->getNodeByOrder(less)->edges.size(), g->getNodeByOrder(more)->edges[k].neighbour_id});
+                                }
+                                //SET EDGE WEIGHTS
+                            for (int m = 0; m < g->getNodeByOrder(less)->edges.size(); m++) {
+                                g->getNodeByOrder(more)->edges[k+m].edge_weight += g->getNodeByOrder(less)->edges[m].edge_weight;
+                            }
+                            g->makeNodeInvisibleMarlon(less);
+
+                            //!!! i++ nur wenn j Schleife nicht am Ende, sonst Fehler.. evtl. auch bei twins;
+                            if (j < g->getSizeOfOrder()-1) {
+                                i++;
+                            }
+                            break;
+                        }
+                    }
                 }
+            }
+        }
+        //increase parameter
+        p++;
+    }
 
-}*/
+    /* std::cout << "number of domination: " << restore_vec.size() << std::endl;
+        for (int i = 0; i < restore_vec.size(); i++) {
+            std::cout << "main: " << restore_vec[i].main << " , part: " << restore_vec[i].part << ", side: " << restore_vec[i].side << ", size: " << restore_vec[i].domination_size << ", start: " << restore_vec[i].start << std::endl;
+        }
+        std::cout << "edge weights: " << std::endl;
+        for (auto& node : g->getOrderNodes()) {
+            std::cout << "node: " << node->id << ", ";
+            for (auto& neighbour : node->edges) {
+                std::cout << "neighbour: " << neighbour.neighbour_id << ", edge_weight: " << neighbour.edge_weight << std::endl;
+            }
+        }
+    */
+    return found_Domination;   
+}
+
+//TODO
+bool Domination_reduction::apply(Graph* g, int twins_count) {
+    return false;
+}
+
+

@@ -5,7 +5,7 @@
 
 class Graph;
 
-enum reduction_type { ZeroEdge, Complete, ZeroCrossings, Twins, AlmostTwins };
+enum reduction_type { ZeroEdge, Complete, ZeroCrossings, Twins, AlmostTwins, Domination };
 
 struct general_reduction {
     general_reduction() {}
@@ -58,6 +58,24 @@ struct AlmostTwin_reduction : public general_reduction {
 		    int main; //save nodeID ->maybe needs to be changed to Nodes
 		    int twin;
             bool side; //which side to place twin s. t. optimal: 0 = left, 1 = right
+	    };
+
+	std::vector<restore_data> restore_vec; //saves twins as pairs of main and twin in a vector
+};
+
+struct Domination_reduction : public general_reduction {
+    virtual reduction_type get_reduction_type() const final { return reduction_type::Domination; }
+    virtual int reduce(Graph* g) override;
+    virtual bool apply(Graph* g, int twins_count) override;
+
+    private:
+	    struct restore_data {
+		    int main; //save nodeID ->maybe needs to be changed to Nodes
+		    int part;
+            bool side; //which side to place twin s. t. optimal: 0 = left, 1 = right
+            //save additional information for apply function:
+            int domination_size; //number of identical neighbours
+            int start; //id of first identical neighbour
 	    };
 
 	std::vector<restore_data> restore_vec; //saves twins as pairs of main and twin in a vector
