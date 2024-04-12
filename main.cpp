@@ -69,17 +69,15 @@ int main(int argc, char* argv[]) {
 
     //Testing on test set
 
-    /*
+    
     std::vector<int> modes;
-    modes.push_back(1);
-    modes.push_back(2);
     modes.push_back(3);
     modes.push_back(4);
 
 
     for (auto mode : modes){
-        calculatePerformance("../tiny_test_set", "../performance_data/" + std::to_string(mode), mode);
+        calculatePerformance("../heuristic-public", "../performance_data/" + std::to_string(mode), mode);
         std::cout << "Mode " << mode << " done." << std::endl;
     }
-    */
+    
 }

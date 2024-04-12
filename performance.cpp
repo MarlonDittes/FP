@@ -24,7 +24,11 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
             return;
         }
         // Iterating through all graphs in folderPath
+        int count = 0;
         for (const auto& entry : fs::directory_iterator(folderPath)) {
+            if (count == 10){
+                break;
+            }
             if (fs::is_regular_file(entry.path())) {
                 size_t lastSlashPos = entry.path().string().find_last_of('/');
                 std::string testname;
@@ -98,6 +102,7 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                         return;
                 }
             }
+            count++;
         }
         outFile.close();
     } catch (const fs::filesystem_error& ex) {
