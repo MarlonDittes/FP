@@ -1355,6 +1355,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             g->makeNodeVisibleMarlon();
 
             // Method 1: Calculate Crossings for every possible position of node
+            ///*
             int minCrossings = g->countCrossingsMarlon();
             auto minOrder = g->getOrderNodes();
             for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
@@ -1366,9 +1367,16 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                 }
             }
 
-            // Method 2: Place node at median position
-            // Can we even do this tho?
+            // Reconstruct min order
+            g->setOrderNodes(minOrder);
+
+            result = std::make_pair(g->getOrderNodes(), minCrossings);
+            //*/
+
+            // Method 2: Place node at nearest median position
             /*
+            auto orderNodes = g->getOrderNodes();        
+            // Calculate median of node we want to place back
             int median = 0;
             if (maxDegreeNode->offset_visible_nodes != maxDegreeNode->edges.size()){
                 std::vector<int> neighbourIDs(0);
@@ -1383,15 +1391,43 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                     median += 0.1;
                 }
             }
-            std::cout << "Med " <<median << std::endl;
-            std::cout << "Vis " << visibleNodeOffset << std::endl;
+
+            // Iterate through all other nodes to find closest median
+            int minDifference = std::numeric_limits<int>::max();
+            Node* closestNode = nullptr;
+            for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                auto& current_node = orderNodes[i];
+                current_node->median_pos = 0;
+                // If there are neighbours, select the median id
+                if (current_node->offset_visible_nodes != current_node->edges.size()){
+                    std::vector<int> neighbourIDs(0);
+                    for (int i = current_node->offset_visible_nodes; i < current_node->edges.size(); i++){
+                        neighbourIDs.push_back(current_node->edges[i].neighbour_id);
+                    }
+
+                    int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
+                    current_node->median_pos = neighbourIDs[pos_index];
+                    // If even degree, further to the right
+                    if (neighbourIDs.size() % 2 == 0){
+                        current_node->median_pos += 0.1;
+                    }
+
+                    // Calculate the absolute difference between node median and the median of the node we want to place back
+                    int difference = std::abs(current_node->median_pos - median);
+
+                    // Update closest node if this node has a smaller difference
+                    if (difference < minDifference) {
+                        minDifference = difference;
+                        closestNode = current_node;
+                    }
+                }
+            }
+
+            maxDegreeNode->order = closestNode->order;
+            g->sortOrderNodesByOrder();
+
+            result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());
             */
-
-            // Reconstruct min order
-            g->setOrderNodes(minOrder);
-
-            result = std::make_pair(g->getOrderNodes(), minCrossings);
-
         }
         else if ((orderNodes.size() - visibleNodeOffset) == 2) {
             int crossings1 = g->countCrossingsMarlon();
