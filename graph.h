@@ -22,7 +22,7 @@ struct Node {
     // ID stuff 
     int id;
     int old_id = -1; // refers to previous ID of this node in bigger graph
-    int order = -1;
+    double order = -1;
     double barycenter_pos = 0;
     double median_pos = 0;
 
@@ -140,6 +140,8 @@ public:
     // Verifier
     bool verifier(Graph check);
 };
+// Utility
+int calculateSpan(Node* node);
 
 // Brute Force
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g);

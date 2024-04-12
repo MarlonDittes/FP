@@ -51,6 +51,7 @@ struct Twins_reduction : public general_reduction {
 struct AlmostTwin_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::AlmostTwins; }
     virtual int reduce(Graph* g) override;
+    virtual bool apply(Graph* g, int twins_count) override;
 
     private:
 	    struct restore_data {

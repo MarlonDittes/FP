@@ -1208,6 +1208,24 @@ void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solut
     }
 }
 
+int calculateSpan(Node* node){
+    if (node->edges.empty()){
+        return 0;
+    }
+
+    // Find the minimum and maximum node IDs in the neighborhood
+    auto minMaxIDs = std::minmax_element(node->edges.begin(), node->edges.end(),
+        [](const Edge& a, const Edge& b) {
+            return a.neighbour_id < b.neighbour_id;
+        });
+
+    int minID = minMaxIDs.first->neighbour_id;
+    int maxID = minMaxIDs.second->neighbour_id;
+
+    // Calculate the span
+    return maxID - minID;
+}
+
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g) {
     std::vector<Node*> baseOrder = g->getOrderNodes();
     std::sort(baseOrder.begin(), baseOrder.end(), compareNodeID);
@@ -1336,19 +1354,33 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
         int visibleNodeOffset = g->getOffsetVisibleOrderNodes();
 
         if ((orderNodes.size() - visibleNodeOffset) > 2) {
-            // Find highest degree visible moveable node
-            Node* maxDegreeNode = orderNodes[visibleNodeOffset];
+            // Method A: Find highest degree visible moveable node
+            ///*
+            Node* foundNode = orderNodes[visibleNodeOffset];
             int maxDegree = orderNodes[visibleNodeOffset]->edges.size() - orderNodes[visibleNodeOffset]->offset_visible_nodes;
             for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
                 if (maxDegree < orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes) {
                     maxDegree = orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes;
-                    maxDegreeNode = orderNodes[i];
+                    foundNode = orderNodes[i];
                 }
             }
+            //*/
+            // Method B: Find most spanning node
+            /*
+            Node* foundNode = orderNodes[visibleNodeOffset];
+            int maxSpan = calculateSpan(foundNode);
+            for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                int currentSpan = calculateSpan(orderNodes[i]);
+                if (maxSpan < currentSpan) {
+                    maxSpan = currentSpan;
+                    foundNode = orderNodes[i];
+                }
+            }
+            */
 
             //std::cout << "Removing node for now" << std::endl;
             // Remove node for now
-            g->makeNodeInvisibleMarlon(maxDegreeNode->order);
+            g->makeNodeInvisibleMarlon(foundNode->order);
             // Solve on remaining nodes
             result = BranchAndReduce(g, reductionTypes);
             // Add node back
@@ -1359,7 +1391,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             int minCrossings = g->countCrossingsMarlon();
             auto minOrder = g->getOrderNodes();
             for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
-                g->swapNodes(maxDegreeNode->order, i);
+                g->swapNodes(foundNode->order, i);
                 int crossings = g->countCrossingsMarlon();
                 if (crossings < minCrossings) {
                     minCrossings = crossings;
@@ -1378,10 +1410,10 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             auto orderNodes = g->getOrderNodes();        
             // Calculate median of node we want to place back
             int median = 0;
-            if (maxDegreeNode->offset_visible_nodes != maxDegreeNode->edges.size()){
+            if (foundNode->offset_visible_nodes != foundNode->edges.size()){
                 std::vector<int> neighbourIDs(0);
-                for (int i = maxDegreeNode->offset_visible_nodes; i < maxDegreeNode->edges.size(); i++){
-                    neighbourIDs.push_back(maxDegreeNode->edges[i].neighbour_id);
+                for (int i = foundNode->offset_visible_nodes; i < foundNode->edges.size(); i++){
+                    neighbourIDs.push_back(foundNode->edges[i].neighbour_id);
                 }
 
                 int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
@@ -1423,7 +1455,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                 }
             }
 
-            maxDegreeNode->order = closestNode->order;
+            foundNode->order = closestNode->order;
             g->sortOrderNodesByOrder();
 
             result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());
@@ -1452,7 +1484,14 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 
     // Apply reductions
     for (auto& reduct : reductionTypes) {
-        bool applied = reduct->apply(g, twins_count);
+        bool applied = false;
+        
+        if (reduct->get_reduction_type() == 3){
+            applied = reduct->apply(g, twins_count);
+        } else if (reduct->get_reduction_type() == 4){
+            applied = reduct->apply(g, almostTwins_count);
+        }
+        
         // Update result if there were changes made to order nodes
         if (applied){
             result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());

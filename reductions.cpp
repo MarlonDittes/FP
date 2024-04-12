@@ -197,6 +197,30 @@ int AlmostTwin_reduction::reduce(Graph* g) {
     return found_AlmostTwins;
 }
 
+bool AlmostTwin_reduction::apply(Graph* g, int twins_count) {
+    if (twins_count > 0){
+        while (twins_count > 0){
+            g->makeNodeVisibleMarlon();
+            auto tuple = restore_vec[restore_vec.size()-1];
+            restore_vec.pop_back();
+
+            double offset = 0;
+            if (tuple.side == 0){
+                offset = -0.5;
+            } else {
+                offset = 0.5;
+            }
+
+            g->setOrderByNode(tuple.twin, g->getOrderByNode(tuple.main) + offset);
+            twins_count--;
+        }
+        g->sortOrderNodesByOrder();
+        return true;
+    } else {
+        return false;
+    }
+}
+
 /*bool Domination_reduction::reduce(Graph* g) {
     bool found_Domination = false;
 
