@@ -203,17 +203,18 @@ int AlmostTwin_reduction::reduce(Graph* g) {
 
 bool AlmostTwin_reduction::apply(Graph* g, int twins_count) {
     if (twins_count > 0){
+        double offset = 1.0 / (twins_count + 1);
         while (twins_count > 0){
             g->makeNodeVisibleMarlon();
             auto tuple = restore_vec[restore_vec.size()-1];
             restore_vec.pop_back();
 
-            double offset = 0;
+            // If on the left, offset to the left (negative)
             if (tuple.side == 0){
-                offset = -0.5;
-            } else {
-                offset = 0.5;
+                offset = -offset;
             }
+
+            double orderOfTwin = g->getOrderByNode(tuple.main) + offset;
 
             g->setOrderByNode(tuple.twin, g->getOrderByNode(tuple.main) + offset);
             twins_count--;

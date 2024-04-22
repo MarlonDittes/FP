@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-void calculatePerformance(std::string folderPath, std::string outputFile, int mode){
+void calculatePerformance(std::string folderPath, std::string outputFile, int mode, int method1, int method2, bool fast){
     /* Modes:   1 BruteForce 
                 2 Barycenter
                 3 Median
@@ -86,7 +86,7 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                     // 4 BranchAndReduce
                     case 4:
                         start = std::chrono::high_resolution_clock::now();
-                        result = BranchAndReduce(g, reductions);
+                        result = BranchAndReduce(g, reductions, method1, method2, fast);
                         stop = std::chrono::high_resolution_clock::now();
                         duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
                         
