@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
     
     // Which reductions to use
     std::vector<general_reduction*> reductions;
-    reductions.push_back(new ZeroEdge_reduction);
+    //reductions.push_back(new ZeroEdge_reduction);
     reductions.push_back(new Complete_reduction);
     reductions.push_back(new ZeroCrossings_reduction);
     reductions.push_back(new Twins_reduction);
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
     //reductions.push_back(new Domination_reduction);
 
     auto result = BranchAndReduce(g, reductions, method1, method2, fast);
-    outputOrder(result.first, "../output2.txt");
+    //outputOrder(result.first, "../output2.txt");
 
     if (!fast){
         if (result.second != g->countCrossingsMarlon()){
