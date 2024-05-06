@@ -191,7 +191,7 @@ int AlmostTwin_reduction::reduce(Graph* g) {
             }
         }
     }
-
+    /*
     std::cout << "number of almost_twins: " << restore_vec.size() << std::endl;
     for (int i = 0; i < restore_vec.size(); i++) {
         std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << ", side: " << restore_vec[i].side << std::endl;
@@ -203,6 +203,7 @@ int AlmostTwin_reduction::reduce(Graph* g) {
             std::cout << "neighbour: " << neighbour.neighbour_id << ", edge_weight: " << neighbour.edge_weight << std::endl;
         }
     }
+    */
 
     return found_AlmostTwins;
 }

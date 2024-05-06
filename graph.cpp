@@ -1333,10 +1333,20 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
         if (!g->getOptimal()) {
             if (reduct->get_reduction_type() == Twins){
                 twins_count = reduct->reduce(g);
+
+                if (twins_count > 0){
+                    changed = true;
+                }
             } else if (reduct->get_reduction_type() == AlmostTwins){
+                std::cout << reduct->first << std::endl;
                 almostTwins_count = reduct->reduce(g);
+
+                if (almostTwins_count > 0){
+                    changed = true;
+                }
+            } else {
+                changed = reduct->reduce(g);
             }
-            changed = reduct->reduce(g);
         }
     }
 
@@ -1411,7 +1421,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             }
             // Method 2B: Place node at nearest median position
             else if (method2 == 1){
-                auto orderNodes = g->getOrderNodes();        
+                orderNodes = g->getOrderNodes();        
                 // Calculate median of node we want to place back
                 int median = 0;
                 if (foundNode->offset_visible_nodes != foundNode->edges.size()){
@@ -1461,6 +1471,68 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                 foundNode->order = closestNode->order;
                 g->sortOrderNodesByOrder();
 
+                if (fast){
+                    result = std::make_pair(g->getOrderNodes(), 0);
+                } else {
+                    result = std::make_pair(g->getOrderNodes(), g->countCrossingsMarlon());
+                }
+            // Method 2C: Calculate Crossings for every possible position of node using only crossings from that node
+            } else if (method2 == 2){
+                orderNodes = g->getOrderNodes();
+                // Init for position = visibleNodeOffset
+                int minCrossings = 0;
+                auto minOrder = g->getOrderNodes();
+                //iterate through visible movable_nodes != current node
+                for (int v = visibleNodeOffset + 1; v < orderNodes.size(); v++) {
+                    for (auto& current_neighbour : foundNode->edges) {
+                        for (auto& v_neighbour : orderNodes[v]->edges) {
+                            if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
+                                minCrossings++;
+                            }
+                        }
+                    }
+                }
+
+                // Loop through every possible position
+                for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                    g->swapNodes(foundNode->order, i);
+
+                    int crossings = 0;
+                    //iterate through visible movable_nodes != current node
+                    for (int v = visibleNodeOffset; v < orderNodes.size(); v++) {
+                        // v == current node, no crossings to itself
+                        if (v == foundNode->order){
+                            continue;
+                        } 
+                        // v to the left of current Node -> count v crossings
+                        else if (v < foundNode->order){
+                            for (auto& v_neighbour : orderNodes[v]->edges) {
+                                for (auto& current_neighbour : foundNode->edges) {
+                                    if (v_neighbour.neighbour_id > current_neighbour.neighbour_id) {
+                                        crossings++;
+                                    }
+                                }
+                            }
+                        }
+                        // v to the right of current Node -> count currentNode crossings
+                        else if (v > foundNode->order){
+                            for (auto& current_neighbour : foundNode->edges) {
+                                for (auto& v_neighbour : orderNodes[v]->edges) {
+                                    if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
+                                        crossings++;
+                                    }
+                                }
+                            }
+                        }     
+                    }
+
+                    if (crossings < minCrossings) {
+                        minCrossings = crossings;
+                        minOrder = g->getOrderNodes();
+                    }
+                }
+                // Reconstruct min order
+                g->setOrderNodes(minOrder);
                 if (fast){
                     result = std::make_pair(g->getOrderNodes(), 0);
                 } else {

@@ -56,9 +56,9 @@ int main(int argc, char* argv[]) {
     
     // Which reductions to use
     std::vector<general_reduction*> reductions;
-    //reductions.push_back(new ZeroEdge_reduction);
+    reductions.push_back(new ZeroEdge_reduction);
     reductions.push_back(new Complete_reduction);
-    reductions.push_back(new ZeroCrossings_reduction);
+    //reductions.push_back(new ZeroCrossings_reduction);
     reductions.push_back(new Twins_reduction);
     if (almost){
         reductions.push_back(new AlmostTwin_reduction);

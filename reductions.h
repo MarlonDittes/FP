@@ -14,6 +14,7 @@ struct general_reduction {
 	virtual int reduce(Graph* g) = 0;
     virtual bool apply(Graph* g, int twins_count) {return false;};
 
+    bool first = true;
     int usage_count = 0;
 };
 
