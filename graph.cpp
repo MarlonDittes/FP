@@ -1511,7 +1511,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
     g->MedianHeuristic();
-
+    
     //Find partitions of Graph
     g->AP_Intervall();
 
