@@ -1,6 +1,7 @@
 #ifndef REDUCTIONS_H
 #define REDUCTIONS_H
 #include <vector>
+#include <algorithm>
 #include "graph.h"
 
 class Graph;
