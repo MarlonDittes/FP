@@ -18,7 +18,7 @@ struct Node {
     std::vector<int> neighbors_partition;
     int offset_visible_nodes = 0; //offset to visible nodes in neighbours
     int hash = 0;
-   
+
     // ID stuff 
     int id;
     int old_id = -1; // refers to previous ID of this node in bigger graph
@@ -28,7 +28,7 @@ struct Node {
 
     // Partition stuff
     bool isAP = false;
-    std::vector<int> partition;    
+    //std::vector<int> partition;
 };
 
 struct Partition_Intervall {
@@ -37,7 +37,8 @@ struct Partition_Intervall {
 
     Partition_Intervall(int low, int high) : interval_high(high), interval_low(low) {};
 
-    std::vector<int> nodes;
+    std::vector<Node*> nodes;
+    //std::vector<int> nodes;
     int interval_high = 0;
     int interval_low = 0;
     bool ignore = false;
@@ -45,7 +46,7 @@ struct Partition_Intervall {
 
 class Graph {
 private:
-    std::vector<Node> graph;            // Adjacency List
+    std::vector<Node> graph;            // Adjacency List --> why not pointer?
     std::vector<Node*> order_nodes;     // Order of moveable nodes
     int offset_visible_order_nodes = 0; // Offset for accessing visible moveable nodes
     std::vector<std::vector<Node*>> partitions;
@@ -118,24 +119,15 @@ public:
     // Partitioning
     void setNoPartitioning();
 
-    void Interval_Partitioning(int start_node_id, int end_node_id);
-    std::pair<int, int> DFSforPartition(int start_node_fixed_id, int partition, std::vector<bool>& visited);
-    void Partition();
     void APUtil(int start_node_id, std::vector<bool>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<bool>& isAP);
-    void APUtilIterative(int start_node_id, std::vector<bool>& visited, std::vector<int>& disc, std::vector<int>& low, std::vector<int>& parent, std::vector<bool>& isAP);
-    int CreatePartitionsVector(int start_node_fixed_id, int& partition_id, std::vector<bool>& visited);
-    void AP();
     void AP_Intervall();
-    int CreatePartitionsVectorNew(int start_node_fixed_id, int& partition_id, std::vector<bool>& visited, std::vector<std::vector<Node*>>& partitions_temp);
-    void DFS_AP_nodes(int start_node, std::vector<bool>& visited, std::vector<Partition_Intervall>& partition_intervall);
+    void DFS_AP_nodes(int start_node, std::vector<bool>& visited, std::vector<Partition_Intervall>& partition_intervall, std::vector<bool>& isAP);
 
     // Solving
     std::pair<std::vector<Node*>, long> Greedy();
     void MedianHeuristic();
     void BarycenterHeuristicMarlon();
     void Barycenter_Heuristic();
-    void Sorted_straight_line_reduction();
-    bool DFS_for_sorted_straight_line(int start_node, std::vector<bool>& visited);
 
     // Verifier
     bool verifier(Graph check);
