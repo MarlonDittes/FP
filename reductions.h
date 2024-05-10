@@ -7,37 +7,39 @@
 class Graph;
 
 enum reduction_type { ZeroEdge, Complete, ZeroCrossings, Twins, AlmostTwins, Domination };
-constexpr int BRUTE_CUTOFF = 10;
 
 struct general_reduction {
     general_reduction() {}
     virtual reduction_type get_reduction_type() const = 0;
-	virtual bool reduce(Graph* g) = 0;
-    virtual void apply(Graph* g, int n = 0) {}
+	virtual int reduce(Graph* g) = 0;
+    virtual bool apply(Graph* g, int twins_count) {return false;};
+
+    bool first = true;
+    int usage_count = 0;
 };
 
 //naive reduction = graph is optimal and will be no more reduced, no apply function
 struct ZeroEdge_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::ZeroEdge; }
-    virtual bool reduce(Graph* g) override;
+    virtual int reduce(Graph* g) override;
 };
 
 //naive reduction
 struct Complete_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::Complete; }
-    virtual bool reduce(Graph* g) override;
+    virtual int reduce(Graph* g) override;
 };
 
 //naive reduction
 struct ZeroCrossings_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::ZeroCrossings; }
-    virtual bool reduce(Graph* g) override;
+    virtual int reduce(Graph* g) override;
 }; 
 
 struct Twins_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::Twins; }
-    virtual bool reduce(Graph* g) override;
-    virtual void apply(Graph* g, int twinsCount) override;
+    virtual int reduce(Graph* g) override;
+    virtual bool apply(Graph* g, int twins_count) override;
 
     private:
 	    struct restore_data {
@@ -50,7 +52,8 @@ struct Twins_reduction : public general_reduction {
 
 struct AlmostTwin_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::AlmostTwins; }
-    virtual bool reduce(Graph* g) override;
+    virtual int reduce(Graph* g) override;
+    virtual bool apply(Graph* g, int twins_count) override;
 
     private:
 	    struct restore_data {
@@ -64,7 +67,8 @@ struct AlmostTwin_reduction : public general_reduction {
 
 struct Domination_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::Domination; }
-    virtual bool reduce(Graph* g) override;
+    virtual int reduce(Graph* g) override;
+    virtual bool apply(Graph* g, int twins_count) override;
 
     private:
 	    struct restore_data {

@@ -11,6 +11,7 @@ build/
 html/
 exact-public/
 heuristic-public/
+performance_data/
 
 ################################
 ############ C/C++ #############

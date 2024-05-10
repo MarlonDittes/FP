@@ -22,7 +22,7 @@ struct Node {
     // ID stuff 
     int id;
     int old_id = -1; // refers to previous ID of this node in bigger graph
-    int order = -1;
+    double order = -1;
     double barycenter_pos = 0;
     double median_pos = 0;
 
@@ -65,7 +65,7 @@ public:
     // Accessing node information
     Node* getNodeByOrder(int order) { return order_nodes[order]; };
     int getOrderByNode(int node_id) { return graph[node_id].order; }
-    void setOrderByNode(int node_id, int newOrder) { graph[node_id].order = newOrder; };
+    void setOrderByNode(int node_id, double newOrder) { graph[node_id].order = newOrder; };
     void setOldID(int node_id, int old_id) { this->graph[node_id].old_id = old_id; };
 
     // Vector Stuff
@@ -140,6 +140,8 @@ public:
     // Verifier
     bool verifier(Graph check);
 };
+// Utility
+int calculateSpan(Node* node);
 
 // Brute Force
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g);
@@ -147,8 +149,8 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
 
 // Branching Stuff
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
-std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes);
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes);
+std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast);
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast);
 
 // OLD SHAI BRANCHING -> REMOVE?
 void Branch_and_Bound(Graph* G);
