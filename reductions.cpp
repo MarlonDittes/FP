@@ -181,7 +181,7 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
         }
     }
 
-    std::cout << "number of almost_twins: " << restore_vec.size() << std::endl;
+    /*std::cout << "number of almost_twins: " << restore_vec.size() << std::endl;
     for (int i = 0; i < restore_vec.size(); i++) {
         std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << ", side: " << restore_vec[i].side << std::endl;
     }
@@ -191,7 +191,7 @@ bool AlmostTwin_reduction::reduce(Graph* g) {
         for (auto& neighbour : node->edges) {
             std::cout << "neighbour: " << neighbour.neighbour_id << ", edge_weight: " << neighbour.edge_weight << std::endl;
         }
-    }
+    }*/
 
     return found_AlmostTwins;
 }
@@ -225,7 +225,9 @@ bool Domination_reduction::reduce(Graph* g) {
                         if (g->getNodeByOrder(less)->edges.size() == 1) { tmp = true; }
                         //check if all other neighbours the same
                         for (int l = 1; l < g->getNodeByOrder(less)->edges.size(); l++) { 
-                            if (g->getNodeByOrder(more)->edges[k+l].neighbour_id != g->getNodeByOrder(less)->edges[l].neighbour_id) {
+                            //OR condition: check neighbourhood of less is all neighbours next to each other, s. t. no other edges can be inside (NOT TESTED)
+                            if (g->getNodeByOrder(more)->edges[k+l].neighbour_id != g->getNodeByOrder(less)->edges[l].neighbour_id
+                                || g->getNodeByOrder(less)->edges[l].neighbour_id != g->getNodeByOrder(less)->edges[l-1].neighbour_id+1) {
                                 break;
                             }
                            //found Domination
