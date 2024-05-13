@@ -24,9 +24,9 @@ int main(int argc, char* argv[]) {
     bool almost = (boolArgInt != 0);
     //Random graph
     /*
-    int sizeX = 100;
-    int sizeY = 100;
-    std::string output = "../.Run/graph.txt";
+    int sizeX = 6;
+    int sizeY = 6;
+    std::string output = "../bipartitegraphs/faulty.gr";
     auto edges = generateBipartiteGraph(sizeX, sizeY);
     writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
     */

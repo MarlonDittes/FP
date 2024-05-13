@@ -71,7 +71,7 @@ public:
 
     // Vector Stuff
     int getSizeOfOrder() { return order_nodes.size(); }
-    std::vector<Node*> getOrderNodes() { return this->order_nodes; };
+    std::vector<Node*>& getOrderNodes() { return this->order_nodes; };
     void setOrderNodes(std::vector<Node*> order);
 
     std::vector<std::vector<Node*>>& getPartitions() { return this->partitions; };

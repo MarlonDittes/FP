@@ -874,7 +874,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
     }
     //Reduce our instance if no more reductions applicable
     else {
-        auto orderNodes = g->getOrderNodes();
+        auto& orderNodes = g->getOrderNodes();
         int visibleNodeOffset = g->getOffsetVisibleOrderNodes();
 
         if ((orderNodes.size() - visibleNodeOffset) > 2) {
@@ -1015,17 +1015,17 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                         if (v == foundNode->order){
                             continue;
                         } 
-                        // v to the left of current Node -> count v crossings
+                        // v to the left of current Node
                         else if (v < foundNode->order){
-                            for (auto& v_neighbour : orderNodes[v]->edges) {
-                                for (auto& current_neighbour : foundNode->edges) {
-                                    if (v_neighbour.neighbour_id > current_neighbour.neighbour_id) {
+                            for (auto& current_neighbour : foundNode->edges) {
+                                for (auto& v_neighbour : orderNodes[v]->edges) {
+                                    if (current_neighbour.neighbour_id < v_neighbour.neighbour_id) {
                                         crossings++;
                                     }
                                 }
                             }
                         }
-                        // v to the right of current Node -> count currentNode crossings
+                        // v to the right of current Node
                         else if (v > foundNode->order){
                             for (auto& current_neighbour : foundNode->edges) {
                                 for (auto& v_neighbour : orderNodes[v]->edges) {
