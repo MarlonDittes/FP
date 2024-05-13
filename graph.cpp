@@ -1338,7 +1338,6 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                     changed = true;
                 }
             } else if (reduct->get_reduction_type() == AlmostTwins){
-                std::cout << reduct->first << std::endl;
                 almostTwins_count = reduct->reduce(g);
 
                 if (almostTwins_count > 0){
