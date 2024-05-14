@@ -37,23 +37,23 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                 3 Median
                 4 BranchAndReduce
     */
-
     try {
         std::vector<std::vector<std::string>> data = {{"graph", "duration[μs]", "crossings",
                                                          "ZeroEdge_usages", "Complete_usages", "ZeroCrossings_usages",
                                                          "Twin_usages", "AlmostTwin_usages"}};
         // Iterating through all graphs in folderPath
-        int count = 0;
         for (const auto& entry : fs::directory_iterator(folderPath)) {
-            std::cout << count << std::endl;
-            //if (count == 50){
-            //    break;
-            //}
             if (fs::is_regular_file(entry.path())) {
                 size_t lastSlashPos = entry.path().string().find_last_of('/');
                 std::string testname;
                 if (lastSlashPos != std::string::npos) {
                     testname = entry.path().string().substr(lastSlashPos + 1);
+                }
+                std::cout << testname << std::endl;
+
+                //TODO: Handle big graphs like 10.gr, 44.gr in heuristic-public, for now I remove it
+                if (testname == "10.gr" || testname == "44.gr"){
+                    continue;
                 }
 
                 //std::cout << "Testing on " << testname << std::endl;
@@ -71,7 +71,7 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                 std::vector<general_reduction*> reductions;
                 reductions.push_back(new ZeroEdge_reduction);
                 reductions.push_back(new Complete_reduction);
-                reductions.push_back(new ZeroCrossings_reduction);
+                //reductions.push_back(new ZeroCrossings_reduction);
                 reductions.push_back(new Twins_reduction);
                 if (almost){
                     reductions.push_back(new AlmostTwin_reduction);
@@ -121,12 +121,12 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                         std::cout << "4 BranchAndReduce" << std::endl;
                         return;
                 }
-                std::vector<std::string> newData = {testname, std::to_string(duration.count()), std::to_string(result.second),
-                                                    std::to_string(reductions[0]->usage_count), std::to_string(reductions[1]->usage_count), std::to_string(reductions[2]->usage_count),
-                                                    std::to_string(reductions[3]->usage_count), std::to_string(reductions[4]->usage_count)};
+                std::vector<std::string> newData = {testname, std::to_string(duration.count()), std::to_string(result.second)};
+                for (size_t i = 0; i < reductions.size(); ++i) {
+                    newData.push_back(std::to_string(reductions[i]->usage_count));
+                }
                 data.push_back(newData);
             }
-            count++;
         }
         writeCSV(outputFile, data);
     } catch (const fs::filesystem_error& ex) {
