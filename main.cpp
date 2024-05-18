@@ -5,6 +5,17 @@
 #include "performance.h"
 #include "reductions.h"
 
+#include "src_henning/src/definitions.h"
+#include "src_henning/src/macros.h"
+#include "src_henning/src/misc.h"
+#include "src_henning/src/graph_hen.h"
+#include "src_henning/src/solver_bf.h"
+#include "src_henning/src/exhaustive_solver.h"
+#include "src_henning/src/partitioner.h"
+#include "src_henning/src/solver.h"
+#include "src_henning/src/useless_reducer.h"
+#include "src_henning/src/front_back_reducer.h"
+
 int main(int argc, char* argv[]) {
      // Check if there are enough command-line arguments
     //if (argc < 6) {
@@ -36,7 +47,11 @@ int main(int argc, char* argv[]) {
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
+    std::cout << "before" << std::endl;
+
     CrossGuard::Graph g_hen(g->getN0(), g->getN1());
+
+    std::cout << "before" << std::endl;
 
     //g->printGraph();
     //std::cout << std::endl;
