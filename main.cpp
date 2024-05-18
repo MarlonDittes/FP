@@ -7,21 +7,23 @@
 
 int main(int argc, char* argv[]) {
      // Check if there are enough command-line arguments
-    if (argc < 6) {
-        std::cerr << "Usage: " << argv[0] << " <graph_file> <method1> <method2> <fast> <almost_twin>" << std::endl;
-        std::cerr << "Types: string int int bool bool" << std::endl;
-        return 1;
-    }
+    //if (argc < 6) {
+    //    std::cerr << "Usage: " << argv[0] << " <graph_file> <method1> <method2> <fast> <almost_twin>" << std::endl;
+    //    std::cerr << "Types: string int int bool bool" << std::endl;
+    //    return 1;
+    //}
 
     std::string graph_file = argv[1];
-    int method1 = std::stoi(argv[2]);
+    
+    /*int method1 = std::stoi(argv[2]);
     int method2 = std::stoi(argv[3]);
     
     int boolArgInt = std::stoi(argv[4]);
     bool fast = (boolArgInt != 0);
 
     boolArgInt = std::stoi(argv[5]);
-    bool almost = (boolArgInt != 0);
+    bool almost = (boolArgInt != 0);*/
+
     //Random graph
     /*
     int sizeX = 6;
@@ -33,6 +35,8 @@ int main(int argc, char* argv[]) {
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
+
+    CrossGuard::Graph g_hen(g->getN0(), g->getN1());
 
     //g->printGraph();
     //std::cout << std::endl;
@@ -47,47 +51,47 @@ int main(int argc, char* argv[]) {
     std::cout << "number of crossings with BarycenterHeuristic g: " << crossing_count << std::endl;
     */
 
-    Graph* copy2 = readGraph(graph_file);
-    copy2->MedianHeuristic();
-    crossing_count = copy2->countCrossingsMarlon();
-    std::cout << "number of crossings with MedianHeuristic g: " << crossing_count << std::endl;
+    //Graph* copy2 = readGraph(graph_file);
+    //copy2->MedianHeuristic();
+    //crossing_count = copy2->countCrossingsMarlon();
+    //std::cout << "number of crossings with MedianHeuristic g: " << crossing_count << std::endl;
 
-    std::cout << std::endl;
-    
-    // Which reductions to use
-    std::vector<general_reduction*> reductions;
-    reductions.push_back(new ZeroEdge_reduction);
-    reductions.push_back(new Complete_reduction);
-    //reductions.push_back(new ZeroCrossings_reduction);
-    reductions.push_back(new Twins_reduction);
-    if (almost){
-        reductions.push_back(new AlmostTwin_reduction);
-    }
-    //reductions.push_back(new Domination_reduction);
+    //std::cout << std::endl;
+    //
+    //// Which reductions to use
+    //std::vector<general_reduction*> reductions;
+    //reductions.push_back(new ZeroEdge_reduction);
+    //reductions.push_back(new Complete_reduction);
+    ////reductions.push_back(new ZeroCrossings_reduction);
+    //reductions.push_back(new Twins_reduction);
+    //if (almost){
+    //    reductions.push_back(new AlmostTwin_reduction);
+    //}
+    ////reductions.push_back(new Domination_reduction);
 
-    auto result = BranchAndReduce(g, reductions, method1, method2, fast);
-    //outputOrder(result.first, "../output2.txt");
+    //auto result = BranchAndReduce(g, reductions, method1, method2, fast);
+    ////outputOrder(result.first, "../output2.txt");
 
-    if (!fast){
-        if (result.second != g->countCrossingsMarlon()){
-        std::cout << "Crossings didn't sum up!" << std::endl;
-        } else {
-            std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
-        }
-    } else{
-        std::cout << "Crossings BranchAndReduce: " << g->countCrossingsMarlon() << std::endl;
-    }
+    //if (!fast){
+    //    if (result.second != g->countCrossingsMarlon()){
+    //    std::cout << "Crossings didn't sum up!" << std::endl;
+    //    } else {
+    //        std::cout << "Crossings BranchAndReduce: " << result.second << std::endl;
+    //    }
+    //} else{
+    //    std::cout << "Crossings BranchAndReduce: " << g->countCrossingsMarlon() << std::endl;
+    //}
 
-    if (g->verifier(verifier)) {
-        std::cout << "Graph is valid" << std::endl;
-    }
-    else {
-        std::cout << "Graph is NOT valid" << std::endl;
-    }
+    //if (g->verifier(verifier)) {
+    //    std::cout << "Graph is valid" << std::endl;
+    //}
+    //else {
+    //    std::cout << "Graph is NOT valid" << std::endl;
+    //}
 
-    for (auto& reduct : reductions){
-        std::cout << reduct->get_reduction_type() << " was used " << reduct->usage_count << " times." << std::endl;
-    }   
+    //for (auto& reduct : reductions){
+    //    std::cout << reduct->get_reduction_type() << " was used " << reduct->usage_count << " times." << std::endl;
+    //}   
 
     //Testing on test set
 

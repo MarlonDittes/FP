@@ -14,6 +14,12 @@ set(CMAKE_BUILD_TYPE Release)
 #add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp LPSolver.cpp)
 add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp)
 
+set(SOURCE_FILES
+    src_henning/src/misc.cpp
+    src_henning/src/edge.cpp
+    # Add all .cpp files from src_henning/src directory
+)
+
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE my_lib)
 
