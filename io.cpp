@@ -5,6 +5,50 @@
 #include <algorithm>
 #include <unordered_set>
 
+Graph* readStandardIn(){
+    std::string tmp; // for p and ocr in input format
+    int n0; // neighbours = A, fixed partition
+    int n1; // movable_nodes = B, free partition
+    int m;
+
+    // Read from standard input
+    std::string line;
+
+    std::getline(std::cin, line);
+
+    while (line[0] == 'c') {
+        std::getline(std::cin, line);
+    }
+
+    std::stringstream ss(line);
+    ss >> tmp; // p
+    ss >> tmp; // ocr
+    ss >> n0;
+    ss >> n1;
+    ss >> m;
+
+    // Initialize graph
+    Graph* g = new Graph(n0, n1, m);
+    
+    // Read adjacencies of the nodes in the input
+    while (std::getline(std::cin, line)) {
+        if (line[0] == 'c' || line.empty()) {
+            continue;
+        }
+        std::stringstream ss(line);
+
+        int x;
+        int y;
+
+        ss >> x;
+        ss >> y;
+        g->addEdge(x-1, y-1);
+    }
+
+    g->sortNeighbours();
+    return g;
+}
+
 Graph* readGraph(std::string graph_file) {
     //std::cout << "Reading graph..." << std::endl;
     std::string tmp; //for p and ocr in input format
@@ -58,6 +102,13 @@ Graph* readGraph(std::string graph_file) {
     //g->printGraph();
     g->sortNeighbours();
     return g;
+}
+
+void outputStandardOut(const std::vector<Node*>& order) {
+    for (const auto& node : order) {
+        // Print the node id to standard output
+        std::cout << node->id + 1 << std::endl;
+    }
 }
 
 void outputOrder(std::vector<Node*> order, std::string output) {
