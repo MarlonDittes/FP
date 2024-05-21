@@ -850,23 +850,31 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 
 void ExactSolution(Graph& g) {
     CrossGuard::Graph g_exact(g.getN0(), g.getN1());
-    
+    std::cout << "before adding edges" << std::endl;
+
+    std::cout << "Offset visible order nodes " << g.getOffsetVisibleOrderNodes() << std::endl;
+    std::cout << "Order Nodes Size : " << g.getOrderNodes().size() << std::endl;
+
     for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
         for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
             //TODO: Check for the added edge weights
             //g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, g.getOrderNodes()[i]->edges[j].edge_weight);
-            
+            std::cout << "i : " << i << " j : " << j << std::endl;
+            std::cout << "i-te nodes amount of neighbours : " << g.getOrderNodes()[i]->edges.size() << std::endl;
+            std::cout << "i-te order node : " << g.getOrderNodes()[i]->id << std::endl;
+            std::cout << "j-te neighbour of i-te node: " << g.getOrderNodes()[i]->edges[j].neighbour_id << std::endl;
             g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, 1);
         }
     }
 
+    std::cout << "After adding edges" << std::endl;
     g_exact.finalize();
 
     CrossGuard::Solver s(g_exact);
     s.solve(true);
     CrossGuard::AlignedVector<CrossGuard::u32> solver_solution = s.get_solution();
     long sumCrossings = g_exact.determine_n_cuts(solver_solution);
-    std::cout << "Crossings : " << sumCrossings << std::endl;*/
+    std::cout << "Crossings : " << sumCrossings << std::endl;
 
 }
 
