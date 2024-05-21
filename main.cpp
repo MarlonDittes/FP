@@ -36,23 +36,24 @@ int main(int argc, char* argv[]) {
     bool almost = (boolArgInt != 0);*/
 
     //Random graph
-    
-    int sizeX = 3;
-    int sizeY = 3;
-    std::string output = "../src_henning/data/test/faulty.gr";
-    auto edges = generateBipartiteGraph(sizeX, sizeY);
-    writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
+    //while (true) {
+        int sizeX = 3;
+        int sizeY = 3;
+        std::string output = "../src_henning/data/test/faulty.gr";
+        auto edges = generateBipartiteGraph(sizeX, sizeY);
+        writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
 
-    Graph* g = readGraph(graph_file);
-    Graph verifier = *g;
+        Graph* g = readGraph(graph_file);
+        Graph verifier = *g;
 
-    ExactSolution(*g);
+        ExactSolution(*g);
+    //}
 
     //g->printGraph();
     //std::cout << std::endl;
 
-    long crossing_count = g->countCrossingsMarlon();
-    std::cout << "number of crossings in default g: " << crossing_count << std::endl;
+    //long crossing_count = g->countCrossingsMarlon();
+    //std::cout << "number of crossings in default g: " << crossing_count << std::endl;
 
     /*
     Graph* copy = readGraph(graph_file);
