@@ -836,8 +836,6 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 }
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
-    static bool firstCall = true;
-
     bool changed = false;
     int twins_count = 0;
     int almostTwins_count = 0;
@@ -905,11 +903,6 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                         foundNode = orderNodes[i];
                     }
                 }
-            }
-
-            if (firstCall){
-                std::cout << orderNodes.size() - visibleNodeOffset << std::endl;
-                firstCall = false;
             }
             
             // Remove node for now

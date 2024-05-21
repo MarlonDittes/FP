@@ -8,7 +8,9 @@
 #include <vector>
 #include "graph.h"
 
+Graph* readStandardIn();
 Graph* readGraph(std::string graph_file);
+void outputStandardOut(const std::vector<Node*>& order);
 void outputOrder(std::vector<Node*> order, std::string output);
 
 void writeGraphToBipartiteGraph(int n0, int n1, int m, std::vector<std::pair<int, int>> edges, std::string output);
