@@ -848,13 +848,43 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     return partGraph;
 }
 
+void TomAlvAlg(Graph& g) {
+
+    std::vector<std::vector<int>> MoveTomAlv(g.getN1(), std::vector<int>(1));
+    std::vector<std::vector<int>> FixTomAlv(g.getN0(), std::vector<int>(1));
+
+    for (int i = 0; i < g.getOrderNodes().size(); i++) {
+        for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
+            MoveTomAlv[i].push_back(g.getOrderNodes()[i]->edges[j].neighbour_id);
+            // FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(i + /* g.getN0());
+            FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(i);
+        }
+    }
+    HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(MoveTomAlv, FixTomAlv);
+    bool converged = false;
+    while (!converged) {
+        converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
+    }
+
+
+
+    /*std::vector<std::vector<int>> freeNodes = {{0, 1}, {0}, {0, 1, 2}};
+    std::vector<std::vector<int>> fixedNodes = { {0, 1, 2}, {0, 2}, {2} };
+    HeuristicGraph myGraph = HeuristicGraph<int, int>(freeNodes, fixedNodes);
+
+    bool didSwitch = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(myGraph, true, false, false);
+    */
+
+
+}
+
 bool ExactSolution(Graph& g) {
     CrossGuard::Graph g_exact(g.getN0(), g.getN1());
     /*std::cout << "Offset visible order nodes " << g.getOffsetVisibleOrderNodes() << std::endl;
     std::cout << "Order Nodes Size : " << g.getOrderNodes().size() << std::endl;*/
 
     for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
-        for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
+        for (int j = g.getOrderNodes()[i]->offset_visible_nodes; j < g.getOrderNodes()[i]->edges.size(); j++) {
             //TODO: Check for the added edge weights
             //g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, g.getOrderNodes()[i]->edges[j].edge_weight);
             /*std::cout << "i : " << i << " j : " << j << std::endl;
