@@ -846,10 +846,10 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     return partGraph;
 }
 
-std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
+std::pair<std::vector<Node*>, int> ExactSolution(Graph& g) {
     CrossGuard::Graph g_exact(g.getN0(), g.getN1());
     
-    for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size; i++) {
+    for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
         for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
             //TODO: Check for the added edge weights
             //g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, g.getOrderNodes()[i]->edges[j].edge_weight);
@@ -862,7 +862,7 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 
     CrossGuard::Solver s(g_exact);
     s.solve(true);
-    CrossGuard::AlignedVector<u32> solver_solution = s.get_solution();
+    CrossGuard::AlignedVector<CrossGuard::u32> solver_solution = s.get_solution();
     int sumCrossings = g_exact.determine_n_cuts();
 
     return std::make_pair(solver_solution, sumCrossings);
@@ -1185,9 +1185,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
             //Call function for henricks initialisation in graph.h
             //
         }
-        else {
-            auto result = branching(g, reductionTypes, method1, method2, fast);
-        }
+        auto result = branching(g, reductionTypes, method1, method2, fast);
         solution = result.first;
         sumCrossings = result.second;
 
