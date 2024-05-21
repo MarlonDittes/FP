@@ -1005,7 +1005,8 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                     for (auto& current_neighbour : foundNode->edges) {
                         for (auto& v_neighbour : orderNodes[v]->edges) {
                             if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
-                                minCrossings++;
+                                //minCrossings++;
+                                minCrossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
                             }
                         }
                     }
@@ -1027,7 +1028,8 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                             for (auto& current_neighbour : foundNode->edges) {
                                 for (auto& v_neighbour : orderNodes[v]->edges) {
                                     if (current_neighbour.neighbour_id < v_neighbour.neighbour_id) {
-                                        crossings++;
+                                        //crossings++;
+                                        crossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
                                     }
                                 }
                             }
@@ -1037,7 +1039,8 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                             for (auto& current_neighbour : foundNode->edges) {
                                 for (auto& v_neighbour : orderNodes[v]->edges) {
                                     if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
-                                        crossings++;
+                                        //crossings++;
+                                        crossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
                                     }
                                 }
                             }
