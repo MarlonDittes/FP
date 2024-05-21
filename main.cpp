@@ -36,13 +36,12 @@ int main(int argc, char* argv[]) {
     bool almost = (boolArgInt != 0);*/
 
     //Random graph
-    /*
-    int sizeX = 6;
-    int sizeY = 6;
-    std::string output = "../bipartitegraphs/faulty.gr";
+    
+    int sizeX = 3;
+    int sizeY = 3;
+    std::string output = "../src_henning/data/test/faulty.gr";
     auto edges = generateBipartiteGraph(sizeX, sizeY);
     writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
-    */
 
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;

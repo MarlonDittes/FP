@@ -1,0 +1,7 @@
+c first number: size neighbours (A)
+c second number: size movable_nodes (B)
+c third number: number of edges (m)
+p ocr 3 3 3
+1 6
+2 5
+3 4
