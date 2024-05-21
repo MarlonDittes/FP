@@ -10,6 +10,8 @@
 #include <omp.h>
 #include <queue>
 #include <stack>
+#include <cstdint>
+#include <string>
 
 #include "src_henning/src/definitions.h"
 #include "src_henning/src/macros.h"
@@ -864,7 +866,7 @@ void ExactSolution(Graph& g) {
     s.solve(true);
     CrossGuard::AlignedVector<CrossGuard::u32> solver_solution = s.get_solution();
     long sumCrossings = g_exact.determine_n_cuts(solver_solution);
-    std::cout << "Crossings : " << sumCrossings << std::endl;
+    std::cout << "Crossings : " << sumCrossings << std::endl;*/
 
 }
 

@@ -12,16 +12,22 @@ set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 #add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp LPSolver.cpp)
-add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp)
+#add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp)
 
-set(SOURCE_FILES
+add_executable(PACE2024Exact
+    main.cpp
+    graph.cpp
+    io.cpp
+    stack.cpp
+    reductions.cpp
+    performance.cpp
     src_henning/src/misc.cpp
     src_henning/src/edge.cpp
     src_henning/src/macros.h
     src_henning/src/definitions.h
     src_henning/src/misc.h
     src_henning/src/edge.h
-    src_henning/src/graph.h
+    src_henning/src/graph_hen.h
     src_henning/src/solver_bf.h
     src_henning/src/perfect_pattern.h
     src_henning/src/exhaustive_solver.h
@@ -37,6 +43,6 @@ set(SOURCE_FILES
     src_henning/src/one_vertex_partition_manager.h
 )
 
-add_executable(main main.cpp)
-target_link_libraries(main PRIVATE my_lib)
+#add_executable(main main.cpp)
+#target_link_libraries(main PRIVATE my_lib)
 
