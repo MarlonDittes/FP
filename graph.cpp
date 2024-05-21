@@ -863,7 +863,7 @@ void ExactSolution(Graph& g) {
     CrossGuard::Solver s(g_exact);
     s.solve(true);
     CrossGuard::AlignedVector<CrossGuard::u32> solver_solution = s.get_solution();
-    long sumCrossings = CrossGuard::g_exact.determine_n_cuts();
+    long sumCrossings = g_exact.determine_n_cuts(solver_solution);
     std::cout << "Crossings : " << sumCrossings << std::endl;
 
 }
