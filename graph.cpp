@@ -848,7 +848,7 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     return partGraph;
 }
 
-void ExactSolution(Graph& g) {
+void ExactSolution(Graph g) {
     CrossGuard::Graph g_exact(g.getN0(), g.getN1());
     /*std::cout << "Offset visible order nodes " << g.getOffsetVisibleOrderNodes() << std::endl;
     std::cout << "Order Nodes Size : " << g.getOrderNodes().size() << std::endl;*/
@@ -873,11 +873,12 @@ void ExactSolution(Graph& g) {
     CrossGuard::AlignedVector<CrossGuard::u32> solver_solution = s.get_solution();
     long sumCrossings = g_exact.determine_n_cuts(solver_solution);
     
-    for (const auto& value : solver_solution) {
-        std::cout << value << " ";
+    for (int i = 0; i < solver_solution.size(); i++) {
+        g.swapNodes(i, g.getOrderNodes()[solver_solution[i]]->order);
     }
 
     std::cout << "Crossings : " << sumCrossings << std::endl;
+    std::cout << " Crossing from graph : " << g.countCrossingsMarlon() << std::endl;
 
 }
 
