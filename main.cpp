@@ -47,11 +47,7 @@ int main(int argc, char* argv[]) {
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
-    std::cout << "before" << std::endl;
-
-    CrossGuard::Graph g_hen(g->getN0(), g->getN1());
-
-    std::cout << "before" << std::endl;
+    ExactSolution(g);
 
     //g->printGraph();
     //std::cout << std::endl;
