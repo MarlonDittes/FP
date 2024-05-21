@@ -143,7 +143,7 @@ std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, in
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast);
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast);
-void ExactSolution(Graph& g);
+bool ExactSolution(Graph& g);
 
 // OLD SHAI BRANCHING -> REMOVE?
 void Branch_and_Bound(Graph* G);

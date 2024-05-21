@@ -36,18 +36,21 @@ int main(int argc, char* argv[]) {
     bool almost = (boolArgInt != 0);*/
 
     //Random graph
-    //while (true) {
-        int sizeX = 3;
-        int sizeY = 3;
-        std::string output = "../src_henning/data/test/faulty.gr";
-        auto edges = generateBipartiteGraph(sizeX, sizeY);
-        writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
+    while (true) {
+    int sizeX = 5;
+    int sizeY = 5;
+    std::string output = "../src_henning/data/test/faulty.gr";
+    auto edges = generateBipartiteGraph(sizeX, sizeY);
+    writeGraphToBipartiteGraph(sizeX, sizeY, edges.size(), edges, output);
 
-        Graph* g = readGraph(graph_file);
-        Graph verifier = *g;
+    Graph* g = readGraph(graph_file);
+    Graph verifier = *g;
 
-        ExactSolution(*g);
-    //}
+    bool check = ExactSolution(*g);
+    if (!check) {
+        return 0;
+    }
+    }
 
     //g->printGraph();
     //std::cout << std::endl;
