@@ -17,7 +17,24 @@ add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.
 set(SOURCE_FILES
     src_henning/src/misc.cpp
     src_henning/src/edge.cpp
-    # Add all .cpp files from src_henning/src directory
+    src_henning/src/macros.h
+    src_henning/src/definitions.h
+    src_henning/src/misc.h
+    src_henning/src/edge.h
+    src_henning/src/graph.h
+    src_henning/src/solver_bf.h
+    src_henning/src/perfect_pattern.h
+    src_henning/src/exhaustive_solver.h
+    src_henning/src/candidate_manager.h
+    src_henning/src/cross_matrix.h
+    src_henning/src/partitioner.h
+    src_henning/src/translation_table.h
+    src_henning/src/twin_reducer.h
+    src_henning/src/solver.h
+    src_henning/src/front_back_reducer.h
+    src_henning/src/useless_reducer.h
+    src_henning/src/one_vertex_partitioner.h
+    src_henning/src/one_vertex_partition_manager.h
 )
 
 add_executable(main main.cpp)
