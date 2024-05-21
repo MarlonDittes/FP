@@ -11,6 +11,17 @@
 #include <queue>
 #include <stack>
 
+#include "src_henning/src/definitions.h"
+#include "src_henning/src/macros.h"
+#include "src_henning/src/misc.h"
+#include "src_henning/src/graph_hen.h"
+#include "src_henning/src/solver_bf.h"
+#include "src_henning/src/exhaustive_solver.h"
+#include "src_henning/src/partitioner.h"
+#include "src_henning/src/solver.h"
+#include "src_henning/src/useless_reducer.h"
+#include "src_henning/src/front_back_reducer.h"
+
 
 
 //Constructor dependent on size of movable_nodes
@@ -835,6 +846,29 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     return partGraph;
 }
 
+std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
+    CrossGuard::Graph g_exact(g.getN0(), g.getN1());
+    
+    for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size; i++) {
+        for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
+            //TODO: Check for the added edge weights
+            //g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, g.getOrderNodes()[i]->edges[j].edge_weight);
+            
+            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, 1);
+        }
+    }
+
+    g_exact.finalize();
+
+    CrossGuard::Solver s(g_exact);
+    s.solve(true);
+    CrossGuard::AlignedVector<u32> solver_solution = s.get_solution();
+    int sumCrossings = g_exact.determine_n_cuts();
+
+    return std::make_pair(solver_solution, sumCrossings);
+}
+
+
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     bool changed = false;
     int twins_count = 0;
@@ -1111,6 +1145,11 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
         for (auto& part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
 
+            if (partGraph->getGraph().size() < 50) {
+                //Call function for henricks initialisation in graph.h
+                //
+            }
+
             auto result = branching(partGraph, reductionTypes, method1, method2, fast);
             results.push_back(result);
         }
@@ -1141,10 +1180,20 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
     }
     // We couldn't partition the graph
     else {
-        auto result = branching(g, reductionTypes, method1, method2, fast);
+
+        if (g->getGraph().size() < 50) {
+            //Call function for henricks initialisation in graph.h
+            //
+        }
+        else {
+            auto result = branching(g, reductionTypes, method1, method2, fast);
+        }
         solution = result.first;
         sumCrossings = result.second;
+
     }
+
+    //TODO: Check if the solution is the order of the nodes.
 
     return std::make_pair(solution, sumCrossings);
 }
