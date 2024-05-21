@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     Graph* g = readGraph(graph_file);
     Graph verifier = *g;
 
-    ExactSolution(g);
+    ExactSolution(*g);
 
     //g->printGraph();
     //std::cout << std::endl;
