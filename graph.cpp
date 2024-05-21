@@ -878,10 +878,10 @@ bool ExactSolution(Graph& g) {
         new_order[i] = &g.getGraph()[solver_solution[i] + g.getN1()];
     }
 
-    std::cout << "Crossings with henning : " << sumCrossings << std::endl;
-    std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
+    //std::cout << "Crossings with henning : " << sumCrossings << std::endl;
+    //std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
     g.setOrderNodes(new_order);
-    std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
+    //std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
 
     if (sumCrossings != g.countCrossingsMarlon()) {
         return false;
