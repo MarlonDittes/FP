@@ -861,7 +861,7 @@ bool ExactSolution(Graph& g) {
             std::cout << "i-te nodes amount of neighbours : " << g.getOrderNodes()[i]->edges.size() << std::endl;
             std::cout << "i-te order node : " << g.getOrderNodes()[i]->id << std::endl;
             std::cout << "j-te neighbour of i-te node: " << g.getOrderNodes()[i]->edges[j].neighbour_id << std::endl;*/
-            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id - g.getN1(), 1);
+            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id - g.getN0(), 1);
         }
     }
 
@@ -875,13 +875,13 @@ bool ExactSolution(Graph& g) {
     std::vector<Node*> new_order = g.getOrderNodes();
     
     for (int i = 0; i < solver_solution.size(); i++) {
-        new_order[i] = &g.getGraph()[solver_solution[i] + g.getN1()];
+        new_order[i] = &g.getGraph()[solver_solution[i] + g.getN0()];
     }
 
-    //std::cout << "Crossings with henning : " << sumCrossings << std::endl;
-    //std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
+    std::cout << "Crossings with henning : " << sumCrossings << std::endl;
+    std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
     g.setOrderNodes(new_order);
-    //std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
+    std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
 
     if (sumCrossings != g.countCrossingsMarlon()) {
         return false;

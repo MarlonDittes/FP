@@ -59,7 +59,7 @@ namespace CrossGuard {
             if(verbose){
                 AlignedVector<u32> sizes;
                 for(auto &g_part : partitions){sizes.push_back(g_part.n_B);}
-                //std::cout << "\tNumber of components: " << component_order.size() << " ";
+                std::cout << "\tNumber of components: " << component_order.size() << " ";
                 print(sizes);
             }
 
@@ -77,7 +77,7 @@ namespace CrossGuard {
                 if(verbose){
                     AlignedVector<u32> sizes;
                     for(auto &g_part : new_partitions){sizes.push_back(g_part.n_B);}
-                    //std::cout << "\t\tFurther divided: " << new_partitions.size() << " ";
+                    std::cout << "\t\tFurther divided: " << new_partitions.size() << " ";
                     print(sizes);
                 }
 
@@ -99,7 +99,7 @@ namespace CrossGuard {
                     ASSERT(reduced_g.is_finalized);
 
                     if (verbose) {
-                        //std::cout << "\t\t\tComponent reduced from " << g_part.n_B << " to " << useless_g.n_B << " to " << fb_g.n_B << " to " << reduced_g.n_B << std::flush;
+                        std::cout << "\t\t\tComponent reduced from " << g_part.n_B << " to " << useless_g.n_B << " to " << fb_g.n_B << " to " << reduced_g.n_B << std::flush;
                     }
 
                     ExhaustiveSolver s(reduced_g);
@@ -108,7 +108,7 @@ namespace CrossGuard {
                     s.solve();
                     AlignedVector<u32> temp = s.get_solution();
 
-                    //if (verbose) { std::cout << " -- Component solved" << std::endl; }
+                    if (verbose) { std::cout << " -- Component solved" << std::endl; }
 
                     temp = reducer.back_propagate(temp);
                     temp = fb_reducer.back_propagate(temp);
