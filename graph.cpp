@@ -1205,16 +1205,16 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
         for (auto& part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
 
-            std::pair<std::vector<Node*>, long> result;
+            //std::pair<std::vector<Node*>, long> result;
 
-            if (partGraph->getGraph().size() < 50) {
-                result = ExactSolution(*partGraph)
-            }
-            else {
-                result = branching(partGraph, reductionTypes, method1, method2, fast);
-            }
+            //if (partGraph->getGraph().size() < 50) {
+            //    result = ExactSolution(*partGraph);
+            //}
+            //else {
+            //    result = branching(partGraph, reductionTypes, method1, method2, fast);
+            //}
 
-            //auto result = branching(partGraph, reductionTypes, method1, method2, fast);
+            auto result = branching(partGraph, reductionTypes, method1, method2, fast);
             results.push_back(result);
         }
 
@@ -1245,15 +1245,15 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
     // We couldn't partition the graph
     else {
 
-        std::pair<std::vector<Node*>, long> result;
+        //std::pair<std::vector<Node*>, long> result;
 
-        if (g->getGraph().size() < 50) {
-            result = ExactSolution(*g);
-        }
-        else {
-            result = branching(g, reductionTypes, method1, method2, fast);
-        }
-        //auto result = branching(g, reductionTypes, method1, method2, fast);
+        //if (g->getGraph().size() < 50) {
+        //    result = ExactSolution(*g);
+        //}
+        //else {
+        //    result = branching(g, reductionTypes, method1, method2, fast);
+        //}
+        auto result = branching(g, reductionTypes, method1, method2, fast);
         solution = result.first;
         sumCrossings = result.second;
 
