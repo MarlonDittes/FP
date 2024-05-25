@@ -871,6 +871,17 @@ void TomAlvAlg(Graph& g) {
     // freenode position id -> pos
     // permutation pos -> id
 
+    const std::vector<int>& Permutation = graphTomAlv.getPermutation();
+    std::vector<Node*> new_order = g.getOrderNodes();
+
+    for (int ix = 0; ix < Permutation.size(); ++i) {
+        std::cout << "Permutation vector : " << Permutation[i] << std::endl;
+        new_order[i] = &g.getGraph()[Permutation[i] + g.getN0()];
+    }
+
+    g.setOrderNodes(new_order);
+    std::cout << " Crossing from graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
+
 }
 
 bool ExactSolution(Graph& g) {
