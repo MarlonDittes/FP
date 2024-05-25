@@ -46,10 +46,12 @@ int main(int argc, char* argv[]) {
         Graph* g = readGraph(graph_file);
         Graph verifier = *g;
 
-        bool check = ExactSolution(*g);
+        /*bool check = ExactSolution(*g);
         if (!check) {
             return 0;
-        }
+        }*/
+
+        TomAlvAlg(*g);
     //}
 
     //g->printGraph();

@@ -24,7 +24,8 @@
 #include "src_henning/src/useless_reducer.h"
 #include "src_henning/src/front_back_reducer.h"
 
-
+#include "TomAlv/heuristic_algorithm.h"
+#include "TomAlv/heuristic_graph.h"
 
 //Constructor dependent on size of movable_nodes
 Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), activeEdges(m), graph(n0 + n1), order_nodes(n1), partitions(1) {
@@ -866,15 +867,9 @@ void TomAlvAlg(Graph& g) {
         converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
     }
 
-
-
-    /*std::vector<std::vector<int>> freeNodes = {{0, 1}, {0}, {0, 1, 2}};
-    std::vector<std::vector<int>> fixedNodes = { {0, 1, 2}, {0, 2}, {2} };
-    HeuristicGraph myGraph = HeuristicGraph<int, int>(freeNodes, fixedNodes);
-
-    bool didSwitch = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(myGraph, true, false, false);
-    */
-
+    // TODO: zurück übersetzen
+    // freenode position id -> pos
+    // permutation pos -> id
 
 }
 
