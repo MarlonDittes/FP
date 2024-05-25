@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
     //}
     ////reductions.push_back(new Domination_reduction);
 
-    auto result = BranchAndReduce(g, reductions, method1, method2, fast);
+    auto result = BranchAndReduce(g, reductions, 1, 2, 1);
     std::cout << "End Crossing is : " << result.second << std::endl;
     ////outputOrder(result.first, "../output2.txt");
 
