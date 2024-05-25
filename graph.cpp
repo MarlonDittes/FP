@@ -883,7 +883,7 @@ void TomAlvAlg(Graph& g) {
 
 }
 
-bool ExactSolution(Graph& g) {
+std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
     CrossGuard::Graph g_exact(g.getN0(), g.getN1());
     /*std::cout << "Offset visible order nodes " << g.getOffsetVisibleOrderNodes() << std::endl;
     std::cout << "Order Nodes Size : " << g.getOrderNodes().size() << std::endl;*/
@@ -921,9 +921,10 @@ bool ExactSolution(Graph& g) {
     std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
 
     if (sumCrossings != g.countCrossingsMarlon()) {
-        return false;
+        std::cout << "SUM OF HENNING AND COUNTCROSSING FUNCTION DID NOT DELIVER THE SAME RESULT" << std::endl;
     }
-    return true;
+
+    return std::make_pair(g.getOrderNodes(), g.countCrossingsMarlon());;
 }
 
 
@@ -1204,12 +1205,16 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
         for (auto& part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
 
+            std::pair<std::vector<Node*>, long> result;
+
             if (partGraph->getGraph().size() < 50) {
-                // Call function for henricks initialisation in graph.h
-                // 
+                result = ExactSolution(*partGraph)
+            }
+            else {
+                result = branching(partGraph, reductionTypes, method1, method2, fast);
             }
 
-            auto result = branching(partGraph, reductionTypes, method1, method2, fast);
+            //auto result = branching(partGraph, reductionTypes, method1, method2, fast);
             results.push_back(result);
         }
 
@@ -1240,11 +1245,15 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
     // We couldn't partition the graph
     else {
 
+        std::pair<std::vector<Node*>, long> result;
+
         if (g->getGraph().size() < 50) {
-            // Call function for henricks initialisation in graph.h
-            //
+            result = ExactSolution(*g);
         }
-        auto result = branching(g, reductionTypes, method1, method2, fast);
+        else {
+            result = branching(g, reductionTypes, method1, method2, fast);
+        }
+        //auto result = branching(g, reductionTypes, method1, method2, fast);
         solution = result.first;
         sumCrossings = result.second;
 
