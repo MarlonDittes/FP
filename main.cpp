@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
         Graph* g = readGraph(graph_file);
         Graph verifier = *g;
 
-        /*bool check = ExactSolution(*g);
-        if (!check) {
+        //bool check = ExactSolution(*g);
+        /*if (!check) {
             return 0;
         }*/
 

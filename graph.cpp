@@ -634,7 +634,8 @@ void Graph::AP_Intervall() {
             while (second_index < second_partition->nodes.size()) {
                 first_partition->nodes.push_back(second_partition->nodes[second_index++]);
             }
-
+            
+            //Change the interval's high and low if necessary after the merge
             if (first_partition->interval_low > second_partition->interval_low) { first_partition->interval_low = second_partition->interval_low; }
             if (first_partition->interval_high < second_partition->interval_high) { first_partition->interval_high = second_partition->interval_high; }
             second_partition->ignore = true;
@@ -648,7 +649,6 @@ void Graph::AP_Intervall() {
     }
 
 }
-
 
 void Graph::setNoPartitioning() {
     if (this->partitions.empty()) {
@@ -867,7 +867,6 @@ void TomAlvAlg(Graph& g) {
         converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
     }
 
-    // TODO: zurück übersetzen
     // freenode position id -> pos
     // permutation pos -> id
 
@@ -875,9 +874,9 @@ void TomAlvAlg(Graph& g) {
     std::vector<Node*> new_order = g.getOrderNodes();
 
     for (int ix = 0; ix < Permutation.size(); ++ix) {
-        std::cout << "Permutation vector : " << Permutation[ix] << std::endl;
         new_order[ix] = &g.getGraph()[Permutation[ix] + g.getN0()];
     }
+
     std::cout << "Crossing from graph before TomAlv algorithm : " << g.countCrossingsMarlon() << std::endl;
     g.setOrderNodes(new_order);
     std::cout << " Crossing from graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
@@ -891,13 +890,15 @@ bool ExactSolution(Graph& g) {
 
     for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
         for (int j = g.getOrderNodes()[i]->offset_visible_nodes; j < g.getOrderNodes()[i]->edges.size(); j++) {
-            //TODO: Check for the added edge weights
+            //TODO: Need to add Edge weights, done.
+            
             //g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, g.getOrderNodes()[i]->edges[j].edge_weight);
             /*std::cout << "i : " << i << " j : " << j << std::endl;
             std::cout << "i-te nodes amount of neighbours : " << g.getOrderNodes()[i]->edges.size() << std::endl;
             std::cout << "i-te order node : " << g.getOrderNodes()[i]->id << std::endl;
             std::cout << "j-te neighbour of i-te node: " << g.getOrderNodes()[i]->edges[j].neighbour_id << std::endl;*/
-            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id - g.getN0(), 1);
+
+            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].edge_weight);
         }
     }
 
@@ -1184,8 +1185,9 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
-    g->MedianHeuristic();
-    
+    //g->MedianHeuristic();
+    TomAlvAlg(*g);
+
     //Find partitions of Graph
     g->AP_Intervall();
 
@@ -1203,8 +1205,8 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
             Graph* partGraph = createGraphByPartition(g, part);
 
             if (partGraph->getGraph().size() < 50) {
-                //Call function for henricks initialisation in graph.h
-                //
+                // Call function for henricks initialisation in graph.h
+                // 
             }
 
             auto result = branching(partGraph, reductionTypes, method1, method2, fast);
@@ -1239,7 +1241,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
     else {
 
         if (g->getGraph().size() < 50) {
-            //Call function for henricks initialisation in graph.h
+            // Call function for henricks initialisation in graph.h
             //
         }
         auto result = branching(g, reductionTypes, method1, method2, fast);
