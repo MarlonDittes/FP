@@ -874,11 +874,11 @@ void TomAlvAlg(Graph& g) {
     const std::vector<int>& Permutation = graphTomAlv.getPermutation();
     std::vector<Node*> new_order = g.getOrderNodes();
 
-    for (int ix = 0; ix < Permutation.size(); ++i) {
-        std::cout << "Permutation vector : " << Permutation[i] << std::endl;
-        new_order[i] = &g.getGraph()[Permutation[i] + g.getN0()];
+    for (int ix = 0; ix < Permutation.size(); ++ix) {
+        std::cout << "Permutation vector : " << Permutation[ix] << std::endl;
+        new_order[ix] = &g.getGraph()[Permutation[ix] + g.getN0()];
     }
-
+    std::cout << "Crossing from graph before TomAlv algorithm : " << g.countCrossingsMarlon() << std::endl;
     g.setOrderNodes(new_order);
     std::cout << " Crossing from graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
 
