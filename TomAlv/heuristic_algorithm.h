@@ -10,8 +10,8 @@
 #include <tuple>
 #include <vector>
 
-#include "ds/heuristic_graph/heuristic_graph.h"
-#include "oscm/median_algorithm/median_algorithm.h"
+#include "heuristic_graph.h"
+#include "median_algorithm.h"
 namespace heuristic_algorithm {
     /*
      * For each  pair of neighbours  u , v with u < v, if the left crossings of u equal 0
