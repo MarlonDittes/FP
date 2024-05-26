@@ -26,6 +26,7 @@
 
 #include "TomAlv/heuristic_algorithm.h"
 #include "TomAlv/heuristic_graph.h"
+#include "TomAlv/median_algorithm.h"
 
 //Constructor dependent on size of movable_nodes
 Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), activeEdges(m), graph(n0 + n1), order_nodes(n1), partitions(1) {
@@ -870,6 +871,7 @@ void TomAlvAlg(Graph& g) {
 
     //HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(MoveTomAlv, FixTomAlv);
     bool converged = false;
+    median_algorithm::medianAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2);
 //    while (!converged) {
     converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
 //    }
