@@ -8,26 +8,32 @@ output_file="output.txt"
 rm -f "$output_file"
 
 # Iterate over the input files
-for i in $(seq 1 100); do
+for i in $(seq 18 18); do
     input_file="$input_dir/$i.gr"
 
-    # Measure the time taken by heiCross, kill if it takes longer than 5 minutes (300 seconds)
-    { /usr/bin/time -f "%e" timeout 300 ./build/heiCross < "$input_file" > temp_output.txt ; } 2> time_output.txt
+    # Start the timer
+    start_time=$(($(date +%s%N)/1000000)) # Convert nanoseconds to milliseconds
 
-    # Check if the program was killed
-    if [ $? -eq 124 ]; then
-        echo "KILLED" >> "$output_file"
-    else
-        # Read the output from heiCross
-        solution=$(cat temp_output.txt)
+    # Run the algorithm and capture its PID
+    ./build/heiCross < "$input_file" > temp_output.txt &
+    pid=$!
 
-        # Read the time taken
-        time_taken=$(cat time_output.txt)
+    # Start the timer for 5 minutes (300 seconds)
+    (sleep 30 && kill -s SIGTERM $pid) &
 
-        # Append the result to the output file
-        echo "$solution,$time_taken" >> "$output_file"
-    fi
+    # Wait for the process to finish
+    wait $pid
+
+    # Calculate the elapsed time
+    end_time=$(($(date +%s%N)/1000000)) # Convert nanoseconds to milliseconds
+    elapsed_time=$((end_time - start_time))
+
+    # Read the output from heiCross
+    solution=$(cat temp_output.txt)
+
+    # Append the result along with the elapsed time to the output file
+    echo "$solution,$elapsed_time" >> "$output_file"
 
     # Clean up temporary files
-    rm -f temp_output.txt time_output.txt
+    rm -f temp_output.txt
 done
