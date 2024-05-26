@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }*/
 
-        //TomAlvAlg(*g);
+        TomAlvAlg(*g);
     //}
 
     //g->printGraph();
@@ -76,18 +76,19 @@ int main(int argc, char* argv[]) {
     //std::cout << std::endl;
     //
     // Which reductions to use
-    std::vector<general_reduction*> reductions;
-    reductions.push_back(new ZeroEdge_reduction);
-    reductions.push_back(new Complete_reduction);
-    //reductions.push_back(new ZeroCrossings_reduction);
-    reductions.push_back(new Twins_reduction);
-    //if (almost){
-    //    reductions.push_back(new AlmostTwin_reduction);
-    //}
-    ////reductions.push_back(new Domination_reduction);
+    //std::vector<general_reduction*> reductions;
+    //reductions.push_back(new ZeroEdge_reduction);
+    //reductions.push_back(new Complete_reduction);
+    ////reductions.push_back(new ZeroCrossings_reduction);
+    //reductions.push_back(new Twins_reduction);
+    ////if (almost){
+    ////    reductions.push_back(new AlmostTwin_reduction);
+    ////}
+    //////reductions.push_back(new Domination_reduction);
 
-    auto result = BranchAndReduce(g, reductions, 1, 2, 1);
-    std::cout << "End Crossing is : " << result.second << std::endl;
+    //auto result = BranchAndReduce(g, reductions, 1, 2, 1);
+    //std::cout << "End Crossing is : " << result.second << std::endl;
+    //std::cout << g->countCrossingsMarlon() << std::endl;
     ////outputOrder(result.first, "../output2.txt");
 
     //if (!fast){
