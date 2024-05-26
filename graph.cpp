@@ -850,28 +850,36 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 }
 
 void TomAlvAlg(Graph& g) {
-
+    
     std::vector<std::vector<int>> MoveTomAlv(g.getN1(), std::vector<int>(1));
     std::vector<std::vector<int>> FixTomAlv(g.getN0(), std::vector<int>(1));
 
+    HeuristicGraph graphTomAlv_2 = HeuristicGraph<int, int>(g.getN0(), g.getN1(), g.getM());
+
     for (int i = 0; i < g.getOrderNodes().size(); i++) {
         for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
-            MoveTomAlv[i].push_back(g.getOrderNodes()[i]->edges[j].neighbour_id);
+            //MoveTomAlv[i].push_back(g.getOrderNodes()[i]->edges[j].neighbour_id);
             // FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(i + /* g.getN0());
-            FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(i);
+            //FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(i);
+            
+            //Create heuristic graph and then add the edges using: 
+            graphTomAlv_2.add_edge(g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].neighbour_id);
+
+
         }
     }
-    HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(MoveTomAlv, FixTomAlv);
-    bool converged = false;
-    while (!converged) {
-        converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
-    }
+
+    //HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(MoveTomAlv, FixTomAlv);
+    //bool converged = false;
+//    while (!converged) {
+        converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
+//    }
 
     // freenode position id -> pos
     // permutation pos -> id
 
-    const std::vector<int>& Permutation = graphTomAlv.getPermutation();
-    std::vector<Node*> new_order = g.getOrderNodes();
+    const std::vector<int>& Permutation = graphTomAlv_2.getPermutation();
+    std::vector<Node*> new_order(g.getorderNodes().size());
 
     for (int ix = 0; ix < Permutation.size(); ++ix) {
         new_order[ix] = &g.getGraph()[Permutation[ix] + g.getN0()];
@@ -879,7 +887,7 @@ void TomAlvAlg(Graph& g) {
 
     std::cout << "Crossing from graph before TomAlv algorithm : " << g.countCrossingsMarlon() << std::endl;
     g.setOrderNodes(new_order);
-    std::cout << " Crossing from graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
+    std::cout << "Crossing from graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
 
 }
 
