@@ -863,10 +863,10 @@ void TomAlvAlg(Graph& g) {
         }
     }
 
-    //std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+    std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
     bool converged = heuristic_algorithm::HeuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
     const std::vector<int>& permutation = graphTomAlv.getPermutation();
-    //std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
 
     
     std::vector<Node*> new_order(g.getOrderNodes().size());
@@ -877,7 +877,7 @@ void TomAlvAlg(Graph& g) {
     }
 
     g.setOrderNodes(new_order);
-    //std::cout << "Crossing from our graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
+    std::cout << "Crossing from our graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
 
 }
 
@@ -1184,8 +1184,8 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
-    //g->MedianHeuristic();
-    TomAlvAlg(*g);
+    g->MedianHeuristic();
+    //TomAlvAlg(*g);
 
     //Find partitions of Graph
     g->AP_Intervall();
