@@ -870,11 +870,10 @@ void TomAlvAlg(Graph& g) {
     }
 
     //HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(MoveTomAlv, FixTomAlv);
-    bool converged = false;
+    std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
+
     median_algorithm::medianAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2);
-//    while (!converged) {
     converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
-//    }
 
     // freenode position id -> pos
     // permutation pos -> id
@@ -886,9 +885,9 @@ void TomAlvAlg(Graph& g) {
         new_order[ix] = &g.getGraph()[FreeNodesPos[ix]];
     }
 
-    std::cout << "Crossing from graph before TomAlv algorithm : " << g.countCrossingsMarlon() << std::endl;
+    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
     g.setOrderNodes(new_order);
-    std::cout << "Crossing from graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
+    std::cout << "Crossing from our graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
 
 }
 

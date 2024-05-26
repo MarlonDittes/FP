@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
         Graph* g = readGraph(graph_file);
         Graph verifier = *g;
 
+        std::cout << "Before median Heuristic : " << verifier.countCrossingsMarlon() << std::endl;
         verifier.MedianHeuristic();
         std::cout << "Median Heuristic : " << verifier.countCrossingsMarlon() << std::endl;
 
