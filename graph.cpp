@@ -857,7 +857,7 @@ void TomAlvAlg(Graph& g) {
 
     HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(g.getN0(), g.getN1(), g.getM());
 
-    for (int i = 0; i < g.getOrderNodes().size(); i++) {
+    for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
         for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
             graphTomAlv.addEdge(g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].neighbour_id);
         }
@@ -873,6 +873,7 @@ void TomAlvAlg(Graph& g) {
 
     for (int i = 0; i < permutation.size(); i++) {
         new_order[i] = &g.getGraph()[permutation[i] + g.getN0()];
+        new_order[i]->median_pos = i;
     }
 
     g.setOrderNodes(new_order);
@@ -1183,8 +1184,8 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
-    //g->MedianHeuristic();
-    TomAlvAlg(*g);
+    g->MedianHeuristic();
+    //TomAlvAlg(*g);
 
     //Find partitions of Graph
     g->AP_Intervall();
