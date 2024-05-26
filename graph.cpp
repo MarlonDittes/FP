@@ -855,36 +855,36 @@ void TomAlvAlg(Graph& g) {
     // freenode position id -> pos
     // permutation pos -> id
 
-    g.MedianHeuristic();
+    //g.MedianHeuristic();
 
-    std::vector<std::vector<int>> MoveTomAlv(g.getN1(), std::vector<int>(1));
-    std::vector<std::vector<int>> FixTomAlv(g.getN0(), std::vector<int>(1));
+    //std::vector<std::vector<int>> MoveTomAlv(g.getN1(), std::vector<int>(1));
+    //std::vector<std::vector<int>> FixTomAlv(g.getN0(), std::vector<int>(1));
 
     HeuristicGraph graphTomAlv_2 = HeuristicGraph<int, int>(g.getN0(), g.getN1(), g.getM());
 
     for (int i = 0; i < g.getOrderNodes().size(); i++) {
         for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
-            MoveTomAlv[i].push_back(g.getOrderNodes()[i]->edges[j].neighbour_id);
-            FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(i);
+            //MoveTomAlv[i].push_back(g.getOrderNodes()[i]->edges[j].neighbour_id);
+            //FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(g.getOrderNodes()[i]->id - g.getN0());
             
             //Create heuristic graph and then add the edges using: 
-            //graphTomAlv_2.addEdge(g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].neighbour_id);
+            graphTomAlv_2.addEdge(g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].neighbour_id);
 
 
         }
     }
 
-    HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(MoveTomAlv, FixTomAlv);
+    /*HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(MoveTomAlv, FixTomAlv);
     std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
     bool converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
     const std::vector<int>& FreeNodesPos = graphTomAlv.getFreeNodesPosition();
-    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;*/
 
-    /*std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
-    median_algorithm::medianAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2);
+    std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
+    //median_algorithm::medianAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2);
     bool converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
     const std::vector<int>& FreeNodesPos = graphTomAlv_2.getFreeNodesPosition();
-    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;*/
+    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
 
     
     std::vector<Node*> new_order(g.getOrderNodes().size());
