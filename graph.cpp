@@ -855,11 +855,6 @@ void TomAlvAlg(Graph& g) {
     // freenode position id -> pos
     // permutation pos -> id
 
-    //g.MedianHeuristic();
-
-    //std::vector<std::vector<int>> MoveTomAlv(g.getN1(), std::vector<int>(1));
-    //std::vector<std::vector<int>> FixTomAlv(g.getN0(), std::vector<int>(1));
-
     HeuristicGraph graphTomAlv_2 = HeuristicGraph<int, int>(g.getN0(), g.getN1(), g.getM());
 
     for (int i = 0; i < g.getOrderNodes().size(); i++) {
@@ -874,23 +869,16 @@ void TomAlvAlg(Graph& g) {
         }
     }
 
-    /*HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(MoveTomAlv, FixTomAlv);
-    std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
-    bool converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
-    const std::vector<int>& FreeNodesPos = graphTomAlv.getFreeNodesPosition();
-    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;*/
-
     std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
-    //median_algorithm::medianAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2);
-    bool converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
-    const std::vector<int>& FreeNodesPos = graphTomAlv_2.getFreeNodesPosition();
+    bool converged = heuristic_algorithm::HeuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
+    const std::vector<int>& permutation = graphTomAlv_2.getPermutation();
     std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
 
     
     std::vector<Node*> new_order(g.getOrderNodes().size());
 
-    for (int ix = 0; ix < FreeNodesPos.size(); ++ix) {
-        new_order[ix] = &g.getGraph()[FreeNodesPos[ix]];
+    for (int i = 0; i < permutation.size(); i++) {
+        new_order[i] = &g.getGraph()[permutation[i] + g.getN0()];
     }
 
     g.setOrderNodes(new_order);
