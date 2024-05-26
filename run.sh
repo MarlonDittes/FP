@@ -8,7 +8,7 @@ output_file="output.txt"
 rm -f "$output_file"
 
 # Iterate over the input files
-for i in $(seq 18 18); do
+for i in $(seq 1 100); do
     input_file="$input_dir/$i.gr"
 
     # Start the timer
@@ -19,7 +19,7 @@ for i in $(seq 18 18); do
     pid=$!
 
     # Start the timer for 5 minutes (300 seconds)
-    (sleep 30 && kill -s SIGTERM $pid) &
+    (sleep 300 && kill -s SIGTERM $pid) &
 
     # Wait for the process to finish
     wait $pid
