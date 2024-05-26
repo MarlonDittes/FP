@@ -852,6 +852,8 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 
 void TomAlvAlg(Graph& g) {
     
+    g.MedianHeuristic();
+
     std::vector<std::vector<int>> MoveTomAlv(g.getN1(), std::vector<int>(1));
     std::vector<std::vector<int>> FixTomAlv(g.getN0(), std::vector<int>(1));
 
@@ -859,11 +861,11 @@ void TomAlvAlg(Graph& g) {
 
     for (int i = 0; i < g.getOrderNodes().size(); i++) {
         for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
-            //MoveTomAlv[i].push_back(g.getOrderNodes()[i]->edges[j].neighbour_id);
-            //FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(i);
+            MoveTomAlv[i].push_back(g.getOrderNodes()[i]->edges[j].neighbour_id);
+            FixTomAlv[g.getOrderNodes()[i]->edges[j].neighbour_id].push_back(i);
             
             //Create heuristic graph and then add the edges using: 
-            graphTomAlv_2.addEdge(g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].neighbour_id);
+            //graphTomAlv_2.addEdge(g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].neighbour_id);
 
 
         }
@@ -873,7 +875,7 @@ void TomAlvAlg(Graph& g) {
     std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
 
     median_algorithm::medianAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2);
-    converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
+    bool converged = heuristic_algorithm::heuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
 
     // freenode position id -> pos
     // permutation pos -> id
