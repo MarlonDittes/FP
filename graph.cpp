@@ -10,7 +10,8 @@
 #include <omp.h>
 #include <queue>
 #include <stack>
-
+#include <cstdlib> // For rand() and srand()
+#include <ctime>   // For time()
 
 
 //Constructor dependent on size of movable_nodes
@@ -874,6 +875,15 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
     }
     //Reduce our instance if no more reductions applicable
     else {
+        // Randomize which method we use to remove node
+        if (method1 == 3){
+            // Seed the random number generator with the current time
+            std::srand(std::time(0));
+
+            // Generate a random number between 0 and 2
+            method1 = std::rand() % 3;
+        }
+
         auto& orderNodes = g->getOrderNodes();
         int visibleNodeOffset = g->getOffsetVisibleOrderNodes();
 
@@ -900,6 +910,18 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                     int currentSpan = calculateSpan(orderNodes[i]);
                     if (maxSpan < currentSpan) {
                         maxSpan = currentSpan;
+                        foundNode = orderNodes[i];
+                    }
+                }
+            }
+            //Method 1C: Find max combined value of span and degree
+            else if (method1 == 2){
+                foundNode = orderNodes[visibleNodeOffset];
+                double maxCombined = (double)calculateSpan(foundNode) / (foundNode->edges.size() - foundNode->offset_visible_nodes);
+                for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                    double currentCombined = (double)calculateSpan(orderNodes[i]) / (orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes);
+                    if (maxCombined < currentCombined) {
+                        maxCombined = currentCombined;
                         foundNode = orderNodes[i];
                     }
                 }

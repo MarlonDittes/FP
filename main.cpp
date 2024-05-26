@@ -9,8 +9,15 @@ int main(int argc, char* argv[]) {
     // Read graph
     Graph* g = readStandardIn();
 
-    //g->MedianHeuristic();
-    //std::cout << g->countCrossingsMarlon() << ",";
+    std::vector<Node*> bestSolution;
+    int bestCrossings;
+
+    g->MedianHeuristic();
+
+    bestSolution = g->getOrderNodes();
+    bestCrossings = g->countCrossingsMarlon();
+
+    std::cout << bestCrossings << ",";
     
     // Which reductions to use
     std::vector<general_reduction*> reductions;
@@ -22,11 +29,20 @@ int main(int argc, char* argv[]) {
     //reductions.push_back(new Domination_reduction);
 
     // Output solution
-    int method1 = 1;
+    int method1 = 0;
     int method2 = 2;
     bool fast = 1;
-    auto result = BranchAndReduce(g, reductions, method1, method2, fast);
 
-    std::cout << g->countCrossingsMarlon() << std::endl;
+    std::vector<int> method1_options = {0,1,2,3};
+    for (auto& option : method1_options){
+        auto result = BranchAndReduce(g, reductions, option, method2, fast);
+        int currentCrossings = g->countCrossingsMarlon();
+        std::cout << currentCrossings << ",";
+        if (currentCrossings < bestCrossings){
+            bestSolution = result.first;
+            bestCrossings = currentCrossings;
+        }
+    }
+    std::cout << std::endl;
     //outputStandardOut(result.first);
 }
