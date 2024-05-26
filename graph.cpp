@@ -863,10 +863,10 @@ void TomAlvAlg(Graph& g) {
         }
     }
 
-    //std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
-    bool converged = heuristic_algorithm::HeuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv_2, true, true, true);
+    //std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+    bool converged = heuristic_algorithm::HeuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
     const std::vector<int>& permutation = graphTomAlv.getPermutation();
-    //std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv_2.getCrossings() << std::endl;
+    //std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
 
     
     std::vector<Node*> new_order(g.getOrderNodes().size());
@@ -1202,16 +1202,16 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
         for (auto& part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
 
-            std::pair<std::vector<Node*>, long> result;
+            //std::pair<std::vector<Node*>, long> result;
 
-            if (partGraph->getGraph().size() < 50) {
-                result = ExactSolution(*partGraph);
-            }
-            else {
-                result = branching(partGraph, reductionTypes, method1, method2, fast);
-            }
+            //if (partGraph->getGraph().size() < 50) {
+            //    result = ExactSolution(*partGraph);
+            //}
+            //else {
+            //    result = branching(partGraph, reductionTypes, method1, method2, fast);
+            //}
 
-            //auto result = branching(partGraph, reductionTypes, method1, method2, fast);
+            auto result = branching(partGraph, reductionTypes, method1, method2, fast);
             results.push_back(result);
         }
 
@@ -1242,15 +1242,16 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
     // We couldn't partition the graph
     else {
 
-        std::pair<std::vector<Node*>, long> result;
+        //std::pair<std::vector<Node*>, long> result;
 
-        if (g->getGraph().size() < 50) {
-            result = ExactSolution(*g);
-        }
-        else {
-            result = branching(g, reductionTypes, method1, method2, fast);
-        }
-        //auto result = branching(g, reductionTypes, method1, method2, fast);
+        //if (g->getGraph().size() < 50) {
+        //    result = ExactSolution(*g);
+        //}
+        //else {
+        //    result = branching(g, reductionTypes, method1, method2, fast);
+        //}
+        
+        auto result = branching(g, reductionTypes, method1, method2, fast);
         solution = result.first;
         sumCrossings = result.second;
 
