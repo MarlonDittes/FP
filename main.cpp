@@ -46,9 +46,9 @@ int main(int argc, char* argv[]) {
         Graph* g = readGraph(graph_file);
         Graph verifier = *g;
 
-        std::cout << "Verfier Graph Crossings" << verifier.countCrossingsMarlon() << std::endl;
+        std::cout << "Verfier Graph Crossings : " << verifier.countCrossingsMarlon() << std::endl;
         verifier.MedianHeuristic();
-        std::cout << "Verifier Graph Crossings After median Heuristic" << verifier.countCrossingsMarlon() << std::endl;
+        std::cout << "Verifier Graph Crossings After median Heuristic : " << verifier.countCrossingsMarlon() << std::endl;
 
 
         //std::pair<std::vector<Node*>, long> check = ExactSolution(*g);
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }*/
 
-        TomAlvAlg(*g);
+        //TomAlvAlg(*g);
     //}
 
     //g->printGraph();
@@ -80,19 +80,19 @@ int main(int argc, char* argv[]) {
     //std::cout << std::endl;
     //
     // Which reductions to use
-    //std::vector<general_reduction*> reductions;
-    //reductions.push_back(new ZeroEdge_reduction);
-    //reductions.push_back(new Complete_reduction);
-    ////reductions.push_back(new ZeroCrossings_reduction);
-    //reductions.push_back(new Twins_reduction);
+    std::vector<general_reduction*> reductions;
+    reductions.push_back(new ZeroEdge_reduction);
+    reductions.push_back(new Complete_reduction);
+    //reductions.push_back(new ZeroCrossings_reduction);
+    reductions.push_back(new Twins_reduction);
     ////if (almost){
     ////    reductions.push_back(new AlmostTwin_reduction);
     ////}
     //////reductions.push_back(new Domination_reduction);
 
-    //auto result = BranchAndReduce(g, reductions, 1, 2, 1);
-    //std::cout << "End Crossing is : " << result.second << std::endl;
-    //std::cout << g->countCrossingsMarlon() << std::endl;
+    auto result = BranchAndReduce(g, reductions, 1, 2, 1);
+    std::cout << "Result.second end Crossing is : " << result.second << std::endl;
+    std::cout << "Crossings from CountCrossings method : "<<g->countCrossingsMarlon() << std::endl;
     ////outputOrder(result.first, "../output2.txt");
 
     //if (!fast){
