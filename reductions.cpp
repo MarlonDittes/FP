@@ -99,6 +99,12 @@ bool Twins_reduction::apply(Graph* g, int twins_count){
 
             g->setOrderByNode(pair.twin, g->getOrderByNode(pair.main));
             twins_count--;
+            // reset edge weights
+            Node* main = g->getNodeByOrder(g->getOrderByNode(pair.main));
+            for (auto& edge : main->edges){
+                edge.edge_weight--;
+            }
+            
         }
         g->sortOrderNodesByOrder();
         return true;

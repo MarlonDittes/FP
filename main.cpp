@@ -4,34 +4,38 @@
 #include "stack.h"
 #include "performance.h"
 #include "reductions.h"
-#include <csignal>
-#include <cstdlib>
+#include <signal.h>
+#include <unistd.h>
+#include <cstring>
 
 // Global variables to store the best solution and its crossings
 std::vector<Node*> bestSolution;
 int bestCrossings;
 
 // Signal handler for SIGTERM
-void handleSigterm(int signum) {
+void term(int signum) {
     // Output the best solution so far
-    std::cout << bestCrossings << std::endl;
-    //outputStandardOut(bestSolution);
+    //std::cout << bestCrossings << std::endl;
+    outputStandardOut(bestSolution);
     std::exit(signum); // Exit the program
 }
 
 int main(int argc, char* argv[]) {
+    std::ios::sync_with_stdio(false);
     // Register the signal handler for SIGTERM
-    std::signal(SIGTERM, handleSigterm);
+    struct sigaction action;
+    memset(&action, 0, sizeof(struct sigaction));
+    action.sa_handler = term;
+    sigaction(SIGTERM, &action, NULL);
 
     // Read graph
     Graph* g = readStandardIn();
 
     g->MedianHeuristic();
-
     bestSolution = g->getOrderNodes();
     bestCrossings = g->countCrossingsMarlon();
 
-    std::cout << bestCrossings << ",";
+    //std::cout << bestCrossings << ",";
     
     // Which reductions to use
     std::vector<general_reduction*> reductions;
@@ -56,7 +60,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    std::cout << bestCrossings << std::endl;
-    std::cout << std::endl;
-    //outputStandardOut(result.first);
+    //std::cout << bestCrossings << std::endl;
+    outputStandardOut(bestSolution);
 }
