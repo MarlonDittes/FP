@@ -46,6 +46,10 @@ int main(int argc, char* argv[]) {
         Graph* g = readGraph(graph_file);
         Graph verifier = *g;
 
+        std::cout << "Verfier Graph Crossings" << verifier.countCrossingsMarlon() << std::endl;
+        verifier.MedianHeuristic();
+        std::cout << "Verifier Graph Crossings After median Heuristic" << verifier.countCrossingsMarlon() << std::endl;
+
 
         //std::pair<std::vector<Node*>, long> check = ExactSolution(*g);
         /*if (!check) {

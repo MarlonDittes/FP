@@ -863,10 +863,10 @@ void TomAlvAlg(Graph& g) {
         }
     }
 
-    std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+    std::cout << "TomAlv Graph Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
     bool converged = heuristic_algorithm::HeuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
     const std::vector<int>& permutation = graphTomAlv.getPermutation();
-    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+    std::cout << "TomAlv Graph Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
 
     
     std::vector<Node*> new_order(g.getOrderNodes().size());
@@ -877,7 +877,7 @@ void TomAlvAlg(Graph& g) {
     }
 
     g.setOrderNodes(new_order);
-    std::cout << "Crossing from our graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
+    std::cout << "Graph g Crossing after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
 
 }
 
