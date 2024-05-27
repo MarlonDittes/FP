@@ -9,8 +9,8 @@
 ################################
 build/
 html/
-#exact-public/
-#heuristic-public/
+exact-public/
+heuristic-public/
 performance_data/
 
 ################################
