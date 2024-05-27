@@ -28,8 +28,8 @@ int bestCrossings;
 // Signal handler for SIGTERM
 void term(int signum) {
     // Output the best solution so far
-    //std::cout << bestCrossings << std::endl;
-    outputStandardOut(bestSolution);
+    std::cout << bestCrossings << std::endl;
+    //outputStandardOut(bestSolution);
     std::exit(signum); // Exit the program
 }
 
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     bestSolution = g->getOrderNodes();
     bestCrossings = g->countCrossingsMarlon();
 
-    //std::cout << bestCrossings << ",";
+    std::cout << bestCrossings << ",";
     
     // Which reductions to use
     std::vector<general_reduction*> reductions;
@@ -73,6 +73,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    //std::cout << bestCrossings << std::endl;
-    outputStandardOut(bestSolution);
+    std::cout << bestCrossings << std::endl;
+    //outputStandardOut(bestSolution);
 }
