@@ -12,7 +12,25 @@
 #include <stack>
 #include <cstdlib> // For rand() and srand()
 #include <ctime>   // For time()
+#include <cstdint>
+#include <string>
 
+/*
+#include "src_henning/src/definitions.h"
+#include "src_henning/src/macros.h"
+#include "src_henning/src/misc.h"
+#include "src_henning/src/graph_hen.h"
+#include "src_henning/src/solver_bf.h"
+#include "src_henning/src/exhaustive_solver.h"
+#include "src_henning/src/partitioner.h"
+#include "src_henning/src/solver.h"
+#include "src_henning/src/useless_reducer.h"
+#include "src_henning/src/front_back_reducer.h"
+*/
+
+#include "TomAlv/heuristic_algorithm.h"
+#include "TomAlv/heuristic_graph.h"
+#include "TomAlv/median_algorithm.h"
 
 //Constructor dependent on size of movable_nodes
 Graph::Graph(int n0, int n1, int m) : n0(n0), n1(n1), m(m), activeEdges(m), graph(n0 + n1), order_nodes(n1), partitions(1) {
@@ -621,7 +639,8 @@ void Graph::AP_Intervall() {
             while (second_index < second_partition->nodes.size()) {
                 first_partition->nodes.push_back(second_partition->nodes[second_index++]);
             }
-
+            
+            //Change the interval's high and low if necessary after the merge
             if (first_partition->interval_low > second_partition->interval_low) { first_partition->interval_low = second_partition->interval_low; }
             if (first_partition->interval_high < second_partition->interval_high) { first_partition->interval_high = second_partition->interval_high; }
             second_partition->ignore = true;
@@ -635,7 +654,6 @@ void Graph::AP_Intervall() {
     }
 
 }
-
 
 void Graph::setNoPartitioning() {
     if (this->partitions.empty()) {
@@ -835,6 +853,84 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     partGraph->sortNeighbours();
     return partGraph;
 }
+
+void TomAlvAlg(Graph& g) {
+    
+    // freenode position id -> pos
+    // permutation pos -> id
+
+    HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(g.getN0(), g.getN1(), g.getM());
+
+    for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
+        for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
+            graphTomAlv.addEdge(g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].neighbour_id);
+        }
+    }
+
+    std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+    bool converged = heuristic_algorithm::HeuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
+    const std::vector<int>& permutation = graphTomAlv.getPermutation();
+    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+
+    
+    std::vector<Node*> new_order(g.getOrderNodes().size());
+
+    for (int i = 0; i < permutation.size(); i++) {
+        new_order[i] = &g.getGraph()[permutation[i] + g.getN0()];
+        new_order[i]->median_pos = i;
+    }
+
+    g.setOrderNodes(new_order);
+    std::cout << "Crossing from our graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
+
+}
+
+/*
+std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
+    CrossGuard::Graph g_exact(g.getN0(), g.getN1());
+    //std::cout << "Offset visible order nodes " << g.getOffsetVisibleOrderNodes() << std::endl;
+    //std::cout << "Order Nodes Size : " << g.getOrderNodes().size() << std::endl;
+
+    for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
+        for (int j = g.getOrderNodes()[i]->offset_visible_nodes; j < g.getOrderNodes()[i]->edges.size(); j++) {
+            //TODO: Need to add Edge weights, done.
+            
+            //g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, g.getOrderNodes()[i]->edges[j].edge_weight);
+            //std::cout << "i : " << i << " j : " << j << std::endl;
+            //std::cout << "i-te nodes amount of neighbours : " << g.getOrderNodes()[i]->edges.size() << std::endl;
+            //std::cout << "i-te order node : " << g.getOrderNodes()[i]->id << std::endl;
+            //std::cout << "j-te neighbour of i-te node: " << g.getOrderNodes()[i]->edges[j].neighbour_id << std::endl;
+
+            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].edge_weight);
+        }
+    }
+
+    //std::cout << "After adding edges" << std::endl;
+    g_exact.finalize();
+
+    CrossGuard::Solver s(g_exact);
+    s.solve(true);
+    CrossGuard::AlignedVector<CrossGuard::u32> solver_solution = s.get_solution();
+    long sumCrossings = g_exact.determine_n_cuts(solver_solution);
+    std::vector<Node*> new_order = g.getOrderNodes();
+    
+    for (int i = 0; i < solver_solution.size(); i++) {
+        new_order[i] = &g.getGraph()[solver_solution[i] + g.getN0()];
+    }
+
+    std::cout << "Crossings with henning : " << sumCrossings << std::endl;
+    std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
+    g.setOrderNodes(new_order);
+    std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
+
+    if (sumCrossings != g.countCrossingsMarlon()) {
+        std::cout << "SUM OF HENNING AND COUNTCROSSING FUNCTION DID NOT DELIVER THE SAME RESULT" << std::endl;
+    }
+
+    return std::make_pair(g.getOrderNodes(), g.countCrossingsMarlon());;
+}
+*/
+
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     bool changed = false;
@@ -1119,7 +1215,8 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
     g->MedianHeuristic();
-    
+    //TomAlvAlg(*g);
+
     //Find partitions of Graph
     g->AP_Intervall();
 
@@ -1135,6 +1232,15 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
         //Get sub solutions
         for (auto& part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
+
+            //std::pair<std::vector<Node*>, long> result;
+
+            //if (partGraph->getGraph().size() < 50) {
+            //    result = ExactSolution(*partGraph);
+            //}
+            //else {
+            //    result = branching(partGraph, reductionTypes, method1, method2, fast);
+            //}
 
             auto result = branching(partGraph, reductionTypes, method1, method2, fast);
             results.push_back(result);
@@ -1166,10 +1272,23 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
     }
     // We couldn't partition the graph
     else {
+
+        //std::pair<std::vector<Node*>, long> result;
+
+        //if (g->getGraph().size() < 50) {
+        //    result = ExactSolution(*g);
+        //}
+        //else {
+        //    result = branching(g, reductionTypes, method1, method2, fast);
+        //}
+        
         auto result = branching(g, reductionTypes, method1, method2, fast);
         solution = result.first;
         sumCrossings = result.second;
+
     }
+
+    //TODO: Check if the solution is the order of the nodes.
 
     return std::make_pair(solution, sumCrossings);
 }
