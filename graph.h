@@ -26,6 +26,9 @@ struct Node {
     double barycenter_pos = 0;
     double median_pos = 0;
 
+    //TomAlv helper attributes
+    int TV_new_order_id = -1;
+
     // Partition stuff
     bool isAP = false;
     //std::vector<int> partition;

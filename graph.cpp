@@ -15,7 +15,6 @@
 #include <cstdint>
 #include <string>
 
-/*
 #include "src_henning/src/definitions.h"
 #include "src_henning/src/macros.h"
 #include "src_henning/src/misc.h"
@@ -26,7 +25,7 @@
 #include "src_henning/src/solver.h"
 #include "src_henning/src/useless_reducer.h"
 #include "src_henning/src/front_back_reducer.h"
-*/
+
 
 #include "TomAlv/heuristic_algorithm.h"
 #include "TomAlv/heuristic_graph.h"
@@ -855,37 +854,58 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
 }
 
 void TomAlvAlg(Graph& g) {
-    
+
     // freenode position id -> pos
     // permutation pos -> id
 
-    HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(g.getN0(), g.getN1(), g.getM());
+    //std::cout<<"In TomAlv algorithm"<<std::endl;
+    /*std::cout<<g.getOrderNodes().size()<<std::endl;
+    std::cout<<g.getOffsetVisibleOrderNodes()<<std::endl;*/
+    std::vector<int> mapping(g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes());
+
+    HeuristicGraph graphTomAlv = HeuristicGraph<int, int>(g.getN0(), g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes(), g.getM());
+
+    /*std::cout<<"N0 : "<<g.getN0()<<std::endl;
+    std::cout<<"order nodes size: "<<g.getOrderNodes().size()<<std::endl;
+    std::cout<<"M : "<<g.getM()<<std::endl;
+    std::cout<<"Offset Visible order Nodes : " <<g.getOffsetVisibleOrderNodes()<<std::endl;*/
 
     for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
-        for (int j = 0; j < g.getOrderNodes()[i]->edges.size(); j++) {
-            graphTomAlv.addEdge(g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].neighbour_id);
+        for (int j = g.getOrderNodes()[i]->offset_visible_nodes; j < g.getOrderNodes()[i]->edges.size(); j++) {
+            //std::cout<<"Order Node ID : "<<g.getOrderNodes()[i]->id<<std::endl;
+            //std::cout<<"neighbour : "<<g.getOrderNodes()[i]->edges[j].neighbour_id<<std::endl;
+
+            g.getOrderNodes()[i]->TV_new_order_id = i - g.getOffsetVisibleOrderNodes();
+            mapping[g.getOrderNodes()[i]->TV_new_order_id] = g.getOrderNodes()[i]->id;
+            graphTomAlv.addEdge(g.getOrderNodes()[i]->TV_new_order_id, g.getOrderNodes()[i]->edges[j].neighbour_id);
         }
     }
 
-    std::cout << "Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+    //std::cout << "TomAlv Graph Crossings before TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+
     bool converged = heuristic_algorithm::HeuristicAlgorithm<HeuristicGraph<int, int>>(graphTomAlv, true, true, true);
     const std::vector<int>& permutation = graphTomAlv.getPermutation();
-    std::cout << "Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
 
-    
+    //std::cout << "TomAlv Graph Crossings After TomAlv Algorithm : " << graphTomAlv.getCrossings() << std::endl;
+
     std::vector<Node*> new_order(g.getOrderNodes().size());
 
-    for (int i = 0; i < permutation.size(); i++) {
-        new_order[i] = &g.getGraph()[permutation[i] + g.getN0()];
+    for (int i = 0; i < g.getOffsetVisibleOrderNodes(); i++) {
+        new_order[i] = g.getOrderNodes()[i];
         new_order[i]->median_pos = i;
     }
 
-    g.setOrderNodes(new_order);
-    std::cout << "Crossing from our graph after TomAlv Algorithm : " << g.countCrossingsMarlon() << std::endl;
+    for (int i = 0; i < permutation.size(); i++) {
+        new_order[i + g.getOffsetVisibleOrderNodes()] = &g.getGraph()[mapping[permutation[i]]];
+        new_order[i + g.getOffsetVisibleOrderNodes()]->median_pos = i;
+    }
 
+    g.setOrderNodes(new_order);
+
+    //std::cout<<"Out of TomAlv Algorithm"<<std::endl;
 }
 
-/*
+
 std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
     CrossGuard::Graph g_exact(g.getN0(), g.getN1());
     //std::cout << "Offset visible order nodes " << g.getOffsetVisibleOrderNodes() << std::endl;
@@ -929,7 +949,7 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 
     return std::make_pair(g.getOrderNodes(), g.countCrossingsMarlon());;
 }
-*/
+
 
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
@@ -1214,8 +1234,8 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
-    g->MedianHeuristic();
-    //TomAlvAlg(*g);
+    //g->MedianHeuristic();
+    TomAlvAlg(*g);
 
     //Find partitions of Graph
     g->AP_Intervall();
