@@ -68,6 +68,7 @@ struct AlmostTwin_reduction : public general_reduction {
 struct Domination_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::Domination; }
     virtual int reduce(Graph* g) override;
+    virtual int reduce(Graph* g, int a);
     virtual bool apply(Graph* g, int twins_count) override;
 
     private:
@@ -78,6 +79,7 @@ struct Domination_reduction : public general_reduction {
             //save additional information for apply function:
             int domination_size; //number of identical neighbours
             int start; //id of first identical neighbour
+            std::pair<int,int> intervall;
 	    };
 
 	std::vector<restore_data> restore_vec; //saves twins as pairs of main and twin in a vector
