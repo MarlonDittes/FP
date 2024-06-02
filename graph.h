@@ -29,6 +29,9 @@ struct Node {
     //TomAlv helper attributes
     int TV_new_order_id = -1;
 
+    //Henning helper mapping attributes
+    int Hen_new_order_id = -1;
+
     // Partition stuff
     bool isAP = false;
     //std::vector<int> partition;

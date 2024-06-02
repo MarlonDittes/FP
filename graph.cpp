@@ -905,23 +905,25 @@ void TomAlvAlg(Graph& g) {
     //std::cout<<"Out of TomAlv Algorithm"<<std::endl;
 }
 
-
 std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
-    CrossGuard::Graph g_exact(g.getN0(), g.getN1());
+
+    std::vector<int> mapping(g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes());
+    CrossGuard::Graph g_exact(g.getN0(), g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes());
     //std::cout << "Offset visible order nodes " << g.getOffsetVisibleOrderNodes() << std::endl;
     //std::cout << "Order Nodes Size : " << g.getOrderNodes().size() << std::endl;
 
     for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
         for (int j = g.getOrderNodes()[i]->offset_visible_nodes; j < g.getOrderNodes()[i]->edges.size(); j++) {
             //TODO: Need to add Edge weights, done.
-            
+
             //g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, g.getOrderNodes()[i]->edges[j].edge_weight);
             //std::cout << "i : " << i << " j : " << j << std::endl;
             //std::cout << "i-te nodes amount of neighbours : " << g.getOrderNodes()[i]->edges.size() << std::endl;
             //std::cout << "i-te order node : " << g.getOrderNodes()[i]->id << std::endl;
             //std::cout << "j-te neighbour of i-te node: " << g.getOrderNodes()[i]->edges[j].neighbour_id << std::endl;
-
-            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id - g.getN0(), g.getOrderNodes()[i]->edges[j].edge_weight);
+            g.getOrderNodes()[i]->Hen_new_order_id = i - g.getOffsetVisibleOrderNodes();
+            mapping[g.getOrderNodes()[i]->Hen_new_order_id] = g.getOrderNodes()[i]->id;
+            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->Hen_new_order_id, g.getOrderNodes()[i]->edges[j].edge_weight);
         }
     }
 
@@ -932,24 +934,35 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
     s.solve(true);
     CrossGuard::AlignedVector<CrossGuard::u32> solver_solution = s.get_solution();
     long sumCrossings = g_exact.determine_n_cuts(solver_solution);
+
     std::vector<Node*> new_order = g.getOrderNodes();
-    
-    for (int i = 0; i < solver_solution.size(); i++) {
-        new_order[i] = &g.getGraph()[solver_solution[i] + g.getN0()];
+
+    for (int i = 0; i < g.getOffsetVisibleOrderNodes(); i++) {
+        new_order[i] = g.getOrderNodes()[i];
+        new_order[i]->median_pos = i;
     }
 
-    std::cout << "Crossings with henning : " << sumCrossings << std::endl;
-    std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
+    for (int i = 0; i < solver_solution.size(); i++) {
+        new_order[i + g.getOffsetVisibleOrderNodes()] = &g.getGraph()[mapping[solver_solution[i]]];
+        new_order[i + g.getOffsetVisibleOrderNodes()]->median_pos = i + g.getOffsetVisibleOrderNodes();
+    }
+
+    /*for (int i = 0; i < solver_solution.size(); i++) {
+        new_order[i] = &g.getGraph()[solver_solution[i] + g.getN0()];
+    }*/
+
+    //std::cout << "Crossings with henning : " << sumCrossings << std::endl;
+    //std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
     g.setOrderNodes(new_order);
-    std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
+    //std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
 
     if (sumCrossings != g.countCrossingsMarlon()) {
         std::cout << "SUM OF HENNING AND COUNTCROSSING FUNCTION DID NOT DELIVER THE SAME RESULT" << std::endl;
     }
 
-    return std::make_pair(g.getOrderNodes(), g.countCrossingsMarlon());;
-}
+    return std::make_pair(g.getOrderNodes(), g.countCrossingsMarlon());
 
+}
 
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
