@@ -29,8 +29,8 @@ int bestCrossings;
 // Signal handler for SIGTERM
 void term(int signum) {
     // Output the best solution so far
-    std::cout << bestCrossings << std::endl;
-    //outputStandardOut(bestSolution);
+    //std::cout << bestCrossings << std::endl;
+    outputStandardOut(bestSolution);
     std::exit(signum); // Exit the program
 }
 
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     bestSolution = g->getOrderNodes();
     bestCrossings = g->countCrossings();
 
-    std::cout << bestCrossings << ",";
+    //std::cout << bestCrossings << ",";
     
     // Which reductions to use
     std::vector<general_reduction*> reductions;
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
     int method2 = 2;
     bool fast = 1;
 
-    std::vector<int> method1_options = {0,1,2};
+    std::vector<int> method1_options = {2};
     for (auto& option : method1_options){
         auto result = BranchAndReduce(g, reductions, option, method2, fast);
         int currentCrossings = g->countCrossings();
@@ -74,6 +74,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    std::cout << bestCrossings << std::endl;
-    //outputStandardOut(bestSolution);
+    //std::cout << bestCrossings << std::endl;
+    outputStandardOut(bestSolution);
 }

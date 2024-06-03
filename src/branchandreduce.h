@@ -2,9 +2,9 @@
 #define BRANCHANDREDUCE_H
 
 #include "graph.h"
-#include "../TomAlv/heuristic_algorithm.h"
-#include "../TomAlv/heuristic_graph.h"
-#include "../TomAlv/median_algorithm.h"
+#include "../src_tomalv/heuristic_algorithm.h"
+#include "../src_tomalv/heuristic_graph.h"
+#include "../src_tomalv/median_algorithm.h"
 
 #include <cstdlib> // For rand() and srand()
 #include <ctime>   // For time()

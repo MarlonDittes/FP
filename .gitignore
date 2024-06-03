@@ -9,9 +9,7 @@
 ################################
 build/
 html/
-exact-public/
-heuristic-public/
-performance_data/
+data/
 src_henning/data/
 
 ################################
