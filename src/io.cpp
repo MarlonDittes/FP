@@ -1,4 +1,5 @@
 #include "io.h"
+#include "graph.h"
 #include <iostream>
 #include <vector>
 #include <random>

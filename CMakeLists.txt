@@ -13,7 +13,7 @@ set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 #add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp LPSolver.cpp)
-add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp)
+add_library(my_lib STATIC src/graph.cpp src/io.cpp src/stack.cpp src/reductions.cpp src/performance.cpp src/branchandreduce.cpp)
 
 add_executable(heiCross main.cpp)
 target_link_libraries(heiCross PRIVATE my_lib)

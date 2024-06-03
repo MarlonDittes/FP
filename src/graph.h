@@ -52,7 +52,7 @@ struct Partition_Intervall {
 
 class Graph {
 private:
-    std::vector<Node> graph;            // Adjacency List --> why not pointer?
+    std::vector<Node> graph;  
     std::vector<Node*> order_nodes;     // Order of moveable nodes
     int offset_visible_order_nodes = 0; // Offset for accessing visible moveable nodes
     std::vector<std::vector<Node*>> partitions;
@@ -96,7 +96,6 @@ public:
 
     // Printing 
     void printGraph();
-    void printGraphByPartitions();
 
     // Sort
     void sortOrderNodesByOrder();
@@ -104,57 +103,35 @@ public:
     static bool compareNeighbours(const Edge& a, const Edge& b) { return a.neighbour_id < b.neighbour_id; }
 
     // Count crossings
-    long countCrossingsMarlon();
-    long countCrossingsBranching();
-    long countCrossings();
-    int countCrossingsForPair(int order_a, int order_b);
-    long countCrossingsWithEdgeWeights();
+    long countCrossings(); //before: countCrossingsMarlon
+    //long countCrossingsWithEdgeWeights();
 
     // Swap
     void swapNodes(int order_a, int order_b);
-    void swapNodesBranching(int order_a, int order_b);
 
     // Invisible Node Stuff
-    void makeNodeInvisibleMarlon(int order_of_node);
-    void makeNodeInvisible(int order);
-    void makeNodeInvisibleBranching(int order);
-
-    void makeNodeVisibleMarlon();
-    void makeNodeVisible(int order_of_node);
+    void makeNodeInvisible(int order_of_node); //before: makeNodeInvisibleMarlon
+    void makeNodeVisible(); //before: makeNodeVisinleMarlon
 
     // Partitioning
-    void setNoPartitioning();
-
     void APUtil(int start_node_id, std::vector<bool>& visited, std::vector<int>& disc, std::vector<int>& low, int& time, int& parent, std::vector<bool>& isAP);
     void AP_Intervall();
     void DFS_AP_nodes(int start_node, std::vector<bool>& visited, std::vector<Partition_Intervall>& partition_intervall, std::vector<bool>& isAP);
 
     // Solving
-    std::pair<std::vector<Node*>, long> Greedy();
+    //std::pair<std::vector<Node*>, long> Greedy();
     void MedianHeuristic();
     void BarycenterHeuristicMarlon();
-    void Barycenter_Heuristic();
 
     // Verifier
     bool verifier(Graph check);
 };
 // Utility
-int calculateSpan(Node* node);
+bool compareNodeID(Node* a, Node* b);
 
 // Brute Force
 std::pair<std::vector<Node*>, long> bruteForce(Graph* g);
 std::pair<std::vector<Node*>, long> bruteForceOnSubgraph(Graph* g, int begin, int end);
-
-// Branching Stuff
-Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
-std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast);
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast);
-std::pair<std::vector<Node*>, long>  ExactSolution(Graph& g);
-void TomAlvAlg(Graph& g);
-
-// OLD SHAI BRANCHING -> REMOVE?
-void Branch_and_Bound(Graph* G);
-void exploreBranch(Graph G_branch, Graph& G_original, int depth, int& best_solution, std::vector<Node*>& best_configuration);
 
 #endif //GRAPH_H
 

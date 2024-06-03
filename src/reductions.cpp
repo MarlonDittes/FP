@@ -25,7 +25,7 @@ int Complete_reduction::reduce(Graph* g) {
 }
 
 int ZeroCrossings_reduction::reduce(Graph* g) {
-    int crossings = g->countCrossingsMarlon();
+    int crossings = g->countCrossings();
     if (crossings == 0) {
         //std::cout << "Zero Crossing works \n";
         g->setOptimalTrue();
@@ -37,7 +37,6 @@ int ZeroCrossings_reduction::reduce(Graph* g) {
 
 int Twins_reduction::reduce(Graph* g) {
     int found_Twins = 0;
-
     for (int i = g->getOffsetVisibleOrderNodes(); i < g->getSizeOfOrder()-1; i++) {
         for (int j = i+1; j < g->getSizeOfOrder(); j++) {
             if (g->getNodeByOrder(i)->edges.size() == g->getNodeByOrder(i)->offset_visible_nodes ||
@@ -67,7 +66,7 @@ int Twins_reduction::reduce(Graph* g) {
                     for (auto& edge : g->getNodeByOrder(i)->edges) {
                         edge.edge_weight++;
                     }
-                    g->makeNodeInvisibleMarlon(j);
+                    g->makeNodeInvisible(j);
                     i++;
                 }
             }
@@ -90,10 +89,11 @@ int Twins_reduction::reduce(Graph* g) {
     */
     return found_Twins;
 }
+
 bool Twins_reduction::apply(Graph* g, int twins_count){
     if (twins_count > 0){
         while (twins_count > 0){
-            g->makeNodeVisibleMarlon();
+            g->makeNodeVisible();
             auto pair = restore_vec[restore_vec.size()-1];
             restore_vec.pop_back();
 
@@ -105,132 +105,6 @@ bool Twins_reduction::apply(Graph* g, int twins_count){
                 edge.edge_weight--;
             }
             
-        }
-        g->sortOrderNodesByOrder();
-        return true;
-    } else {
-        return false;
-    }
-}
-
-int AlmostTwin_reduction::reduce(Graph* g) {
-    int found_AlmostTwins = 0;
-
-    std::vector<Node*> copy = g->getOrderNodes();
-    int offset = g->getOffsetVisibleOrderNodes();
-    //copy and sort order array after number of edges -> find right almost twins (deterministic)
-    std::sort(copy.begin() + offset, copy.end(), [](const Node* a, const Node* b) {
-        return a->edges.size() < b->edges.size();
-    }); 
-
-    for (int i = offset; i < copy.size()-1; i++) {
-        for (int j = i+1; j < copy.size(); j++) {
-
-            Node* less = copy[j]; 
-            Node* more = copy[i];
-            
-            if (copy[i]->edges.size() < copy[j]->edges.size()) {
-                less = copy[i];
-                more = copy[j];
-            }
-
-            if (less->edges.size()+1 == more->edges.size()) {
-                
-                //first neighbour identical -> if j is almost twin it has to be on the left side of i
-                if (less->edges[0].neighbour_id == more->edges[0].neighbour_id) {
-                    // need tmp variable for this edge case
-                    bool tmp = false;
-                    if (less->edges.size() == 1) {
-                        tmp = true;
-                    }
-                    else {
-                        for (int k = 1; k < less->edges.size(); k++) {
-                            if (less->edges[k].neighbour_id != more->edges[k].neighbour_id) { break; }
-                            //found Almost Twins
-                            if (k == less->edges.size()-1) { tmp = true; }
-                        }
-                    }
-
-                    if (tmp) {
-                        found_AlmostTwins++;
-                        this->usage_count++;
-                        restore_vec.push_back({more->id, less->id, 0});
-                        //SET EDGE WEIGHTS  
-                        for (int l = 0; l < less->edges.size(); l++) {
-                            more->edges[l].edge_weight += less->edges[l].edge_weight;
-                        }
-                        g->makeNodeInvisibleMarlon(less->order);
-                        if (j < copy.size()-1) {
-                            i++;
-                        }
-                    }
-                }
-                //last neighbour identical -> if j almost twin, it has to be on the right of i 
-                else if (less->edges[less->edges.size()-1].neighbour_id == more->edges[more->edges.size()-1].neighbour_id) {
-                    bool tmp = false;
-                    if (less->edges.size() == 1) {
-                        tmp = true;
-                    }
-                    else {
-                        //check if all other neighbours before are the same
-                        for (int k = 0; k < less->edges.size()-1; k++) {
-                            if (less->edges[k].neighbour_id != more->edges[k+1].neighbour_id) { break; }
-                            //found Almost Twins
-                            if (k == less->edges.size()-2) { tmp = true; }
-                        }
-                    }
-
-                    if (tmp) {
-                        found_AlmostTwins++;
-                        this->usage_count++;
-                        restore_vec.push_back({more->id, less->id, 1});
-                        //SET EDGE WEIGHTS
-                        for (int l = 1; l < more->edges.size(); l++) {
-                            more->edges[l].edge_weight += less->edges[l-1].edge_weight;
-                        }
-                        g->makeNodeInvisibleMarlon(less->order);
-                        if (j < copy.size()-1) {
-                            i++;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    /*
-    std::cout << "number of almost_twins: " << restore_vec.size() << std::endl;
-    for (int i = 0; i < restore_vec.size(); i++) {
-        std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << ", side: " << restore_vec[i].side << std::endl;
-    }
-    std::cout << "edge weights: " << std::endl;
-    for (auto& node : g->getOrderNodes()) {
-        std::cout << "node: " << node->id << ", ";
-        for (auto& neighbour : node->edges) {
-            std::cout << "neighbour: " << neighbour.neighbour_id << ", edge_weight: " << neighbour.edge_weight << std::endl;
-        }
-    }
-    */
-
-    return found_AlmostTwins;
-}
-
-bool AlmostTwin_reduction::apply(Graph* g, int twins_count) {
-    if (twins_count > 0){
-        double offset = 1.0 / (twins_count + 1);
-        while (twins_count > 0){
-            g->makeNodeVisibleMarlon();
-            auto tuple = restore_vec[restore_vec.size()-1];
-            restore_vec.pop_back();
-
-            // If on the left, offset to the left (negative)
-            if (tuple.side == 0){
-                offset = -offset;
-            }
-
-            double orderOfTwin = g->getOrderByNode(tuple.main) + offset;
-
-            g->setOrderByNode(tuple.twin, g->getOrderByNode(tuple.main) + offset);
-            twins_count--;
         }
         g->sortOrderNodesByOrder();
         return true;
@@ -288,7 +162,7 @@ int Domination_reduction::reduce(Graph* g) {
                             for (int m = 0; m < g->getNodeByOrder(less)->edges.size(); m++) {
                                 g->getNodeByOrder(more)->edges[k+m].edge_weight += g->getNodeByOrder(less)->edges[m].edge_weight;
                             }
-                            g->makeNodeInvisibleMarlon(less);
+                            g->makeNodeInvisible(less);
 
                             //!!! i++ nur wenn j Schleife nicht am Ende, sonst Fehler.. evtl. auch bei twins;
                             if (j < g->getSizeOfOrder()-1) {
@@ -324,4 +198,127 @@ bool Domination_reduction::apply(Graph* g, int twins_count) {
     return false;
 }
 
+/*int AlmostTwin_reduction::reduce(Graph* g) {
+    int found_AlmostTwins = 0;
 
+    std::vector<Node*> copy = g->getOrderNodes();
+    int offset = g->getOffsetVisibleOrderNodes();
+    //copy and sort order array after number of edges -> find right almost twins (deterministic)
+    std::sort(copy.begin() + offset, copy.end(), [](const Node* a, const Node* b) {
+        return a->edges.size() < b->edges.size();
+    }); 
+
+    for (int i = offset; i < copy.size()-1; i++) {
+        for (int j = i+1; j < copy.size(); j++) {
+
+            Node* less = copy[j]; 
+            Node* more = copy[i];
+            
+            if (copy[i]->edges.size() < copy[j]->edges.size()) {
+                less = copy[i];
+                more = copy[j];
+            }
+
+            if (less->edges.size()+1 == more->edges.size()) {
+                
+                //first neighbour identical -> if j is almost twin it has to be on the left side of i
+                if (less->edges[0].neighbour_id == more->edges[0].neighbour_id) {
+                    // need tmp variable for this edge case
+                    bool tmp = false;
+                    if (less->edges.size() == 1) {
+                        tmp = true;
+                    }
+                    else {
+                        for (int k = 1; k < less->edges.size(); k++) {
+                            if (less->edges[k].neighbour_id != more->edges[k].neighbour_id) { break; }
+                            //found Almost Twins
+                            if (k == less->edges.size()-1) { tmp = true; }
+                        }
+                    }
+
+                    if (tmp) {
+                        found_AlmostTwins++;
+                        this->usage_count++;
+                        restore_vec.push_back({more->id, less->id, 0});
+                        //SET EDGE WEIGHTS  
+                        for (int l = 0; l < less->edges.size(); l++) {
+                            more->edges[l].edge_weight += less->edges[l].edge_weight;
+                        }
+                        g->makeNodeInvisible(less->order);
+                        if (j < copy.size()-1) {
+                            i++;
+                        }
+                    }
+                }
+                //last neighbour identical -> if j almost twin, it has to be on the right of i 
+                else if (less->edges[less->edges.size()-1].neighbour_id == more->edges[more->edges.size()-1].neighbour_id) {
+                    bool tmp = false;
+                    if (less->edges.size() == 1) {
+                        tmp = true;
+                    }
+                    else {
+                        //check if all other neighbours before are the same
+                        for (int k = 0; k < less->edges.size()-1; k++) {
+                            if (less->edges[k].neighbour_id != more->edges[k+1].neighbour_id) { break; }
+                            //found Almost Twins
+                            if (k == less->edges.size()-2) { tmp = true; }
+                        }
+                    }
+
+                    if (tmp) {
+                        found_AlmostTwins++;
+                        this->usage_count++;
+                        restore_vec.push_back({more->id, less->id, 1});
+                        //SET EDGE WEIGHTS
+                        for (int l = 1; l < more->edges.size(); l++) {
+                            more->edges[l].edge_weight += less->edges[l-1].edge_weight;
+                        }
+                        g->makeNodeInvisible(less->order);
+                        if (j < copy.size()-1) {
+                            i++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    std::cout << "number of almost_twins: " << restore_vec.size() << std::endl;
+    for (int i = 0; i < restore_vec.size(); i++) {
+        std::cout << "main: " << restore_vec[i].main << " , twin: " << restore_vec[i].twin << ", side: " << restore_vec[i].side << std::endl;
+    }
+    std::cout << "edge weights: " << std::endl;
+    for (auto& node : g->getOrderNodes()) {
+        std::cout << "node: " << node->id << ", ";
+        for (auto& neighbour : node->edges) {
+            std::cout << "neighbour: " << neighbour.neighbour_id << ", edge_weight: " << neighbour.edge_weight << std::endl;
+        }
+    }
+
+    return found_AlmostTwins;
+}*/
+
+/*bool AlmostTwin_reduction::apply(Graph* g, int twins_count) {
+    if (twins_count > 0){
+        double offset = 1.0 / (twins_count + 1);
+        while (twins_count > 0){
+            g->makeNodeVisible();
+            auto tuple = restore_vec[restore_vec.size()-1];
+            restore_vec.pop_back();
+
+            // If on the left, offset to the left (negative)
+            if (tuple.side == 0){
+                offset = -offset;
+            }
+
+            double orderOfTwin = g->getOrderByNode(tuple.main) + offset;
+
+            g->setOrderByNode(tuple.twin, g->getOrderByNode(tuple.main) + offset);
+            twins_count--;
+        }
+        g->sortOrderNodesByOrder();
+        return true;
+    } else {
+        return false;
+    }
+}*/

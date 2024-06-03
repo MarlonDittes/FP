@@ -6,6 +6,7 @@
 #include "graph.h"
 #include "reductions.h"
 #include "io.h"
+#include "branchandreduce.h"
 
 namespace fs = std::filesystem;
 
@@ -109,7 +110,7 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                         stop = std::chrono::high_resolution_clock::now();
                         duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
                         if (fast){
-                            result.second = g->countCrossingsMarlon();
+                            result.second = g->countCrossings();
                         }
                         break;
 

@@ -1,9 +1,10 @@
 #include <iostream>
-#include "graph.h"
-#include "io.h"
-#include "stack.h"
-#include "performance.h"
-#include "reductions.h"
+#include "src/graph.h"
+#include "src/io.h"
+#include "src/stack.h"
+#include "src/performance.h"
+#include "src/reductions.h"
+#include "src/branchandreduce.h"
 #include <signal.h>
 #include <unistd.h>
 #include <cstring>
@@ -36,17 +37,17 @@ void term(int signum) {
 int main(int argc, char* argv[]) {
     std::ios::sync_with_stdio(false);
     // Register the signal handler for SIGTERM
-    struct sigaction action;
+    /*struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = term;
-    sigaction(SIGTERM, &action, NULL);
+    sigaction(SIGTERM, &action, NULL);*/
 
     // Read graph
     Graph* g = readStandardIn();
 
     g->MedianHeuristic();
     bestSolution = g->getOrderNodes();
-    bestCrossings = g->countCrossingsMarlon();
+    bestCrossings = g->countCrossings();
 
     std::cout << bestCrossings << ",";
     
@@ -66,7 +67,7 @@ int main(int argc, char* argv[]) {
     std::vector<int> method1_options = {0,1,2};
     for (auto& option : method1_options){
         auto result = BranchAndReduce(g, reductions, option, method2, fast);
-        int currentCrossings = g->countCrossingsMarlon();
+        int currentCrossings = g->countCrossings();
         if (currentCrossings < bestCrossings){
             bestSolution = result.first;
             bestCrossings = currentCrossings;
