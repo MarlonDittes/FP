@@ -68,12 +68,14 @@ namespace heuristic_algorithm {
     bool HeuristicAlgorithm(Graph& graph, bool runR1, bool runR2, bool runR3) {
         using NodeType = typename Graph::NodeType;
 
-        median_algorithm::medianAlgorithm(graph);
+        //std::cout<<"in graph of alvaro before median crossings : "<<graph.getCrossings()<<std::endl;
+        //median_algorithm::medianAlgorithm(graph);
         for (int i = 0; i < graph.getFreeNodesSize(); ++i) {
-            auto permutation = graph.getPermutation();
-            graph.setFreeNodePosition(permutation[i], i);
+            auto permutation = graph.getPermutatuinAtIndex(i);
+            graph.setFreeNodePosition(permutation, i);
         }
         graph.computeCrossingSums();
+        //std::cout<<"in graph of alvaro after median before doing algorithm : "<<graph.getCrossings()<<std::endl;
         bool didChange = true;
         bool madeSwitch = false;
         while (didChange) {
@@ -105,6 +107,7 @@ namespace heuristic_algorithm {
                 madeSwitch = true;
             }
         }
+        graph.computeCrossingSums();
         return madeSwitch;
     }
 }  // namespace heuristic_algorithm

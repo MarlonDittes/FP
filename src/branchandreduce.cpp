@@ -86,12 +86,16 @@ void TomAlvAlg(Graph& g) {
     std::cout<<"Offset Visible order Nodes : " <<g.getOffsetVisibleOrderNodes()<<std::endl;*/
 
     for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
+
+        g.getOrderNodes()[i]->TV_new_order_id = i - g.getOffsetVisibleOrderNodes();
+        mapping[g.getOrderNodes()[i]->TV_new_order_id] = g.getOrderNodes()[i]->order;
+
         for (int j = g.getOrderNodes()[i]->offset_visible_nodes; j < g.getOrderNodes()[i]->edges.size(); j++) {
             //std::cout<<"Order Node ID : "<<g.getOrderNodes()[i]->id<<std::endl;
             //std::cout<<"neighbour : "<<g.getOrderNodes()[i]->edges[j].neighbour_id<<std::endl;
 
-            g.getOrderNodes()[i]->TV_new_order_id = i - g.getOffsetVisibleOrderNodes();
-            mapping[g.getOrderNodes()[i]->TV_new_order_id] = g.getOrderNodes()[i]->id;
+            //g.getOrderNodes()[i]->TV_new_order_id = i - g.getOffsetVisibleOrderNodes();
+            //mapping[g.getOrderNodes()[i]->TV_new_order_id] = g.getOrderNodes()[i]->order;
             graphTomAlv.addEdge(g.getOrderNodes()[i]->TV_new_order_id, g.getOrderNodes()[i]->edges[j].neighbour_id);
         }
     }
@@ -107,12 +111,12 @@ void TomAlvAlg(Graph& g) {
 
     for (int i = 0; i < g.getOffsetVisibleOrderNodes(); i++) {
         new_order[i] = g.getOrderNodes()[i];
-        new_order[i]->median_pos = i;
+        //new_order[i]->median_pos = i;
     }
 
     for (int i = 0; i < permutation.size(); i++) {
-        new_order[i + g.getOffsetVisibleOrderNodes()] = &g.getGraph()[mapping[permutation[i]]];
-        new_order[i + g.getOffsetVisibleOrderNodes()]->median_pos = i;
+        new_order[i + g.getOffsetVisibleOrderNodes()] = g.getOrderNodes()[mapping[permutation[i]]];
+        //new_order[i + g.getOffsetVisibleOrderNodes()]->median_pos = i;
     }
 
     g.setOrderNodes(new_order);
@@ -120,6 +124,70 @@ void TomAlvAlg(Graph& g) {
     //std::cout<<"Out of TomAlv Algorithm"<<std::endl;
 }
 
+std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
+
+    std::vector<int> mapping(g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes());
+
+    CrossGuard::Graph g_exact(g.getN0(), g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes());
+    //std::cout << "Offset visible order nodes " << g.getOffsetVisibleOrderNodes() << std::endl;
+    //std::cout << "Order Nodes Size : " << g.getOrderNodes().size() << std::endl;
+
+    for (int i = g.getOffsetVisibleOrderNodes(); i < g.getOrderNodes().size(); i++) {
+
+        g.getOrderNodes()[i]->Hen_new_order_id = i - g.getOffsetVisibleOrderNodes();
+        mapping[g.getOrderNodes()[i]->Hen_new_order_id] = g.getOrderNodes()[i]->order;
+
+        for (int j = g.getOrderNodes()[i]->offset_visible_nodes; j < g.getOrderNodes()[i]->edges.size(); j++) {
+            //TODO: Need to add Edge weights, done.
+
+            //g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->id, g.getOrderNodes()[i]->edges[j].edge_weight);
+            //std::cout << "i : " << i << " j : " << j << std::endl;
+            //std::cout << "i-te nodes amount of neighbours : " << g.getOrderNodes()[i]->edges.size() << std::endl;
+            //std::cout << "i-te order node : " << g.getOrderNodes()[i]->id << std::endl;
+            //std::cout << "j-te neighbour of i-te node: " << g.getOrderNodes()[i]->edges[j].neighbour_id << std::endl;
+
+            g_exact.add_edge(g.getOrderNodes()[i]->edges[j].neighbour_id, g.getOrderNodes()[i]->Hen_new_order_id, g.getOrderNodes()[i]->edges[j].edge_weight);
+        }
+    }
+
+    //std::cout << "After adding edges" << std::endl;
+    g_exact.finalize();
+
+    CrossGuard::Solver s(g_exact);
+    s.solve(true);
+    CrossGuard::AlignedVector<CrossGuard::u32> solver_solution = s.get_solution();
+    long sumCrossings = g_exact.determine_n_cuts(solver_solution);
+
+    std::vector<Node*> new_order = g.getOrderNodes();
+
+    for (int i = 0; i < g.getOffsetVisibleOrderNodes(); i++) {
+        new_order[i] = g.getOrderNodes()[i];
+        new_order[i]->median_pos = i;
+    }
+
+    for (int i = 0; i < solver_solution.size(); i++) {
+        new_order[i + g.getOffsetVisibleOrderNodes()] = g.getOrderNodes()[mapping[solver_solution[i]]];
+        new_order[i + g.getOffsetVisibleOrderNodes()]->median_pos = i + g.getOffsetVisibleOrderNodes();
+    }
+
+    /*for (int i = 0; i < solver_solution.size(); i++) {
+        new_order[i] = &g.getGraph()[solver_solution[i] + g.getN0()];
+    }*/
+
+    //std::cout << "Crossings with henning : " << sumCrossings << std::endl;
+    //std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
+    g.setOrderNodes(new_order);
+    //std::cout << " Crossing from graph after new order: " << g.countCrossingsMarlon() << std::endl;
+
+    if (sumCrossings != g.countCrossings()) {
+        std::cout << "SUM OF HENNING AND COUNTCROSSING FUNCTION DID NOT DELIVER THE SAME RESULT" << std::endl;
+    }
+
+    return std::make_pair(g.getOrderNodes(), g.countCrossings());
+
+}
+
+int EXACT_SOLUTION_SIZE = 40;
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     bool changed = false;
@@ -132,25 +200,28 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             if (reduct->get_reduction_type() == Twins) {
                 twins_count = reduct->reduce(g);
 
-                if (twins_count > 0){
+                if (twins_count > 0) {
                     changed = true;
                 }
-            } else if (reduct->get_reduction_type() == AlmostTwins){
+            }
+            else if (reduct->get_reduction_type() == AlmostTwins) {
                 almostTwins_count = reduct->reduce(g);
 
-                if (almostTwins_count > 0){
+                if (almostTwins_count > 0) {
                     changed = true;
                 }
-            } else {
+            }
+            else {
                 changed = reduct->reduce(g);
             }
         }
     }
 
     if (g->getOptimal()) { //order already optimal, s.t. no recursion or bruteforce needed
-        if (fast){
+        if (fast) {
             result = std::make_pair(g->getOrderNodes(), 0);
-        } else{
+        }
+        else {
             result = std::make_pair(g->getOrderNodes(), g->countCrossings());
         }
     }
@@ -160,8 +231,14 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
     }
     //Reduce our instance if no more reductions applicable
     else {
+
+        if (g->getOrderNodes().size() < EXACT_SOLUTION_SIZE) {
+            result = ExactSolution(*g);
+        } else {
+
+
         // Randomize which method we use to remove node
-        if (method1 == 3){
+        if (method1 == 3) {
             // Seed the random number generator with the current time
             std::srand(std::time(0));
 
@@ -177,7 +254,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             // Step 1: What kind of node do we want to remove?
             // Method 1A: Find highest degree visible moveable node
             Node* foundNode = nullptr;
-            if (method1 == 0){
+            if (method1 == 0) {
                 foundNode = orderNodes[visibleNodeOffset];
                 int maxDegree = orderNodes[visibleNodeOffset]->edges.size() - orderNodes[visibleNodeOffset]->offset_visible_nodes;
                 for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
@@ -188,7 +265,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                 }
             }
             // Method 1B: Find most spanning node
-            else if (method1 == 1){
+            else if (method1 == 1) {
                 foundNode = orderNodes[visibleNodeOffset];
                 int maxSpan = calculateSpan(foundNode);
                 for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
@@ -200,7 +277,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                 }
             }
             //Method 1C: Find max combined value of span and degree
-            else if (method1 == 2){
+            else if (method1 == 2) {
                 foundNode = orderNodes[visibleNodeOffset];
                 double maxCombined = (double)calculateSpan(foundNode) / (foundNode->edges.size() - foundNode->offset_visible_nodes);
                 for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
@@ -211,7 +288,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                     }
                 }
             }
-            
+
             // Remove node for now
             g->makeNodeInvisible(foundNode->order);
             // Solve on remaining nodes
@@ -222,7 +299,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             //TODO: Try param here, so e.g. if less than 10 nodes left try every position (Method 2A)
             // Step 2: Where do we want to place the previously removed node?
             // Method 2A: Calculate Crossings for every possible position of node
-            if (method2 == 0){
+            if (method2 == 0) {
                 int minCrossings = g->countCrossings();
                 auto minOrder = g->getOrderNodes();
                 for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
@@ -238,20 +315,20 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                 result = std::make_pair(g->getOrderNodes(), minCrossings);
             }
             // Method 2B: Place node at nearest median position
-            else if (method2 == 1){
-                orderNodes = g->getOrderNodes();        
+            else if (method2 == 1) {
+                orderNodes = g->getOrderNodes();
                 // Calculate median of node we want to place back
                 int median = 0;
-                if (foundNode->offset_visible_nodes != foundNode->edges.size()){
+                if (foundNode->offset_visible_nodes != foundNode->edges.size()) {
                     std::vector<int> neighbourIDs(0);
-                    for (int i = foundNode->offset_visible_nodes; i < foundNode->edges.size(); i++){
+                    for (int i = foundNode->offset_visible_nodes; i < foundNode->edges.size(); i++) {
                         neighbourIDs.push_back(foundNode->edges[i].neighbour_id);
                     }
 
                     int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
                     median = neighbourIDs[pos_index];
                     // If even degree, further to the right
-                    if (neighbourIDs.size() % 2 == 0){
+                    if (neighbourIDs.size() % 2 == 0) {
                         median += 0.1;
                     }
                 }
@@ -263,16 +340,16 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                     auto& current_node = orderNodes[i];
                     current_node->median_pos = 0;
                     // If there are neighbours, select the median id
-                    if (current_node->offset_visible_nodes != current_node->edges.size()){
+                    if (current_node->offset_visible_nodes != current_node->edges.size()) {
                         std::vector<int> neighbourIDs(0);
-                        for (int i = current_node->offset_visible_nodes; i < current_node->edges.size(); i++){
+                        for (int i = current_node->offset_visible_nodes; i < current_node->edges.size(); i++) {
                             neighbourIDs.push_back(current_node->edges[i].neighbour_id);
                         }
 
                         int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
                         current_node->median_pos = neighbourIDs[pos_index];
                         // If even degree, further to the right
-                        if (neighbourIDs.size() % 2 == 0){
+                        if (neighbourIDs.size() % 2 == 0) {
                             current_node->median_pos += 0.1;
                         }
 
@@ -289,13 +366,15 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                 foundNode->order = closestNode->order;
                 g->sortOrderNodesByOrder();
 
-                if (fast){
+                if (fast) {
                     result = std::make_pair(g->getOrderNodes(), 0);
-                } else {
+                }
+                else {
                     result = std::make_pair(g->getOrderNodes(), g->countCrossings());
                 }
-            // Method 2C: Calculate Crossings for every possible position of node using only crossings from that node
-            } else if (method2 == 2){
+                // Method 2C: Calculate Crossings for every possible position of node using only crossings from that node
+            }
+            else if (method2 == 2) {
                 orderNodes = g->getOrderNodes();
                 // Init for position = visibleNodeOffset
                 int minCrossings = 0;
@@ -320,11 +399,11 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                     //iterate through visible movable_nodes != current node
                     for (int v = visibleNodeOffset; v < orderNodes.size(); v++) {
                         // v == current node, no crossings to itself
-                        if (v == foundNode->order){
+                        if (v == foundNode->order) {
                             continue;
-                        } 
+                        }
                         // v to the left of current Node
-                        else if (v < foundNode->order){
+                        else if (v < foundNode->order) {
                             for (auto& current_neighbour : foundNode->edges) {
                                 for (auto& v_neighbour : orderNodes[v]->edges) {
                                     if (current_neighbour.neighbour_id < v_neighbour.neighbour_id) {
@@ -335,7 +414,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                             }
                         }
                         // v to the right of current Node
-                        else if (v > foundNode->order){
+                        else if (v > foundNode->order) {
                             for (auto& current_neighbour : foundNode->edges) {
                                 for (auto& v_neighbour : orderNodes[v]->edges) {
                                     if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
@@ -344,7 +423,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                                     }
                                 }
                             }
-                        }     
+                        }
                     }
 
                     if (crossings < minCrossings) {
@@ -354,9 +433,10 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
                 }
                 // Reconstruct min order
                 g->setOrderNodes(minOrder);
-                if (fast){
+                if (fast) {
                     result = std::make_pair(g->getOrderNodes(), 0);
-                } else {
+                }
+                else {
                     result = std::make_pair(g->getOrderNodes(), g->countCrossings());
                 }
             }
@@ -380,6 +460,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
         else {
             result = std::make_pair(g->getOrderNodes(), 0);
         }
+    }
     }
 
     // Run through applies in backward order
