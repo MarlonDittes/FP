@@ -68,7 +68,6 @@ struct AlmostTwin_reduction : public general_reduction {
 struct Domination_reduction : public general_reduction {
     virtual reduction_type get_reduction_type() const final { return reduction_type::Domination; }
     virtual int reduce(Graph* g) override;
-    virtual int reduce(Graph* g, int a);
     virtual bool apply(Graph* g, int twins_count) override;
 
     private:
