@@ -189,7 +189,6 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 */
 
 int EXACT_SOLUTION_SIZE = 40;
-int TIMEOUT = 290;
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     bool changed = false;

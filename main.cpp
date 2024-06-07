@@ -64,6 +64,10 @@ int main(int argc, char* argv[]) {
     int method2 = 2;
     bool fast = 1;
 
+    TomAlvAlg(*g);
+
+    //std::cout << g->countCrossings() << ",";
+
     auto result = BranchAndReduce(g, reductions, 2, method2, fast);
     int currentCrossings = g->countCrossings();
     if (currentCrossings < bestCrossings){
@@ -81,6 +85,7 @@ int main(int argc, char* argv[]) {
             bestCrossings = currentCrossings;
         }
     }
+    
     
     //std::cout << bestCrossings << std::endl;
     //outputStandardOut(bestSolution);

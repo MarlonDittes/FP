@@ -145,8 +145,6 @@ void Graph::swapNodes(int node0, int node1) {
 void Graph::makeNodeInvisible(int order_of_node) {
     assert(offset_visible_order_nodes <= order_of_node);
     assert(order_of_node <= order_nodes.size() - 1);
-    //Make sure node is not already invisible
-    assert(order_nodes[order_of_node]->offset_visible_nodes != order_nodes[order_of_node]->edges.size());
 
     Node* node = order_nodes[order_of_node];
     this->activeEdges -= node->edges.size();
@@ -552,7 +550,7 @@ bool compareNodeID(Node* a, Node* b) {
     do {
         g->setOrderNodes(baseOrder);
         // Display the current permutation
-        /*std::cout << "Permutation:";
+        //std::cout << "Permutation:";
         for (const Node* node : baseOrder) {
             std::cout << " order_nodes: " << node->order << ", ID: " << node->id;
         }

@@ -1,16 +1,12 @@
 cmake_minimum_required(VERSION 3.13)
 project(test VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 17)
+
+# Need this for optil static binary submissions
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 set(CMAKE_BUILD_TYPE Release)
-
-# Enable debugging information
 #set(CMAKE_BUILD_TYPE Debug)
-
-# Enable profiling
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 #add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp performance.cpp LPSolver.cpp)
 add_library(my_lib STATIC src/graph.cpp src/io.cpp src/stack.cpp src/reductions.cpp src/performance.cpp src/branchandreduce.cpp)
