@@ -65,11 +65,16 @@ int main(int argc, char* argv[]) {
     bool fast = 1;
 
     TomAlvAlg(*g);
+    int currentCrossings = g->countCrossings();
+    if (currentCrossings < bestCrossings){
+        bestSolution = g->getOrderNodes();
+        bestCrossings = currentCrossings;
+    }
 
     //std::cout << g->countCrossings() << ",";
 
     auto result = BranchAndReduce(g, reductions, 2, method2, fast);
-    int currentCrossings = g->countCrossings();
+    currentCrossings = g->countCrossings();
     if (currentCrossings < bestCrossings){
         bestSolution = result.first;
         bestCrossings = currentCrossings;
