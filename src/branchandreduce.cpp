@@ -123,7 +123,7 @@ void TomAlvAlg(Graph& g) {
 
     //std::cout<<"Out of TomAlv Algorithm"<<std::endl;
 }
-
+/*
 std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 
     std::vector<int> mapping(g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes());
@@ -170,9 +170,9 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
         new_order[i + g.getOffsetVisibleOrderNodes()]->median_pos = i + g.getOffsetVisibleOrderNodes();
     }
 
-    /*for (int i = 0; i < solver_solution.size(); i++) {
-        new_order[i] = &g.getGraph()[solver_solution[i] + g.getN0()];
-    }*/
+    //for (int i = 0; i < solver_solution.size(); i++) {
+    //    new_order[i] = &g.getGraph()[solver_solution[i] + g.getN0()];
+    //}
 
     //std::cout << "Crossings with henning : " << sumCrossings << std::endl;
     //std::cout << "Crossing from graph before new order : " << g.countCrossingsMarlon() << std::endl;
@@ -186,8 +186,10 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
     return std::make_pair(g.getOrderNodes(), g.countCrossings());
 
 }
+*/
 
 int EXACT_SOLUTION_SIZE = 40;
+int TIMEOUT = 290;
 
 std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     bool changed = false;
@@ -232,9 +234,10 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
     //Reduce our instance if no more reductions applicable
     else {
 
-        if (g->getOrderNodes().size() < EXACT_SOLUTION_SIZE) {
-            result = ExactSolution(*g);
-        } else {
+        //if (g->getOrderNodes().size() < EXACT_SOLUTION_SIZE) {
+        //    result = ExactSolution(*g);
+        //    g->setOrderNodes(result.first);
+        //} else {
 
 
         // Randomize which method we use to remove node
@@ -461,7 +464,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
             result = std::make_pair(g->getOrderNodes(), 0);
         }
     }
-    }
+    //}
 
     // Run through applies in backward order
     for (auto reduct = reductionTypes.rbegin(); reduct != reductionTypes.rend(); ++reduct) {
@@ -484,7 +487,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
 
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
-    g->MedianHeuristic();
+    //g->MedianHeuristic();
     //TomAlvAlg(*g);
 
     //Find partitions of Graph
@@ -502,16 +505,6 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
         //Get sub solutions
         for (auto& part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
-
-            //std::pair<std::vector<Node*>, long> result;
-
-            //if (partGraph->getGraph().size() < 50) {
-            //    result = ExactSolution(*partGraph);
-            //}
-            //else {
-            //    result = branching(partGraph, reductionTypes, method1, method2, fast);
-            //}
-
             auto result = branching(partGraph, reductionTypes, method1, method2, fast);
             results.push_back(result);
         }
@@ -557,8 +550,6 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
         sumCrossings = result.second;
 
     }
-
-    //TODO: Check if the solution is the order of the nodes.
 
     return std::make_pair(solution, sumCrossings);
 }

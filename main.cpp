@@ -37,10 +37,10 @@ void term(int signum) {
 int main(int argc, char* argv[]) {
     std::ios::sync_with_stdio(false);
     // Register the signal handler for SIGTERM
-    /*struct sigaction action;
+    struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = term;
-    sigaction(SIGTERM, &action, NULL);*/
+    sigaction(SIGTERM, &action, NULL);
 
     // Read graph
     Graph* g = readStandardIn();
@@ -64,16 +64,24 @@ int main(int argc, char* argv[]) {
     int method2 = 2;
     bool fast = 1;
 
-    std::vector<int> method1_options = {2};
-    for (auto& option : method1_options){
-        auto result = BranchAndReduce(g, reductions, option, method2, fast);
+    auto result = BranchAndReduce(g, reductions, 2, method2, fast);
+    int currentCrossings = g->countCrossings();
+    if (currentCrossings < bestCrossings){
+        bestSolution = result.first;
+        bestCrossings = currentCrossings;
+    }
+
+    
+    while(true){
+        g->MedianHeuristic();
+        auto result = BranchAndReduce(g, reductions, 3, method2, fast);
         int currentCrossings = g->countCrossings();
         if (currentCrossings < bestCrossings){
             bestSolution = result.first;
             bestCrossings = currentCrossings;
         }
     }
-
+    
     //std::cout << bestCrossings << std::endl;
-    outputStandardOut(bestSolution);
+    //outputStandardOut(bestSolution);
 }
