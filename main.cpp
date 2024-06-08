@@ -81,8 +81,7 @@ int main(int argc, char* argv[]) {
         bestCrossings = currentCrossings;
     }
 
-    int tries = 0;
-    while(tries < 100){
+    while(true){
         g->MedianHeuristic();
         result = BranchAndReduce(g, reductions, 3, method2, fast);
         currentCrossings = g->countCrossings();
@@ -90,7 +89,6 @@ int main(int argc, char* argv[]) {
             bestSolution = result.first;
             bestCrossings = currentCrossings;
         }
-        tries++;
     }
     
     outputStandardOut(bestSolution);
