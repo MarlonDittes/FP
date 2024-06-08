@@ -90,7 +90,6 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    outputStandardOut(bestSolution);
     //std::cout << bestCrossings << std::endl;
     //outputStandardOut(bestSolution);
 }
