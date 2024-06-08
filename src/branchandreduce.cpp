@@ -202,7 +202,6 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
             result = std::make_pair(g->getOrderNodes(), g->countCrossings());
         }
     }
-    // TODO: Check this maybe with param
     else if (changed) {
         result = BranchAndReduce(g, reductionTypes, method1, method2, fast);
     }
@@ -229,7 +228,6 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
         int visibleNodeOffset = g->getOffsetVisibleOrderNodes();
 
         if ((orderNodes.size() - visibleNodeOffset) > 2) {
-            // TODO: Try param maybe?
             // Step 1: What kind of node do we want to remove?
             // Method 1A: Find highest degree visible moveable node
             Node* foundNode = nullptr;
@@ -275,7 +273,6 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
             // Add node back
             g->makeNodeVisible();
 
-            //TODO: Try param here, so e.g. if less than 10 nodes left try every position (Method 2A)
             // Step 2: Where do we want to place the previously removed node?
             // Method 2A: Calculate Crossings for every possible position of node
             if (method2 == 0) {
@@ -462,7 +459,6 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
 }
 
 std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast) {
-    //TODO: Try param here, maybe running Median once at beginning is often
     //g->MedianHeuristic();
     //TomAlvAlg(*g);
 
