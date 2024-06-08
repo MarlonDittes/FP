@@ -1,4 +1,5 @@
 #include "branchandreduce.h"
+#include <memory>
 
 #include "../src_henning/src/definitions.h"
 #include "../src_henning/src/macros.h"
@@ -29,7 +30,7 @@ int calculateSpan(Node* node) {
     return maxID - minID;
 }
 
-Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
+std::unique_ptr<Graph> createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     std::sort(partition.begin(), partition.end(), compareNodeID);
     int n0 = 0;
     int n1 = 0;
@@ -53,7 +54,7 @@ Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
         }
     }
 
-    Graph* partGraph = new Graph(n0, n1, m); // use smartppointers
+    std::unique_ptr<Graph> partGraph = std::make_unique<Graph>(n0, n1, m);
 
     for (int i = 0; i < partition.size(); i++) {
         partGraph->setOldID(i, partition[i]->id);
@@ -161,7 +162,7 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 
 int EXACT_SOLUTION_SIZE = 10;
 
-std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
+std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast) {
     bool changed = false;
     int twins_count = 0;
     int almostTwins_count = 0;
@@ -457,7 +458,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
     return result;
 }
 
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
     //g->MedianHeuristic();
     //TomAlvAlg(*g);
@@ -476,8 +477,8 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<genera
 
         //Get sub solutions
         for (auto& part : partitions) {
-            Graph* partGraph = createGraphByPartition(g, part);
-            auto result = branching(partGraph, reductionTypes, method1, method2, fast);
+            auto partGraph = createGraphByPartition(g, part);  // Take ownership of the new graph
+            auto result = branching(partGraph.get(), reductionTypes, method1, method2, fast);
             results.push_back(result);
         }
 

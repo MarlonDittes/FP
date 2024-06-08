@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <cstring>
+#include <memory>
 
 /*
 #include "src_henning/src/definitions.h"
@@ -52,13 +53,13 @@ int main(int argc, char* argv[]) {
     //std::cout << bestCrossings << ",";
     
     // Which reductions to use
-    std::vector<general_reduction*> reductions;
-    reductions.push_back(new ZeroEdge_reduction);
-    reductions.push_back(new Complete_reduction);
-    //reductions.push_back(new ZeroCrossings_reduction);
-    reductions.push_back(new Twins_reduction);
-    //reductions.push_back(new AlmostTwin_reduction);
-    //reductions.push_back(new Domination_reduction);
+    std::vector<std::unique_ptr<general_reduction>> reductions;
+    reductions.push_back(std::make_unique<ZeroEdge_reduction>());
+    reductions.push_back(std::make_unique<Complete_reduction>());
+    //reductions.push_back(std::make_unique<ZeroCrossings_reduction>());
+    reductions.push_back(std::make_unique<Twins_reduction>());
+    //reductions.push_back(std::make_unique<AlmostTwin_reduction>());
+    //reductions.push_back(std::make_unique<Domination_reduction>());
 
     // Output solution
     int method2 = 2;
@@ -80,18 +81,17 @@ int main(int argc, char* argv[]) {
         bestCrossings = currentCrossings;
     }
 
-    
     while(true){
         g->MedianHeuristic();
-        auto result = BranchAndReduce(g, reductions, 3, method2, fast);
-        int currentCrossings = g->countCrossings();
+        result = BranchAndReduce(g, reductions, 3, method2, fast);
+        currentCrossings = g->countCrossings();
         if (currentCrossings < bestCrossings){
             bestSolution = result.first;
             bestCrossings = currentCrossings;
         }
     }
     
-    
+    outputStandardOut(bestSolution);
     //std::cout << bestCrossings << std::endl;
     //outputStandardOut(bestSolution);
 }

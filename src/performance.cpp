@@ -106,7 +106,7 @@ void calculatePerformance(std::string folderPath, std::string outputFile, int mo
                     // 4 BranchAndReduce
                     case 4:
                         start = std::chrono::high_resolution_clock::now();
-                        result = BranchAndReduce(g, reductions, method1, method2, fast);
+                        //result = BranchAndReduce(g, reductions, method1, method2, fast);
                         stop = std::chrono::high_resolution_clock::now();
                         duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
                         if (fast){
