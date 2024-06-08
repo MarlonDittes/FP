@@ -29,8 +29,8 @@ int bestCrossings;
 // Signal handler for SIGTERM
 void term(int signum) {
     // Output the best solution so far
-    //std::cout << bestCrossings << std::endl;
-    outputStandardOut(bestSolution);
+    std::cout << bestCrossings << std::endl;
+    //outputStandardOut(bestSolution);
     std::exit(signum); // Exit the program
 }
 
@@ -80,6 +80,7 @@ int main(int argc, char* argv[]) {
         bestCrossings = currentCrossings;
     }
 
+    
     while(true){
         g->MedianHeuristic();
         result = BranchAndReduce(g, reductions, 3, method2, fast);

@@ -8,7 +8,6 @@ set(CMAKE_EXE_LINKER_FLAGS "-static")
 set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_BUILD_TYPE Debug)
 
-#add_library(my_lib STATIC graph.cpp io.cpp stack.cpp reductions.cpp LPSolver.cpp)
 add_library(my_lib STATIC src/graph.cpp src/io.cpp src/stack.cpp src/reductions.cpp src/branchandreduce.cpp)
 
 add_executable(heiCross main.cpp)

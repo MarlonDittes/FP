@@ -32,7 +32,7 @@ int calculateSpan(Node* node) {
     return maxID - minID;
 }
 
-std::unique_ptr<Graph> createGraphByPartition(Graph* g, std::vector<Node*> partition) {
+Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition) {
     std::sort(partition.begin(), partition.end(), compareNodeID);
     int n0 = 0;
     int n1 = 0;
@@ -56,7 +56,7 @@ std::unique_ptr<Graph> createGraphByPartition(Graph* g, std::vector<Node*> parti
         }
     }
 
-    std::unique_ptr<Graph> partGraph = std::make_unique<Graph>(n0, n1, m);
+    Graph* partGraph = new Graph(n0, n1, m);
 
     for (int i = 0; i < partition.size(); i++) {
         partGraph->setOldID(i, partition[i]->id);
@@ -473,11 +473,13 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::u
     // We could partition the graph
     if (partitions.size() > 1) {
         std::vector<std::pair<std::vector<Node*>, long>> results(0);
+        std::vector<Graph*> partGraphPointers; // used to deallocate partGraphs later
 
         //Get sub solutions
         for (auto& part : partitions) {
-            auto partGraph = createGraphByPartition(g, part);  // Take ownership of the new graph
-            auto result = branching(partGraph.get(), reductionTypes, method1, method2, fast);
+            Graph* partGraph = createGraphByPartition(g, part);
+            partGraphPointers.push_back(partGraph);
+            auto result = branching(partGraph, reductionTypes, method1, method2, fast);
             results.push_back(result);
         }
 
@@ -503,6 +505,11 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::u
         }
 
         g->setOrderNodes(solution);
+
+        //deallocate partGraphs
+        for (auto partGraph : partGraphPointers){
+            delete partGraph;
+        }
 
     }
     // We couldn't partition the graph
