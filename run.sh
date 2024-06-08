@@ -12,13 +12,13 @@ for i in $(seq 1 100); do
     echo $i
     input_file="$input_dir/$i.gr"
 
-    ./runlim --time-limit=10 ./build/heiCross < $input_file > temp.txt
+    ./runlim --time-limit=60 ./build/heiCross < $input_file > temp.txt
 
     # Read the output from heiCross
     solution=$(cat temp.txt)
 
     # Append the result along with the elapsed time to the output file
-    echo $solution >> "$output_file"
+    echo $i.gr,$solution >> "$output_file"
 
     # Clean up temporary files
     rm -f temp.txt

@@ -29,8 +29,8 @@ int bestCrossings;
 // Signal handler for SIGTERM
 void term(int signum) {
     // Output the best solution so far
-    std::cout << bestCrossings << std::endl;
-    //outputStandardOut(bestSolution);
+    //std::cout << bestCrossings << std::endl;
+    outputStandardOut(bestSolution);
     std::exit(signum); // Exit the program
 }
 
