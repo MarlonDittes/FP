@@ -1,4 +1,5 @@
 #include "branchandreduce.h"
+#include <memory>
 
 /*#include "../src_henning/src/definitions.h"
 #include "../src_henning/src/macros.h"
@@ -190,7 +191,7 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 
 int EXACT_SOLUTION_SIZE = 40;
 
-std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
+std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast) {
     bool changed = false;
     int twins_count = 0;
     int almostTwins_count = 0;
@@ -484,7 +485,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<general_redu
     return result;
 }
 
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<general_reduction*> reductionTypes, int method1, int method2, bool fast) {
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast) {
     //TODO: Try param here, maybe running Median once at beginning is often
     //g->MedianHeuristic();
     //TomAlvAlg(*g);
