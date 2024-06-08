@@ -211,7 +211,6 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
         /*
         if (g->getOrderNodes().size() < EXACT_SOLUTION_SIZE) {
             result = ExactSolution(*g);
-            g->setOrderNodes(result.first);
             return result;
         }*/
 
