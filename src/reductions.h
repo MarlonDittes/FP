@@ -13,9 +13,6 @@ struct general_reduction {
     virtual reduction_type get_reduction_type() const = 0;
 	virtual int reduce(Graph* g) = 0;
     virtual bool apply(Graph* g, int twins_count) {return false;};
-
-    bool first = true;
-    int usage_count = 0;
 };
 
 //naive reduction = graph is optimal and will be no more reduced, no apply function

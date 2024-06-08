@@ -2,7 +2,6 @@
 #include "src/graph.h"
 #include "src/io.h"
 #include "src/stack.h"
-#include "src/performance.h"
 #include "src/reductions.h"
 #include "src/branchandreduce.h"
 #include <signal.h>

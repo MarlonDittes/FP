@@ -4,7 +4,6 @@ int ZeroEdge_reduction::reduce(Graph* g) {
     if (g->getActiveEdges() == 0) {
         //std::cout << "Zero Edge works \n";
         g->setOptimalTrue();
-        this->usage_count++;
         return 1;
     }
     return 0;
@@ -18,7 +17,6 @@ int Complete_reduction::reduce(Graph* g) {
     if (n0 * n1 == m) {
         //std::cout << "Complete works \n";
         g->setOptimalTrue();
-        this->usage_count++;
         return 1;
     }
     return 0;
@@ -29,7 +27,6 @@ int ZeroCrossings_reduction::reduce(Graph* g) {
     if (crossings == 0) {
         //std::cout << "Zero Crossing works \n";
         g->setOptimalTrue();
-        this->usage_count++;
         return 1;
     }
     return 0;
@@ -61,7 +58,6 @@ int Twins_reduction::reduce(Graph* g) {
                 if (k == g->getNodeByOrder(i)->edges.size()-1) {
                     //std::cout << "found Twins: " << g->getNodeByOrder(i)->id + 1 << " and "<< g->getNodeByOrder(j)->id + 1<< std::endl;
                     found_Twins++;
-                    this->usage_count++;
                     restore_vec.push_back({g->getNodeByOrder(i)->id, g->getNodeByOrder(j)->id}); //save twins
                     for (auto& edge : g->getNodeByOrder(i)->edges) {
                         edge.edge_weight++;

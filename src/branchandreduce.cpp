@@ -1,6 +1,7 @@
 #include "branchandreduce.h"
 #include <memory>
 
+/*
 #include "../src_henning/src/definitions.h"
 #include "../src_henning/src/macros.h"
 #include "../src_henning/src/misc.h"
@@ -11,6 +12,7 @@
 #include "../src_henning/src/solver.h"
 #include "../src_henning/src/useless_reducer.h"
 #include "../src_henning/src/front_back_reducer.h"
+*/
 
 int calculateSpan(Node* node) {
     if (node->edges.empty()) {
@@ -110,6 +112,7 @@ void TomAlvAlg(Graph& g) {
 
 }
 
+/*
 std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 
     std::vector<int> mapping(g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes());
@@ -148,9 +151,9 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 
     g.setOrderNodes(new_order);
 
-    /*if(sumCrossings != g.countCrossings()) {
-        std::cout<<"CROSSINGS COUNT DO NOT MATCH"<<std::endl;
-    }*/
+    //if(sumCrossings != g.countCrossings()) {
+    //    std::cout<<"CROSSINGS COUNT DO NOT MATCH"<<std::endl;
+    //}
 
     for (int i = 0; i < g.getOrderNodes().size(); i++) {
         g.getOrderNodes()[i]->Hen_new_order_id = -1;
@@ -159,6 +162,7 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
     return std::make_pair(g.getOrderNodes(), g.countCrossings());
 
 }
+*/
 
 int EXACT_SOLUTION_SIZE = 10;
 
@@ -204,237 +208,237 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
     }
     //Reduce our instance if no more reductions applicable
     else {
-
+        /*
         if (g->getOrderNodes().size() < EXACT_SOLUTION_SIZE) {
             result = ExactSolution(*g);
-            //g->setOrderNodes(result.first);
+            g->setOrderNodes(result.first);
+            return result;
+        }*/
+
+
+
+        // Randomize which method we use to remove node
+        if (method1 == 3) {
+            // Seed the random number generator with the current time
+            std::srand(std::time(0));
+
+            // Generate a random number between 0 and 2
+            method1 = std::rand() % 3;
         }
-        else {
 
+        auto& orderNodes = g->getOrderNodes();
+        int visibleNodeOffset = g->getOffsetVisibleOrderNodes();
 
-            // Randomize which method we use to remove node
-            if (method1 == 3) {
-                // Seed the random number generator with the current time
-                std::srand(std::time(0));
-
-                // Generate a random number between 0 and 2
-                method1 = std::rand() % 3;
+        if ((orderNodes.size() - visibleNodeOffset) > 2) {
+            // TODO: Try param maybe?
+            // Step 1: What kind of node do we want to remove?
+            // Method 1A: Find highest degree visible moveable node
+            Node* foundNode = nullptr;
+            if (method1 == 0) {
+                foundNode = orderNodes[visibleNodeOffset];
+                int maxDegree = orderNodes[visibleNodeOffset]->edges.size() - orderNodes[visibleNodeOffset]->offset_visible_nodes;
+                for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                    if (maxDegree < orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes) {
+                        maxDegree = orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes;
+                        foundNode = orderNodes[i];
+                    }
+                }
+            }
+            // Method 1B: Find most spanning node
+            else if (method1 == 1) {
+                foundNode = orderNodes[visibleNodeOffset];
+                int maxSpan = calculateSpan(foundNode);
+                for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                    int currentSpan = calculateSpan(orderNodes[i]);
+                    if (maxSpan < currentSpan) {
+                        maxSpan = currentSpan;
+                        foundNode = orderNodes[i];
+                    }
+                }
+            }
+            //Method 1C: Find max combined value of span and degree
+            else if (method1 == 2) {
+                foundNode = orderNodes[visibleNodeOffset];
+                double maxCombined = (double)calculateSpan(foundNode) / (foundNode->edges.size() - foundNode->offset_visible_nodes);
+                for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                    double currentCombined = (double)calculateSpan(orderNodes[i]) / (orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes);
+                    if (maxCombined < currentCombined) {
+                        maxCombined = currentCombined;
+                        foundNode = orderNodes[i];
+                    }
+                }
             }
 
-            auto& orderNodes = g->getOrderNodes();
-            int visibleNodeOffset = g->getOffsetVisibleOrderNodes();
+            // Remove node for now
+            g->makeNodeInvisible(foundNode->order);
+            // Solve on remaining nodes
+            result = BranchAndReduce(g, reductionTypes, method1, method2, fast);
+            // Add node back
+            g->makeNodeVisible();
 
-            if ((orderNodes.size() - visibleNodeOffset) > 2) {
-                // TODO: Try param maybe?
-                // Step 1: What kind of node do we want to remove?
-                // Method 1A: Find highest degree visible moveable node
-                Node* foundNode = nullptr;
-                if (method1 == 0) {
-                    foundNode = orderNodes[visibleNodeOffset];
-                    int maxDegree = orderNodes[visibleNodeOffset]->edges.size() - orderNodes[visibleNodeOffset]->offset_visible_nodes;
-                    for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
-                        if (maxDegree < orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes) {
-                            maxDegree = orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes;
-                            foundNode = orderNodes[i];
-                        }
+            //TODO: Try param here, so e.g. if less than 10 nodes left try every position (Method 2A)
+            // Step 2: Where do we want to place the previously removed node?
+            // Method 2A: Calculate Crossings for every possible position of node
+            if (method2 == 0) {
+                int minCrossings = g->countCrossings();
+                auto minOrder = g->getOrderNodes();
+                for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                    g->swapNodes(foundNode->order, i);
+                    int crossings = g->countCrossings();
+                    if (crossings < minCrossings) {
+                        minCrossings = crossings;
+                        minOrder = g->getOrderNodes();
                     }
                 }
-                // Method 1B: Find most spanning node
-                else if (method1 == 1) {
-                    foundNode = orderNodes[visibleNodeOffset];
-                    int maxSpan = calculateSpan(foundNode);
-                    for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
-                        int currentSpan = calculateSpan(orderNodes[i]);
-                        if (maxSpan < currentSpan) {
-                            maxSpan = currentSpan;
-                            foundNode = orderNodes[i];
-                        }
+                // Reconstruct min order
+                g->setOrderNodes(minOrder);
+                result = std::make_pair(g->getOrderNodes(), minCrossings);
+            }
+            // Method 2B: Place node at nearest median position
+            else if (method2 == 1) {
+                orderNodes = g->getOrderNodes();
+                // Calculate median of node we want to place back
+                int median = 0;
+                if (foundNode->offset_visible_nodes != foundNode->edges.size()) {
+                    std::vector<int> neighbourIDs(0);
+                    for (int i = foundNode->offset_visible_nodes; i < foundNode->edges.size(); i++) {
+                        neighbourIDs.push_back(foundNode->edges[i].neighbour_id);
                     }
-                }
-                //Method 1C: Find max combined value of span and degree
-                else if (method1 == 2) {
-                    foundNode = orderNodes[visibleNodeOffset];
-                    double maxCombined = (double)calculateSpan(foundNode) / (foundNode->edges.size() - foundNode->offset_visible_nodes);
-                    for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
-                        double currentCombined = (double)calculateSpan(orderNodes[i]) / (orderNodes[i]->edges.size() - orderNodes[i]->offset_visible_nodes);
-                        if (maxCombined < currentCombined) {
-                            maxCombined = currentCombined;
-                            foundNode = orderNodes[i];
-                        }
+
+                    int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
+                    median = neighbourIDs[pos_index];
+                    // If even degree, further to the right
+                    if (neighbourIDs.size() % 2 == 0) {
+                        median += 0.1;
                     }
                 }
 
-                // Remove node for now
-                g->makeNodeInvisible(foundNode->order);
-                // Solve on remaining nodes
-                result = BranchAndReduce(g, reductionTypes, method1, method2, fast);
-                // Add node back
-                g->makeNodeVisible();
-
-                //TODO: Try param here, so e.g. if less than 10 nodes left try every position (Method 2A)
-                // Step 2: Where do we want to place the previously removed node?
-                // Method 2A: Calculate Crossings for every possible position of node
-                if (method2 == 0) {
-                    int minCrossings = g->countCrossings();
-                    auto minOrder = g->getOrderNodes();
-                    for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
-                        g->swapNodes(foundNode->order, i);
-                        int crossings = g->countCrossings();
-                        if (crossings < minCrossings) {
-                            minCrossings = crossings;
-                            minOrder = g->getOrderNodes();
-                        }
-                    }
-                    // Reconstruct min order
-                    g->setOrderNodes(minOrder);
-                    result = std::make_pair(g->getOrderNodes(), minCrossings);
-                }
-                // Method 2B: Place node at nearest median position
-                else if (method2 == 1) {
-                    orderNodes = g->getOrderNodes();
-                    // Calculate median of node we want to place back
-                    int median = 0;
-                    if (foundNode->offset_visible_nodes != foundNode->edges.size()) {
+                // Iterate through all other nodes to find closest median
+                int minDifference = std::numeric_limits<int>::max();
+                Node* closestNode = nullptr;
+                for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                    auto& current_node = orderNodes[i];
+                    current_node->median_pos = 0;
+                    // If there are neighbours, select the median id
+                    if (current_node->offset_visible_nodes != current_node->edges.size()) {
                         std::vector<int> neighbourIDs(0);
-                        for (int i = foundNode->offset_visible_nodes; i < foundNode->edges.size(); i++) {
-                            neighbourIDs.push_back(foundNode->edges[i].neighbour_id);
+                        for (int i = current_node->offset_visible_nodes; i < current_node->edges.size(); i++) {
+                            neighbourIDs.push_back(current_node->edges[i].neighbour_id);
                         }
 
                         int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
-                        median = neighbourIDs[pos_index];
+                        current_node->median_pos = neighbourIDs[pos_index];
                         // If even degree, further to the right
                         if (neighbourIDs.size() % 2 == 0) {
-                            median += 0.1;
-                        }
-                    }
-
-                    // Iterate through all other nodes to find closest median
-                    int minDifference = std::numeric_limits<int>::max();
-                    Node* closestNode = nullptr;
-                    for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
-                        auto& current_node = orderNodes[i];
-                        current_node->median_pos = 0;
-                        // If there are neighbours, select the median id
-                        if (current_node->offset_visible_nodes != current_node->edges.size()) {
-                            std::vector<int> neighbourIDs(0);
-                            for (int i = current_node->offset_visible_nodes; i < current_node->edges.size(); i++) {
-                                neighbourIDs.push_back(current_node->edges[i].neighbour_id);
-                            }
-
-                            int pos_index = ceil(neighbourIDs.size() / 2.0) - 1;
-                            current_node->median_pos = neighbourIDs[pos_index];
-                            // If even degree, further to the right
-                            if (neighbourIDs.size() % 2 == 0) {
-                                current_node->median_pos += 0.1;
-                            }
-
-                            // Calculate the absolute difference between node median and the median of the node we want to place back
-                            int difference = std::abs(current_node->median_pos - median);
-
-                            // Update closest node if this node has a smaller difference
-                            if (difference < minDifference) {
-                                minDifference = difference;
-                                closestNode = current_node;
-                            }
-                        }
-                    }
-                    foundNode->order = closestNode->order;
-                    g->sortOrderNodesByOrder();
-
-                    if (fast) {
-                        result = std::make_pair(g->getOrderNodes(), 0);
-                    }
-                    else {
-                        result = std::make_pair(g->getOrderNodes(), g->countCrossings());
-                    }
-                    // Method 2C: Calculate Crossings for every possible position of node using only crossings from that node
-                }
-                else if (method2 == 2) {
-                    orderNodes = g->getOrderNodes();
-                    // Init for position = visibleNodeOffset
-                    int minCrossings = 0;
-                    auto minOrder = g->getOrderNodes();
-                    //iterate through visible movable_nodes != current node
-                    for (int v = visibleNodeOffset + 1; v < orderNodes.size(); v++) {
-                        for (auto& current_neighbour : foundNode->edges) {
-                            for (auto& v_neighbour : orderNodes[v]->edges) {
-                                if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
-                                    //minCrossings++;
-                                    minCrossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
-                                }
-                            }
-                        }
-                    }
-
-                    // Loop through every possible position
-                    for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
-                        g->swapNodes(foundNode->order, i);
-
-                        int crossings = 0;
-                        //iterate through visible movable_nodes != current node
-                        for (int v = visibleNodeOffset; v < orderNodes.size(); v++) {
-                            // v == current node, no crossings to itself
-                            if (v == foundNode->order) {
-                                continue;
-                            }
-                            // v to the left of current Node
-                            else if (v < foundNode->order) {
-                                for (auto& current_neighbour : foundNode->edges) {
-                                    for (auto& v_neighbour : orderNodes[v]->edges) {
-                                        if (current_neighbour.neighbour_id < v_neighbour.neighbour_id) {
-                                            //crossings++;
-                                            crossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
-                                        }
-                                    }
-                                }
-                            }
-                            // v to the right of current Node
-                            else if (v > foundNode->order) {
-                                for (auto& current_neighbour : foundNode->edges) {
-                                    for (auto& v_neighbour : orderNodes[v]->edges) {
-                                        if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
-                                            //crossings++;
-                                            crossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
-                                        }
-                                    }
-                                }
-                            }
+                            current_node->median_pos += 0.1;
                         }
 
-                        if (crossings < minCrossings) {
-                            minCrossings = crossings;
-                            minOrder = g->getOrderNodes();
+                        // Calculate the absolute difference between node median and the median of the node we want to place back
+                        int difference = std::abs(current_node->median_pos - median);
+
+                        // Update closest node if this node has a smaller difference
+                        if (difference < minDifference) {
+                            minDifference = difference;
+                            closestNode = current_node;
                         }
-                    }
-                    // Reconstruct min order
-                    g->setOrderNodes(minOrder);
-                    if (fast) {
-                        result = std::make_pair(g->getOrderNodes(), 0);
-                    }
-                    else {
-                        result = std::make_pair(g->getOrderNodes(), g->countCrossings());
                     }
                 }
-            }
-            // For 2 remaining nodes, try which should come first
-            else if ((orderNodes.size() - visibleNodeOffset) == 2) {
-                int crossings1 = g->countCrossings();
-                g->swapNodes(visibleNodeOffset, visibleNodeOffset + 1);
-                int crossings2 = g->countCrossings();
-                // go back to previous order if it was better
-                if (crossings1 < crossings2) {
-                    g->swapNodes(visibleNodeOffset, visibleNodeOffset + 1);
-                    result = std::make_pair(g->getOrderNodes(), crossings1);
+                foundNode->order = closestNode->order;
+                g->sortOrderNodesByOrder();
+
+                if (fast) {
+                    result = std::make_pair(g->getOrderNodes(), 0);
                 }
                 else {
-                    result = std::make_pair(g->getOrderNodes(), crossings2);
+                    result = std::make_pair(g->getOrderNodes(), g->countCrossings());
+                }
+                // Method 2C: Calculate Crossings for every possible position of node using only crossings from that node
+            }
+            else if (method2 == 2) {
+                orderNodes = g->getOrderNodes();
+                // Init for position = visibleNodeOffset
+                int minCrossings = 0;
+                auto minOrder = g->getOrderNodes();
+                //iterate through visible movable_nodes != current node
+                for (int v = visibleNodeOffset + 1; v < orderNodes.size(); v++) {
+                    for (auto& current_neighbour : foundNode->edges) {
+                        for (auto& v_neighbour : orderNodes[v]->edges) {
+                            if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
+                                //minCrossings++;
+                                minCrossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
+                            }
+                        }
+                    }
                 }
 
+                // Loop through every possible position
+                for (int i = visibleNodeOffset + 1; i < orderNodes.size(); i++) {
+                    g->swapNodes(foundNode->order, i);
+
+                    int crossings = 0;
+                    //iterate through visible movable_nodes != current node
+                    for (int v = visibleNodeOffset; v < orderNodes.size(); v++) {
+                        // v == current node, no crossings to itself
+                        if (v == foundNode->order) {
+                            continue;
+                        }
+                        // v to the left of current Node
+                        else if (v < foundNode->order) {
+                            for (auto& current_neighbour : foundNode->edges) {
+                                for (auto& v_neighbour : orderNodes[v]->edges) {
+                                    if (current_neighbour.neighbour_id < v_neighbour.neighbour_id) {
+                                        //crossings++;
+                                        crossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
+                                    }
+                                }
+                            }
+                        }
+                        // v to the right of current Node
+                        else if (v > foundNode->order) {
+                            for (auto& current_neighbour : foundNode->edges) {
+                                for (auto& v_neighbour : orderNodes[v]->edges) {
+                                    if (current_neighbour.neighbour_id > v_neighbour.neighbour_id) {
+                                        //crossings++;
+                                        crossings += current_neighbour.edge_weight * v_neighbour.edge_weight;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (crossings < minCrossings) {
+                        minCrossings = crossings;
+                        minOrder = g->getOrderNodes();
+                    }
+                }
+                // Reconstruct min order
+                g->setOrderNodes(minOrder);
+                if (fast) {
+                    result = std::make_pair(g->getOrderNodes(), 0);
+                }
+                else {
+                    result = std::make_pair(g->getOrderNodes(), g->countCrossings());
+                }
             }
-            // Less than two moveable nodes left -> nothing left to do
+        }
+        // For 2 remaining nodes, try which should come first
+        else if ((orderNodes.size() - visibleNodeOffset) == 2) {
+            int crossings1 = g->countCrossings();
+            g->swapNodes(visibleNodeOffset, visibleNodeOffset + 1);
+            int crossings2 = g->countCrossings();
+            // go back to previous order if it was better
+            if (crossings1 < crossings2) {
+                g->swapNodes(visibleNodeOffset, visibleNodeOffset + 1);
+                result = std::make_pair(g->getOrderNodes(), crossings1);
+            }
             else {
-                result = std::make_pair(g->getOrderNodes(), 0);
+                result = std::make_pair(g->getOrderNodes(), crossings2);
             }
+
+        }
+        // Less than two moveable nodes left -> nothing left to do
+        else {
+            result = std::make_pair(g->getOrderNodes(), 0);
         }
     }
 
