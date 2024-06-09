@@ -78,6 +78,5 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    //std::cout << bestCrossings << std::endl;
-    //outputStandardOut(bestSolution);
+    //term(0);
 }
