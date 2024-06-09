@@ -1,4 +1,4 @@
-PACE CHALLENGE 2024 - Team: HeiCross
+PACE CHALLENGE 2024 - Team: heiCross
 
 DESCRIPTION
 The one-sided crossing minimization problem (OCM) asks for an order of one layer of a two-layer bipartite graph, 
@@ -27,11 +27,13 @@ AUTHORS
 Marlon Dittes @MarlonDittes
 Shai Peretz @Shaip161
 Antonie Wagner @Tonyloni
-
-Co-Authors:
 Alvaro Garmendia @alvarogarmen
 Tomer Haham @TomerHaham
-Ernestine Großman
+
+Co-Authors:
 Henning Woydt
+
+Supervisors:
+Ernestine Großmann
 Henrik Reinstädtler
 Adil Chhabra
