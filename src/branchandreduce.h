@@ -13,8 +13,8 @@
 int calculateSpan(Node* node);
 Graph* createGraphByPartition(Graph* g, std::vector<Node*> partition);
 void TomAlvAlg(Graph& g);
-std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast);
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast);
+std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast, int exactSize);
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast, int exactSize);
 std::pair<std::vector<Node*>, long>  ExactSolution(Graph& g);
 
 #endif //BRANCHANDREDUCE_H

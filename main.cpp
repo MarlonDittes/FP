@@ -59,8 +59,8 @@ int main(int argc, char* argv[]) {
     }
 
     //std::cout << g->countCrossings() << ",";
-
-    auto result = BranchAndReduce(g, reductions, 2, method2, fast);
+    int exactSize = 10;
+    auto result = BranchAndReduce(g, reductions, 2, method2, fast, exactSize);
     currentCrossings = g->countCrossings();
     if (currentCrossings < bestCrossings){
         bestSolution = result.first;
@@ -70,12 +70,13 @@ int main(int argc, char* argv[]) {
     
     while(true){
         g->MedianHeuristic();
-        result = BranchAndReduce(g, reductions, 3, method2, fast);
+        result = BranchAndReduce(g, reductions, 3, method2, fast, exactSize);
         currentCrossings = g->countCrossings();
         if (currentCrossings < bestCrossings){
             bestSolution = result.first;
             bestCrossings = currentCrossings;
         }
+        exactSize += 5;
     }
     
     //std::cout << bestCrossings << std::endl;

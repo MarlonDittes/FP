@@ -164,9 +164,7 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 }
 
 
-int EXACT_SOLUTION_SIZE = 10;
-
-std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast) {
+std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast, int exactSize) {
     bool changed = false;
     int twins_count = 0;
     int almostTwins_count = 0;
@@ -203,12 +201,12 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
         }
     }
     else if (changed) {
-        result = BranchAndReduce(g, reductionTypes, method1, method2, fast);
+        result = BranchAndReduce(g, reductionTypes, method1, method2, fast, exactSize);
     }
     //Reduce our instance if no more reductions applicable
     else {
         
-        if (g->getOrderNodes().size() < EXACT_SOLUTION_SIZE) {
+        if (g->getOrderNodes().size() <= exactSize) {
             result = ExactSolution(*g);
             return result;
         }
@@ -269,7 +267,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
             // Remove node for now
             g->makeNodeInvisible(foundNode->order);
             // Solve on remaining nodes
-            result = BranchAndReduce(g, reductionTypes, method1, method2, fast);
+            result = BranchAndReduce(g, reductionTypes, method1, method2, fast, exactSize);
             // Add node back
             g->makeNodeVisible();
 
@@ -458,7 +456,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
     return result;
 }
 
-std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast) {
+std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::unique_ptr<general_reduction>>& reductionTypes, int method1, int method2, bool fast, int exactSize) {
     //g->MedianHeuristic();
     //TomAlvAlg(*g);
 
@@ -479,7 +477,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::u
         for (auto& part : partitions) {
             Graph* partGraph = createGraphByPartition(g, part);
             partGraphPointers.push_back(partGraph);
-            auto result = branching(partGraph, reductionTypes, method1, method2, fast);
+            auto result = branching(partGraph, reductionTypes, method1, method2, fast, exactSize);
             results.push_back(result);
         }
 
@@ -515,7 +513,7 @@ std::pair<std::vector<Node*>, long> BranchAndReduce(Graph* g, std::vector<std::u
     // We couldn't partition the graph
     else {
 
-        auto result = branching(g, reductionTypes, method1, method2, fast);
+        auto result = branching(g, reductionTypes, method1, method2, fast, exactSize);
         solution = result.first;
         sumCrossings = result.second;
 
