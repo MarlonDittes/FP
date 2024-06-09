@@ -1,9 +1,12 @@
-PACE CHALLENGE 2024 - Team: HeiCross
+PACE CHALLENGE 2024 - Team: heiCross
 
 DESCRIPTION
 The one-sided crossing minimization problem (OCM) asks for an order of one layer of a two-layer bipartite graph, 
 where the other layer of nodes is fixed, such that the number of edge crossings is minimized. 
 Our heiCross solver employs a branch and reduce approach specifically designed for the heuristic track of the challenge. 
+It starts by partitioning the graph via articulation points. Then, three reduction rules and further partitioning recursivly 
+reduce the size of the graph. If this approach can no longer be executed, we use branching to build a heuristic solution. 
+When the partitions reach a specific size, an exact solver is used. 
 
 INSTALLATION
 1. Clone the repository: 
@@ -23,15 +26,20 @@ INSTALLATION
     ./heiCross < InputFile > OutputFile
     If the OutputFile is omitted, the output is printed directly to the Console.
 
+REQUIREMENTS
+Boost Library https://www.boost.org/
+
 AUTHORS
 Marlon Dittes @MarlonDittes
 Shai Peretz @Shaip161
 Antonie Wagner @Tonyloni
-
-Co-Authors:
 Alvaro Garmendia @alvarogarmen
 Tomer Haham @TomerHaham
-Ernestine Großman
-Henning Woydt
+
+Co-Authors:
+Henning Woydt @HenningWoydt
+
+Supervisors:
+Ernestine Großmann
 Henrik Reinstädtler
 Adil Chhabra
