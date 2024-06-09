@@ -23,6 +23,9 @@ INSTALLATION
     ./heiCross < InputFile > OutputFile
     If the OutputFile is omitted, the output is printed directly to the Console.
 
+REQUIREMENTS
+Boost Library https://www.boost.org/
+
 AUTHORS
 Marlon Dittes @MarlonDittes
 Shai Peretz @Shaip161
