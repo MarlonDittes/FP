@@ -20,7 +20,7 @@ INSTALLATION
     cmake    
     make 
 5. Run with:
-    ./heiCross <InputFile> OutputFile
+    ./heiCross < InputFile > OutputFile
     If the OutputFile is omitted, the output is printed directly to the Console.
 
 AUTHORS
