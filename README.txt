@@ -6,7 +6,7 @@ where the other layer of nodes is fixed, such that the number of edge crossings 
 Our heiCross solver employs a branch and reduce approach specifically designed for the heuristic track of the challenge. 
 It starts by partitioning the graph via articulation points. Then, three reduction rules and further partitioning recursivly 
 reduce the size of the graph. If this approach can no longer be executed, we use branching to build a heuristic solution. 
-When the partitions reach a size of ten nodes or less, an exact solver is used. 
+When the partitions reach a specific size, an exact solver is used. 
 
 INSTALLATION
 1. Clone the repository: 
@@ -37,7 +37,7 @@ Alvaro Garmendia @alvarogarmen
 Tomer Haham @TomerHaham
 
 Co-Authors:
-Henning Woydt
+Henning Woydt @HenningWoydt
 
 Supervisors:
 Ernestine Großmann
