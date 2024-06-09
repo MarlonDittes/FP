@@ -1,7 +1,7 @@
 #include "branchandreduce.h"
 #include <memory>
 
-/*
+
 #include "../src_henning/src/definitions.h"
 #include "../src_henning/src/macros.h"
 #include "../src_henning/src/misc.h"
@@ -12,7 +12,7 @@
 #include "../src_henning/src/solver.h"
 #include "../src_henning/src/useless_reducer.h"
 #include "../src_henning/src/front_back_reducer.h"
-*/
+
 
 int calculateSpan(Node* node) {
     if (node->edges.empty()) {
@@ -112,7 +112,7 @@ void TomAlvAlg(Graph& g) {
 
 }
 
-/*
+
 std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
 
     std::vector<int> mapping(g.getOrderNodes().size() - g.getOffsetVisibleOrderNodes());
@@ -162,7 +162,7 @@ std::pair<std::vector<Node*>, long> ExactSolution(Graph& g) {
     return std::make_pair(g.getOrderNodes(), g.countCrossings());
 
 }
-*/
+
 
 int EXACT_SOLUTION_SIZE = 10;
 
@@ -207,11 +207,11 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
     }
     //Reduce our instance if no more reductions applicable
     else {
-        /*
+        
         if (g->getOrderNodes().size() < EXACT_SOLUTION_SIZE) {
             result = ExactSolution(*g);
             return result;
-        }*/
+        }
 
 
 

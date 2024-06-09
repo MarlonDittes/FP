@@ -8,19 +8,17 @@ set(CMAKE_EXE_LINKER_FLAGS "-static")
 set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_BUILD_TYPE Debug)
 
-add_library(my_lib STATIC src/graph.cpp src/io.cpp src/stack.cpp src/reductions.cpp src/branchandreduce.cpp)
+#add_library(my_lib STATIC src/graph.cpp src/io.cpp src/stack.cpp src/reductions.cpp src/branchandreduce.cpp)
+#add_executable(heiCross main.cpp)
+#target_link_libraries(heiCross PRIVATE my_lib)
 
-add_executable(heiCross main.cpp)
-target_link_libraries(heiCross PRIVATE my_lib)
-
-#[[
-add_executable(PACE2024Exact
+add_executable(heiCross
     main.cpp
-    graph.cpp
-    io.cpp
-    stack.cpp
-    reductions.cpp
-    performance.cpp
+    src/graph.cpp
+    src/io.cpp
+    src/stack.cpp
+    src/reductions.cpp
+    src/branchandreduce.cpp
     src_henning/src/misc.cpp
     src_henning/src/edge.cpp
     src_henning/src/macros.h
@@ -42,4 +40,3 @@ add_executable(PACE2024Exact
     src_henning/src/one_vertex_partitioner.h
     src_henning/src/one_vertex_partition_manager.h
 )
-]]
