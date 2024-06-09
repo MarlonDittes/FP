@@ -79,6 +79,5 @@ int main(int argc, char* argv[]) {
         exactSize += 5;
     }
     
-    //std::cout << bestCrossings << std::endl;
-    //outputStandardOut(bestSolution);
+    //term(0);
 }

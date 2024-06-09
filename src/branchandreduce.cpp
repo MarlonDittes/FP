@@ -206,7 +206,7 @@ std::pair<std::vector<Node*>, long> branching(Graph* g, std::vector<std::unique_
     //Reduce our instance if no more reductions applicable
     else {
         
-        if (g->getOrderNodes().size() <= exactSize) {
+        if ((g->getSizeOfOrder() - g->getOffsetVisibleOrderNodes()) < exactSize) {
             result = ExactSolution(*g);
             return result;
         }
